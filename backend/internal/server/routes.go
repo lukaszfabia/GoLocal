@@ -18,9 +18,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.HandleFunc("/", s.HelloWorldHandler)
 
-	r.HandleFunc("/health", s.healthHandler)
-
-	r.HandleFunc("/websocket", s.websocketHandler)
+	r.HandleFunc("/ws", s.websocketHandler)
 
 	return r
 }

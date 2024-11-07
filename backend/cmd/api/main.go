@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/internal/server"
 	"context"
 	"fmt"
 	"log"
@@ -8,8 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	"backend/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -39,6 +38,8 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 func main() {
 
 	server := server.NewServer()
+
+	log.Printf("Server is listening on http://localhost%s\n", server.Addr)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)

@@ -11,6 +11,9 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // Service represents a service that interacts with a database.
@@ -25,33 +28,29 @@ type Service interface {
 }
 
 type service struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 var (
-	database   = os.Getenv("BLUEPRINT_DB_DATABASE")
-	password   = os.Getenv("BLUEPRINT_DB_PASSWORD")
-	username   = os.Getenv("BLUEPRINT_DB_USERNAME")
-	port       = os.Getenv("BLUEPRINT_DB_PORT")
-	host       = os.Getenv("BLUEPRINT_DB_HOST")
-	schema     = os.Getenv("BLUEPRINT_DB_SCHEMA")
+	database   = os.Getenv("DB_DATABASE")
+	password   = os.Getenv("DB_PASSWORD")
+	username   = os.Getenv("DB_USERNAME")
+	port       = os.Getenv("DB_PORT")
+	host       = os.Getenv("DB_HOST")
 	dbInstance *service
 )
 
 func New() Service {
 	// Reuse Connection
-	if dbInstance != nil {
-		return dbInstance
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, username, password, database, port)
+	if db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	}); err != nil {
+		panic("Can't connect to db!")
+	} else {
+		log.Println("Successfully connected to db!")
+		return &service{db: db}
 	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbInstance = &service{
-		db: db,
-	}
-	return dbInstance
 }
 
 // Health checks the health of the database connection by pinging the database.
@@ -62,8 +61,17 @@ func (s *service) Health() map[string]string {
 
 	stats := make(map[string]string)
 
+	var err error
+	var sqlDB *sql.DB
+
+	sqlDB, err = s.db.DB()
+
+	if err != nil {
+		log.Println(err)
+	}
+
 	// Ping the database
-	err := s.db.PingContext(ctx)
+	err = sqlDB.PingContext(ctx)
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
@@ -76,7 +84,7 @@ func (s *service) Health() map[string]string {
 	stats["message"] = "It's healthy"
 
 	// Get database stats (like open connections, in use, idle, etc.)
-	dbStats := s.db.Stats()
+	dbStats := sqlDB.Stats()
 	stats["open_connections"] = strconv.Itoa(dbStats.OpenConnections)
 	stats["in_use"] = strconv.Itoa(dbStats.InUse)
 	stats["idle"] = strconv.Itoa(dbStats.Idle)
@@ -111,5 +119,13 @@ func (s *service) Health() map[string]string {
 // If an error occurs while closing the connection, it returns the error.
 func (s *service) Close() error {
 	log.Printf("Disconnected from database: %s", database)
-	return s.db.Close()
+
+	if dbInstance, err := s.db.DB(); err != nil {
+		log.Println(err)
+		return err
+	} else {
+		_ = dbInstance.Close()
+	}
+
+	return nil
 }
