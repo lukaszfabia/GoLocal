@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,6 +20,32 @@ type Server struct {
 	db database.Service
 }
 
+type response struct {
+	HTTPCode int `json:"status"`
+	Data     any `json:"data,omitempty"`
+}
+
+// Creates new server response
+func (s *Server) NewResponse(w http.ResponseWriter, httpCode int, data any) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if httpCode >= 200 && httpCode < 300 {
+		w.WriteHeader(httpCode)
+	}
+
+	err := json.NewEncoder(w).Encode(&response{
+		HTTPCode: httpCode,
+		Data:     data,
+	})
+
+	if err != nil {
+		log.Printf("Error encoding response: %v", err)
+		if httpCode == http.StatusOK {
+			http.Error(w, "Error encoding response", http.StatusInternalServerError)
+		}
+	}
+}
+
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
@@ -25,6 +53,8 @@ func NewServer() *http.Server {
 
 		db: database.New(),
 	}
+
+	NewServer.db.Sync()
 
 	// Declare Server config
 	server := &http.Server{

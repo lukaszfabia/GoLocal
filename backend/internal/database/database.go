@@ -1,6 +1,7 @@
 package database
 
 import (
+	"backend/internal/models"
 	"context"
 	"database/sql"
 	"fmt"
@@ -16,19 +17,16 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// Service represents a service that interacts with a database.
-type Service interface {
-	// Health returns a map of health status information.
-	// The keys and values in the map are service-specific.
-	Health() map[string]string
-
-	// Close terminates the database connection.
-	// It returns an error if the connection cannot be closed.
-	Close() error
-}
-
-type service struct {
-	db *gorm.DB
+var allModels []any = []any{
+	&models.User{},
+	&models.Location{},
+	&models.Coords{},
+	&models.Address{},
+	&models.Event{},
+	&models.Comment{},
+	&models.Vote{},
+	&models.Survey{},
+	&models.SurveyQuestion{},
 }
 
 var (
@@ -40,6 +38,33 @@ var (
 	dbInstance *service
 )
 
+// Service represents a service that interacts with a database.
+type Service interface {
+	// Health returns a map of health status information.
+	// The keys and values in the map are service-specific.
+	Health() map[string]string
+
+	// Close terminates the database connection.
+	// It returns an error if the connection cannot be closed.
+	Close() error
+
+	// Make table migration to database.
+	// If something go wrong, info is logeed in console.
+	Sync()
+
+	UserService() UserService
+	TokenService() TokenService
+}
+
+type service struct {
+	db *gorm.DB
+
+	userService  UserService
+	tokenService TokenService
+}
+
+// Initializes new database connection and services
+// Returns service
 func New() Service {
 	// Reuse Connection
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, username, password, database, port)
@@ -49,7 +74,18 @@ func New() Service {
 		panic("Can't connect to db!")
 	} else {
 		log.Println("Successfully connected to db!")
-		return &service{db: db}
+
+		// register services
+
+		userService := NewUserService(db)
+		tokenService := NewTokenService(db)
+
+		return &service{
+			db:           db,
+			userService:  userService,
+			tokenService: tokenService,
+		}
+
 	}
 }
 
@@ -128,4 +164,14 @@ func (s *service) Close() error {
 	}
 
 	return nil
+}
+
+// Migrates tables using allModels to database
+func (s *service) Sync() {
+	for _, model := range allModels {
+		if err := s.db.AutoMigrate(model); err != nil {
+			log.Println(err)
+		}
+	}
+	log.Println("Migrating models has been done.")
 }

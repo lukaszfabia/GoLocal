@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/internal/auth"
 	"backend/internal/server"
 	"context"
 	"fmt"
@@ -36,7 +37,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
-
+	auth.NewAuth()
 	server := server.NewServer()
 
 	log.Printf("Server is listening on http://localhost%s\n", server.Addr)
