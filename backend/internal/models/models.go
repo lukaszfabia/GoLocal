@@ -19,7 +19,7 @@ type User struct {
 	LastName     string  `gorm:"not null:size:255" json:"lastName"`
 	Email        string  `gorm:"not null;size:100;unique" json:"email"`
 	Password     *string `gorm:"null;size:400" json:"-"`
-	AuthProvider string  `json:"provider"`
+	AuthProvider *string `gorm:"null" json:"provider"`
 
 	IsPremium bool    `gorm:"default:false" json:"isPremium"`
 	AvatarURL *string `gorm:"null;size:1024" json:"avatarUrl"`
@@ -61,9 +61,10 @@ type Event struct {
 	Model
 	EventOrganizers []*User `gorm:"many2many:event_organizers" json:"eventOrganizers"`
 
-	Title       string `gorm:"not null;size:255" json:"title"`
-	Description string `gorm:"default:'';null;size:255" json:"description"`
-	IsAdultOnly bool   `gorm:"default:true" json:"isAdultOnly"`
+	Title       string  `gorm:"not null;size:255" json:"title"`
+	Description string  `gorm:"default:'';null;size:255" json:"description"`
+	IamgeURL    *string `gorm:"null;size:1024" json:"image"`
+	IsAdultOnly bool    `gorm:"default:true" json:"isAdultOnly"`
 
 	// Timestamp with time zone
 	StartDate  *time.Time `gorm:"type:date;not null" json:"startDate"`

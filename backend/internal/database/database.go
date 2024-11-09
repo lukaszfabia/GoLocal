@@ -27,6 +27,7 @@ var allModels []any = []any{
 	&models.Vote{},
 	&models.Survey{},
 	&models.SurveyQuestion{},
+	&models.BlacklistedTokens{},
 }
 
 var (

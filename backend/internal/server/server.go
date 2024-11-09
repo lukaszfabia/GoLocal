@@ -46,6 +46,10 @@ func (s *Server) NewResponse(w http.ResponseWriter, httpCode int, data any) {
 	}
 }
 
+func (s *Server) InvalidFormResponse(w http.ResponseWriter) {
+	s.NewResponse(w, http.StatusBadRequest, "Invalid body")
+}
+
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{

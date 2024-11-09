@@ -14,6 +14,8 @@ type UserService interface {
 
 	// Get user using cond like: "email = joe.doe@example.com", use fmt.Sprintf
 	GetUser(cond string) (*models.User, error)
+
+	CreateUser(user *models.User) (*models.User, error)
 }
 
 func NewUserService(db *gorm.DB) UserService {
@@ -44,4 +46,18 @@ func (u *userServiceImpl) GetUser(cond string) (*models.User, error) {
 	}
 
 	return res, nil
+}
+
+func (u *userServiceImpl) CreateUser(user *models.User) (*models.User, error) {
+	if err := u.db.Save(&user).Error; err != nil {
+		return nil, err
+	}
+
+	newUser := &models.User{}
+
+	if err := u.db.First(newUser, "email = ?", user.Email).Error; err != nil {
+		return nil, err
+	}
+
+	return newUser, nil
 }

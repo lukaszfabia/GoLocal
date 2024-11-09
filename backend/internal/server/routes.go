@@ -2,22 +2,22 @@ package server
 
 import (
 	"backend/internal/auth"
+	"backend/internal/forms"
 	"backend/internal/models"
+	"backend/pkg"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
-
-	"fmt"
 	"time"
 
+	"github.com/coder/websocket"
 	"github.com/gorilla/mux"
 	"github.com/markbates/goth/gothic"
 	"golang.org/x/crypto/bcrypt"
-
-	"github.com/coder/websocket"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -32,7 +32,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// authentication routes
 	api.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodPost)
 	api.HandleFunc("/sign-up/", s.SignUpHandler).Methods(http.MethodPost)
-	api.HandleFunc("/logout/", s.Logout)
+	api.HandleFunc("refresh-token/", s.RefreshTokenHandler).Methods(http.MethodPost)
+	api.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
 
 	provider := api.PathPrefix("/{provider}").Subrouter()
 	provider.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodGet) // handles signing up
@@ -46,43 +47,100 @@ func (s *Server) RegisterRoutes() http.Handler {
 	auth.HandleFunc("/account/", s.AccountHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
-	auth.HandleFunc("/logout/", s.Logout).Methods(http.MethodGet)
+	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
 
 	return r
 }
 
-func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {}
+func (s *Server) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
+	form, err := pkg.DecodeJSON[forms.RefreshTokenRequest](r)
 
-func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
-	provider := r.Context().Value("provider")
-
-	// if he was logged by provider
-	if provider != "" {
-		if err := gothic.Logout(w, r); err != nil {
-			log.Println(err)
-
-			s.NewResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		s.NewResponse(w, http.StatusOK, "Successfully logged out!")
-	} else {
-		authorization := r.Header.Get("Authorization")
-		tokenStr := strings.TrimPrefix(authorization, "Bearer ")
-
-		if err := s.db.TokenService().SetAsBlacklisted(tokenStr); err != nil {
-			log.Println("Can not blacklist token")
-			s.NewResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		removeUser := context.WithValue(r.Context(), "user", "nil")
-		r.WithContext(removeUser)
-
-		s.NewResponse(w, http.StatusOK, map[string]any{
-			"message": "Logged out!",
-		})
+	// decode the refresh token
+	sub, err := auth.DecodeJWT(form.Token)
+	if err != nil {
+		log.Println("Error decoding refresh token:", err)
+		s.NewResponse(w, http.StatusUnauthorized, "Invalid or expired refresh token")
+		return
 	}
 
+	// blacklist the old refresh token
+	if err := s.db.TokenService().SetAsBlacklisted(form.Token); err != nil {
+		log.Println("Error blacklisting token:", err)
+		s.NewResponse(w, http.StatusInternalServerError, "Could not blacklist the token")
+		return
+	}
+
+	// generate new tokens
+	tokens, err := auth.GenerateJWT(sub, nil)
+	if err != nil {
+		log.Println("Error generating new tokens:", err)
+		s.NewResponse(w, http.StatusInternalServerError, "Failed to generate new tokens")
+		return
+	}
+
+	// send the new tokens
+	s.NewResponse(w, http.StatusOK, *tokens)
+}
+
+func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	form, err := pkg.DecodeJSON[forms.Register](r)
+
+	if err != nil {
+		s.InvalidFormResponse(w)
+		return
+	}
+
+	var user *models.User = &models.User{
+		FirstName: form.FirstName,
+		LastName:  form.LastName,
+		Password:  &form.Password,
+		Email:     form.Email,
+	}
+
+	user, e := s.db.UserService().CreateUser(user)
+
+	if e != nil {
+		s.NewResponse(w, http.StatusBadRequest, "Could not create user account")
+		return
+	}
+
+	if tokens, err := auth.GenerateJWT(user.ID, nil); err != nil {
+		s.NewResponse(w, http.StatusUnauthorized, err.Error())
+	} else {
+
+		s.NewResponse(w, http.StatusCreated, tokens)
+	}
+
+}
+
+func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	provider, ok := r.Context().Value("provider").(string)
+
+	// if logged in through a provider
+	if ok && provider != "" {
+		if err := gothic.Logout(w, r); err != nil {
+			log.Println("Error during provider logout:", err)
+			s.NewResponse(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+		s.NewResponse(w, http.StatusOK, map[string]string{"message": "Successfully logged out!"})
+		return
+	}
+
+	// if not logged in through a provider, blacklist token
+	authorization := r.Header.Get("Authorization")
+	tokenStr := strings.TrimPrefix(authorization, "Bearer ")
+
+	if err := s.db.TokenService().SetAsBlacklisted(tokenStr); err != nil {
+		log.Println("Error blacklisting token:", err)
+		s.NewResponse(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	ctx := context.WithValue(r.Context(), "user", nil)
+	r = r.WithContext(ctx)
+
+	s.NewResponse(w, http.StatusOK, map[string]string{"message": "Logged out!"})
 }
 
 func (s *Server) Callback(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +159,7 @@ func (s *Server) Callback(w http.ResponseWriter, r *http.Request) {
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
-		AuthProvider: user.Provider,
+		AuthProvider: &user.Provider,
 		IsPremium:    false,
 	}
 
@@ -112,23 +170,27 @@ func (s *Server) Callback(w http.ResponseWriter, r *http.Request) {
 	if user, err := s.db.UserService().GetOrCreateUser(&returnedUser); err != nil {
 		log.Println("Error creating user:", err)
 		s.NewResponse(w, http.StatusInternalServerError, err.Error())
+		return
 	} else {
-		token, err := auth.GenerateJWT(user.ID, nil)
+		tokens, err := auth.GenerateJWT(user.ID, nil)
 		if err != nil {
 			log.Println("Error generating JWT token:", err)
 			s.NewResponse(w, http.StatusInternalServerError, "Error generating JWT token")
 			return
 		}
 
-		s.NewResponse(w, http.StatusOK, map[string]interface{}{
-			"message": "User authenticated successfully",
-			"token":   token,
-		})
+		s.NewResponse(w, http.StatusOK, *tokens)
 	}
 
 }
 
 func (s *Server) AccountHandler(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		s.NewResponse(w, http.StatusUnauthorized, "")
+		return
+	}
+	s.NewResponse(w, http.StatusOK, fmt.Sprintf("you re logged as %s %s", user.FirstName, user.LastName))
 }
 
 func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -149,16 +211,14 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			"user":    gothUser,
 		})
 	} else {
-		var lf models.LoginForm
-		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&lf)
+		form, err := pkg.DecodeJSON[forms.Login](r)
+
 		if err != nil {
-			log.Println("Error decoding JSON:", err)
-			s.NewResponse(w, http.StatusBadRequest, err.Error())
+			s.InvalidFormResponse(w)
 			return
 		}
 
-		user, err := s.db.UserService().GetUser(fmt.Sprintf("email = %s", lf.Email))
+		user, err := s.db.UserService().GetUser(fmt.Sprintf("email = '%s'", form.Email))
 
 		if err != nil {
 			s.NewResponse(w, http.StatusNotFound, err.Error())
@@ -166,18 +226,17 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		comparePassword := func() error {
-			if err := bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(lf.Password)); err != nil {
+			if err := bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(form.Password)); err != nil {
 				return errors.New("credentials are invalid")
 			}
 
 			return nil
 		}
 
-		if token, err := auth.GenerateJWT(user.ID, &comparePassword); err != nil {
-			s.NewResponse(w, http.StatusOK, map[string]any{
-				"message": "Successfully logged in!",
-				"token":   token,
-			})
+		if tokens, err := auth.GenerateJWT(user.ID, &comparePassword); err != nil {
+			s.NewResponse(w, http.StatusUnauthorized, err.Error())
+		} else {
+			s.NewResponse(w, http.StatusOK, *tokens)
 		}
 	}
 }
