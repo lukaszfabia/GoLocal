@@ -61,10 +61,12 @@ type Event struct {
 	Model
 	EventOrganizers []*User `gorm:"many2many:event_organizers" json:"eventOrganizers"`
 
-	Title       string  `gorm:"not null;size:255" json:"title"`
-	Description string  `gorm:"default:'';null;size:255" json:"description"`
-	IamgeURL    *string `gorm:"null;size:1024" json:"image"`
-	IsAdultOnly bool    `gorm:"default:true" json:"isAdultOnly"`
+	Title       string    `gorm:"not null;size:255" json:"title"`
+	Description string    `gorm:"default:'';null;size:255" json:"description"`
+	ImageURL    *string   `gorm:"null;size:1024" json:"image"`
+	IsAdultOnly bool      `gorm:"default:true" json:"isAdultOnly"`
+	EventType   EventType `gorm:"type:text;not null" json:"event_type"`
+	Tags        []*Tag    `gorm:"many2many:event_tags" json:"event_tags"` // for ml
 
 	// Timestamp with time zone
 	StartDate  *time.Time `gorm:"type:date;not null" json:"startDate"`
@@ -75,6 +77,11 @@ type Event struct {
 
 	Comments []*Comment `gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE" json:"comments"`
 	Votes    []*Vote    `gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE" json:"votes"`
+}
+
+type Tag struct {
+	Model
+	Name string `gorm:"not null;unique;size:100"`
 }
 
 type Comment struct {
