@@ -1,6 +1,6 @@
-# Project backend for GoLocal
+# Backend for GoLocal
 
-One Paragraph of project description goes here
+Server which power `Mobile app`.
 
 ## Getting Started
 

@@ -29,9 +29,7 @@ type response struct {
 func (s *Server) NewResponse(w http.ResponseWriter, httpCode int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if httpCode >= 200 && httpCode < 300 {
-		w.WriteHeader(httpCode)
-	}
+	w.WriteHeader(httpCode)
 
 	err := json.NewEncoder(w).Encode(&response{
 		HTTPCode: httpCode,

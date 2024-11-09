@@ -15,17 +15,19 @@ type Model struct {
 
 type User struct {
 	Model
-	FirstName    string  `gorm:"not null:size:255" json:"firstName"`
-	LastName     string  `gorm:"not null:size:255" json:"lastName"`
-	Email        string  `gorm:"not null;size:100;unique" json:"email"`
-	Password     *string `gorm:"null;size:400" json:"-"`
-	AuthProvider *string `gorm:"null" json:"provider"`
+	FirstName    string     `gorm:"not null:size:255" json:"firstName"`
+	LastName     string     `gorm:"not null:size:255" json:"lastName"`
+	Email        string     `gorm:"not null;size:100;unique" json:"email"`
+	Password     *string    `gorm:"null;size:400" json:"-"`
+	Birthday     *time.Time `gorm:"type:date"`
+	Bio          *string    `gorm:"size:512" json:"bio"`
+	AuthProvider *string    `gorm:"null" json:"provider"`
 
 	IsPremium bool    `gorm:"default:false" json:"isPremium"`
 	AvatarURL *string `gorm:"null;size:1024" json:"avatarUrl"`
 
-	Followers []*User `gorm:"many2many:user_followers" json:"followers"`
-	Following []*User `gorm:"many2many:user_following" json:"following"`
+	Followers []*User `gorm:"many2many:user_followers;constraint:OnDelete:CASCADE" json:"followers"`
+	Following []*User `gorm:"many2many:user_following;constraint:OnDelete:CASCADE" json:"following"`
 
 	Comments []*Comment `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
 	Votes    []*Vote    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
