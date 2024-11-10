@@ -22,6 +22,7 @@ type User struct {
 	Birthday     *time.Time `gorm:"type:date"`
 	Bio          *string    `gorm:"size:512" json:"bio"`
 	AuthProvider *string    `gorm:"null" json:"provider"`
+	IsVerified   bool       `gorm:"null" json:"isVerified"`
 
 	IsPremium bool    `gorm:"default:false" json:"isPremium"`
 	AvatarURL *string `gorm:"null;size:1024" json:"avatarUrl"`

@@ -26,3 +26,7 @@ type EditAccount struct {
 	Birthday  time.Time `json:"birthday"`
 	Bio       string    `json:"bio"`
 }
+
+type VerifyUser struct {
+	Email string `json:"email"`
+}

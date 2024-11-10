@@ -12,7 +12,7 @@ import (
 
 // register forms here
 type Formable interface {
-	forms.Login | forms.Register | forms.RefreshTokenRequest | forms.EditAccount
+	forms.Login | forms.Register | forms.RefreshTokenRequest | forms.EditAccount | forms.VerifyUser
 }
 
 type FileInfo struct {

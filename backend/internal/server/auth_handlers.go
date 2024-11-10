@@ -193,3 +193,26 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// Send code on e-mail
+func (s *Server) sendCode(w http.ResponseWriter, r *http.Request) {
+	type emailBody struct {
+		Email string `json:"email"`
+	}
+
+	_, err := pkg.DecodeJSON[forms.VerifyUser](r)
+
+	if err != nil {
+		s.InvalidFormResponse(w)
+	}
+
+	// send email
+}
+
+func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Server) PasswordReset(w http.ResponseWriter, r *http.Request) {
+
+}
