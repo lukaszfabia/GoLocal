@@ -4,11 +4,18 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
 	"golang.org/x/exp/rand"
 )
+
+type Store interface {
+	SetCode(email string) (string, error)
+	Compare(email, code string) bool
+	clear(email string)
+}
 
 // Use cases: verification codes, password restoring
 type storage struct {
@@ -17,6 +24,7 @@ type storage struct {
 }
 
 func New() *storage {
+	log.Println("Store has been initialized")
 	return &storage{
 		usersCodes: map[string]string{},
 	}

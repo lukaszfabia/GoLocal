@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet" type="text/css">
+
+    <style>
+        * {
+            font-family: "Ubuntu", Helvetica, sans-serif;
+        }
+
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            background-color: #F7F8F9;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            color: #000000;
+            text-align: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-secondary {
+            color: #34495e;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container text-left">
+        <h1><b>Go Local, Welcome {{ .Username }}</b></h1>
+        <hr>
+        <h2>{{ .Sub }}</h2>
+        <p>{{ .Info }}</p>
+        <p>Here's your code: <b>{{ .Code }}</b></p>
+
+        <div class="text-right text-secondary" style="padding-bottom: 1rem;">
+            <small>Please remember that the code expires in <b>2 minutes</b>.</small>
+        </div>
+
+        <hr>
+
+        <div class="text-secondary text-center" style="word-wrap: break-word;">
+            <small>
+                <span>Copyright &copy; 2024
+                    <a class="text-secondary" rel="noopener" href="https://github.com/lukaszfabia/GoLocal"
+                        target="_blank">Go Local</a> Team.
+                    All rights reserved.
+                </span>
+            </small>
+        </div>
+    </div>
+</body>
+
+</html>

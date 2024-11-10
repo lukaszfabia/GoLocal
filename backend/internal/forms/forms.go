@@ -27,6 +27,10 @@ type EditAccount struct {
 	Bio       string    `json:"bio"`
 }
 
-type VerifyUser struct {
+type RestoreAccount struct {
 	Email string `json:"email"`
+}
+
+type CodeRequest struct {
+	Code string `json:"code"`
 }

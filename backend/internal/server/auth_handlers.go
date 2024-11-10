@@ -2,6 +2,7 @@ package server
 
 import (
 	"backend/internal/auth"
+	"backend/internal/email"
 	"backend/internal/forms"
 	"backend/internal/models"
 	"backend/pkg"
@@ -194,25 +195,88 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Send code on e-mail
-func (s *Server) sendCode(w http.ResponseWriter, r *http.Request) {
-	type emailBody struct {
-		Email string `json:"email"`
+func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
+	// get user from ctx
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
 	}
 
-	_, err := pkg.DecodeJSON[forms.VerifyUser](r)
+	code, err := s.store.SetCode(user.Email)
+
+	if err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Something went wrong with storage")
+		return
+	}
+
+	if err := email.SendCode(&email.Verify{}, *user, code); err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Failed to send code")
+		return
+	}
+
+	s.NewResponse(w, http.StatusOK, "")
+}
+
+func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	form, err := pkg.DecodeJSON[forms.CodeRequest](r)
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
+	}
 
 	if err != nil {
 		s.InvalidFormResponse(w)
+		return
 	}
 
-	// send email
+	if !s.store.Compare(user.Email, form.Code) {
+		s.NewResponse(w, http.StatusUnauthorized, "Failed to authorize, check spelling")
+		return
+	}
+
+	user.IsVerified = true
+
+	if _, err := s.db.UserService().SaveUser(user); err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Failed to save user")
+		return
+	}
+
+	s.NewResponse(w, http.StatusOK, fmt.Sprintf("%s %s, you' ve been verifed", user.FirstName, user.LastName))
+
 }
 
-func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
-
+func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	//TODO implement
 }
 
-func (s *Server) PasswordReset(w http.ResponseWriter, r *http.Request) {
+func (s *Server) PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
+	form, err := pkg.DecodeJSON[forms.RestoreAccount](r)
 
+	if err != nil {
+		s.InvalidFormResponse(w)
+		return
+	}
+
+	user, err := s.db.UserService().GetUser(fmt.Sprintf("email = %s", form.Email))
+
+	if err != nil {
+		s.NewResponse(w, http.StatusNotFound, "Incorrect email")
+		return
+	}
+
+	code, err := s.store.SetCode(user.Email)
+
+	if err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Something went wrong with storage")
+		return
+	}
+
+	if err := email.SendCode(&email.Verify{}, *user, code); err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Failed to send code")
+		return
+	}
+
+	s.NewResponse(w, http.StatusOK, "")
 }

@@ -12,12 +12,14 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"backend/internal/database"
+	"backend/internal/store"
 )
 
 type Server struct {
 	port int
 
-	db database.Service
+	db    database.Service
+	store store.Store
 }
 
 type response struct {
@@ -53,7 +55,8 @@ func NewServer() *http.Server {
 	NewServer := &Server{
 		port: port,
 
-		db: database.New(),
+		db:    database.New(),
+		store: store.New(),
 	}
 
 	NewServer.db.Sync()
