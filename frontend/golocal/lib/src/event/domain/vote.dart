@@ -11,4 +11,10 @@ class Vote extends Model {
     required this.eventId,
     required this.state,
   });
+
+  Vote.fromJson(super.json)
+      : userId = json['userId'],
+        eventId = json['eventId'],
+        state = json['state'],
+        super.fromJson();
 }
