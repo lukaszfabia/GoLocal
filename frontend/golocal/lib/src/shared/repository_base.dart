@@ -10,6 +10,8 @@ abstract class Repository<T extends Model, V extends RemoteDataSource,
     required this.localDataSource,
   });
 
+  // TODO: add methods to allow either local or remote data source to be used
+
   Future<bool> create(T model);
   Future<bool> update(T model);
   Future<bool> delete(T model);

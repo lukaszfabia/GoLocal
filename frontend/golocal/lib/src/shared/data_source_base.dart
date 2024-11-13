@@ -1,6 +1,7 @@
 abstract class DataSource {
   // For now it returns either true or false,
   // TODO: change to Either<Success,Failure>
+
   Future<bool> create(Map<String, dynamic> data);
   Future<bool> update(Map<String, dynamic> data);
   Future<bool> delete(Map<String, dynamic> data);

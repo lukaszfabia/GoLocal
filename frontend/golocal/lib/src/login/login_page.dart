@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,25 +15,18 @@ class LoginScreen extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         children: [
           ColorCircle(
-            color: Colors.purpleAccent,
+            color: Color(0xE0E99CFF),
             opacity: 0.8,
-            top: -0.1,
-            left: -0.5,
-            size: 1.3,
+            bottom: -0.3,
+            right: -0.3,
+            size: 1,
           ),
           ColorCircle(
-            color: Colors.deepPurple,
-            opacity: 0.9,
-            top: -0.5,
-            left: -0.6,
-            size: 1.5,
-          ),
-          ColorCircle(
-            color: Colors.yellow,
+            color: Color(0x6851FFE4),
             opacity: 0.8,
-            size: 2,
-            right: -1.4,
-            top: 0.3,
+            top: -0.3,
+            left: -0.3,
+            size: 1,
           ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
