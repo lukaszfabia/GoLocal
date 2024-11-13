@@ -32,6 +32,9 @@ type User struct {
 
 	Comments []*Comment `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
 	Votes    []*Vote    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
+
+	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
+	LocationID uint      `json:"locationID"`
 }
 
 type Location struct {

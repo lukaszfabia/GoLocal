@@ -10,6 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Validation
+
 func hashPassword(password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password is empty")

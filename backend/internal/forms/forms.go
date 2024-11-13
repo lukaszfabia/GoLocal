@@ -34,3 +34,7 @@ type RestoreAccount struct {
 type CodeRequest struct {
 	Code string `json:"code"`
 }
+
+type NewPasswordRequest struct {
+	Password string `json:"newPassword"`
+}

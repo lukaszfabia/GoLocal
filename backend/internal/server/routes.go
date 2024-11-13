@@ -20,6 +20,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.HandleFunc("/ws", s.websocketHandler)
 
 	api := r.PathPrefix("/api").Subrouter()
+
+	api.PathPrefix("/media/").Handler(http.StripPrefix("/media/", http.FileServer(http.Dir("./media"))))
+
 	// authentication routes
 	api.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodPost)
 	api.HandleFunc("/sign-up/", s.SignUpHandler).Methods(http.MethodPost)
@@ -27,6 +30,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
 	api.HandleFunc("/verify/", s.VerifyHandler).Methods(http.MethodPost)
 	api.HandleFunc("/password-reset/", s.PasswordResetHandler).Methods(http.MethodPost)
+	api.HandleFunc("/verify/callback/", s.VerifyCallbackHandler).Methods(http.MethodPost)
+	api.HandleFunc("/password-reset/callback", s.PasswordResetCallbackHandler).Methods(http.MethodPost)
 
 	provider := api.PathPrefix("/{provider}").Subrouter()
 	provider.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodGet) // handles signing up

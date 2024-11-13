@@ -15,7 +15,9 @@ import (
 
 // register forms here
 type Formable interface {
-	forms.Login | forms.Register | forms.RefreshTokenRequest | forms.EditAccount | forms.RestoreAccount | forms.CodeRequest
+	forms.Login | forms.Register |
+		forms.RefreshTokenRequest | forms.EditAccount |
+		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest
 }
 
 type FileInfo struct {
