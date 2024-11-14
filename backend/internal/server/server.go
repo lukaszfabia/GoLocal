@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -51,7 +52,7 @@ func (s *Server) InvalidFormResponse(w http.ResponseWriter) {
 }
 
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	port, _ := strconv.Atoi(strings.TrimSpace(os.Getenv("PORT")))
 	NewServer := &Server{
 		port: port,
 

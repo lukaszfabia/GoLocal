@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -30,11 +31,11 @@ var allModels []any = []any{
 }
 
 var (
-	database   = os.Getenv("DB_DATABASE")
-	password   = os.Getenv("DB_PASSWORD")
-	username   = os.Getenv("DB_USERNAME")
-	port       = os.Getenv("DB_PORT")
-	host       = os.Getenv("DB_HOST")
+	database   = strings.TrimSpace(os.Getenv("DB_DATABASE"))
+	password   = strings.TrimSpace(os.Getenv("DB_PASSWORD"))
+	username   = strings.TrimSpace(os.Getenv("DB_USERNAME"))
+	port       = strings.TrimSpace(os.Getenv("DB_PORT"))
+	host       = strings.TrimSpace(os.Getenv("DB_HOST"))
 	dbInstance *service
 )
 
