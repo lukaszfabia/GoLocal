@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/ui/event_card.dart';
+import 'package:golocal/src/event/ui/event_detail.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
 class EventsViewPage extends StatelessWidget {
@@ -15,8 +16,8 @@ class EventsViewPage extends StatelessWidget {
       ),
       // ignore: prefer_const_constructors
       body: ListView.builder(
-        itemBuilder: (context, index) => EventCard(
-          event: Event(
+        itemBuilder: (context, index) {
+          Event event = Event(
             id: 1,
             title: "Najazd na 16 tarnogaj",
             eventOrganizers: [
@@ -36,8 +37,14 @@ class EventsViewPage extends StatelessWidget {
             tags: [],
             startDate: DateTime(2024, 11, 15),
             eventType: EventType.party,
-          ),
-        ),
+          );
+          return GestureDetector(
+              onTap: () => showModalBottomSheet(
+                    context: context,
+                    builder: (context) => EventDetail(event: event),
+                  ),
+              child: EventCard(event: event));
+        },
       ),
     );
   }
