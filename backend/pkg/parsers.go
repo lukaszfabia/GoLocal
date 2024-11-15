@@ -11,7 +11,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
+
+	"github.com/gorilla/schema"
 )
+
+var decoder = schema.NewDecoder()
 
 // register forms here
 type Formable interface {
@@ -36,25 +41,30 @@ func DecodeJSON[T Formable](r *http.Request) (*T, error) {
 	return form, nil
 }
 
-func DecodeMultipartForm[T Formable](r *http.Request) (*T, error) {
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+func DecodeMultipartForm[T any](r *http.Request) (*T, error) {
+	if err := r.ParseMultipartForm(10 << 20); err != nil { // 10 MB limit
 		log.Println("Error parsing form:", err)
 		return nil, errors.New("invalid form format")
 	}
 
 	form := new(T)
 
-	jsonField := r.FormValue("json")
-	if jsonField == "" {
-		return nil, errors.New("missing json field in form")
-	}
-
-	if err := json.Unmarshal([]byte(jsonField), form); err != nil {
-		log.Println("Error decoding JSON:", err)
-		return nil, errors.New("invalid JSON format in form field")
+	// map values
+	if err := decoder.Decode(form, r.PostForm); err != nil {
+		log.Println("Error decoding form fields:", err)
+		return nil, errors.New("invalid form data")
 	}
 
 	return form, nil
+}
+
+func ParseDate(date string) time.Time {
+	if date, err := time.Parse(time.DateOnly, date); err != nil {
+		log.Println("Failed to parse date")
+		return time.Time{}
+	} else {
+		return date
+	}
 }
 
 func GetFileFromForm(form *multipart.Form, fieldName string) (FileInfo, error) {

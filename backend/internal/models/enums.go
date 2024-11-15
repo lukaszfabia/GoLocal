@@ -12,6 +12,8 @@ const (
 	Party     EventType = "PARTY"
 )
 
+var EventTypes = []string{string(Workshop), string(Cultural), string(Sports), string(Social), string(Community), string(Charity), string(Party)}
+
 type ParticipationStatus string
 
 const (
@@ -19,3 +21,5 @@ const (
 	WillParticipate ParticipationStatus = "WILL_PARTICIPATE"
 	NotInterested   ParticipationStatus = "NOT_INTERESTED"
 )
+
+var ParticipationStatuses = []ParticipationStatus{Interested, WillParticipate, NotInterested}

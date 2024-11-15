@@ -34,7 +34,9 @@ type User struct {
 	Votes    []*Vote    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
 
 	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
-	LocationID uint      `json:"locationID"`
+	LocationID *uint     `json:"locationID"`
+
+	SkipValidation bool `gorm:"-" json:"-"`
 }
 
 type Location struct {
@@ -59,7 +61,7 @@ type Coords struct {
 type Address struct {
 	Model
 	Street         string `gorm:"not null;size:255" json:"street"`
-	StreetNumber   int    `gorm:"null" json:"streetNumber"`
+	StreetNumber   string `gorm:"null" json:"streetNumber"`
 	AdditionalInfo string `gorm:"null:size:512" json:"additionalInfo"`
 }
 
@@ -104,18 +106,15 @@ type Vote struct {
 	State   ParticipationStatus `gorm:"type:text;not null" json:"state"`
 }
 
-type Survey struct {
+type Opinion struct {
 	Model
 	Event   *Event `gorm:"foreignKey:EventID;references:ID;constraint:OnDelete:RESTRICT" json:"event"`
 	EventID uint   `json:"eventID"`
 
-	Questions []*SurveyQuestion `gorm:"foreignKey:SurveyID;constraint:OnDelete:CASCADE" json:"questions"`
-}
+	User   *User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:RESTRICT" json:"user"`
+	UserID uint  `json:"userID"`
 
-type SurveyQuestion struct {
-	Model
-	Question string `gorm:"not null;unique;size:512" json:"question"`
-	SurveyID uint   `json:"surveyID"`
+	Opinion string `gorm:"not null;size:1024"`
 }
 
 type BlacklistedTokens struct {

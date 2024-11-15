@@ -62,7 +62,9 @@ func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request, user *
 	user.Email = form.Email
 	user.Password = &form.Password
 	user.Bio = &form.Bio
-	user.Birthday = &form.Birthday
+
+	parsedDate := pkg.ParseDate(form.Birthday)
+	user.Birthday = &parsedDate
 
 	updatedUser, err := s.db.UserService().SaveUser(user)
 	if err != nil {

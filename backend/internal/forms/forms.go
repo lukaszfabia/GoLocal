@@ -1,6 +1,8 @@
 package forms
 
-import "time"
+import (
+	"mime/multipart"
+)
 
 type Register struct {
 	FirstName string `json:"firstName"`
@@ -19,12 +21,13 @@ type Login struct {
 }
 
 type EditAccount struct {
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	Birthday  time.Time `json:"birthday"`
-	Bio       string    `json:"bio"`
+	FirstName string                `json:"firstName" form:"firstName"`
+	LastName  string                `json:"lastName" form:"lastName"`
+	Email     string                `json:"email" form:"email"`
+	Password  string                `json:"password" form:"password"`
+	Birthday  string                `json:"birthday" form:"birthday"` // 1970-01-01
+	Bio       string                `json:"bio" form:"bio"`
+	Avatar    *multipart.FileHeader `json:"-" form:"avatar"`
 }
 
 type RestoreAccount struct {

@@ -107,8 +107,8 @@ func DecodeJWT(tokenStr string) (uint, error) {
 	})
 
 	if err != nil {
-		msg := "Error during paring the token"
-		log.Println(msg)
+		msg := "Error during parsing the token"
+		log.Println(err)
 		return 0, errors.New(strings.ToLower(msg))
 	}
 

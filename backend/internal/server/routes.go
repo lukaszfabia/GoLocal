@@ -21,7 +21,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	api := r.PathPrefix("/api").Subrouter()
 
-	api.PathPrefix("/media/").Handler(http.StripPrefix("/media/", http.FileServer(http.Dir("./media"))))
+	fileServer := http.FileServer(http.Dir("./media"))
+
+	api.PathPrefix("/media/").Handler(http.StripPrefix("/api/media/", fileServer))
 
 	// authentication routes
 	api.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodPost)
