@@ -8,7 +8,9 @@ import (
 	"net/http"
 )
 
+// Manage user
 func (s *Server) AccountHandler(w http.ResponseWriter, r *http.Request) {
+	// Get user from ctx
 	user, ok := r.Context().Value("user").(*models.User)
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
@@ -45,6 +47,7 @@ func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request, user *
 	if err != nil {
 		log.Println("Avatar upload error:", err)
 	} else {
+		// Handle image
 		info.OldPath = user.AvatarURL
 		if path, err := pkg.SaveImage[*pkg.Avatar](info); err == nil {
 			user.AvatarURL = &path
@@ -59,7 +62,9 @@ func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request, user *
 	user.Email = form.Email
 	user.Password = &form.Password
 	user.Bio = &form.Bio
-	user.Birthday = &form.Birthday
+
+	parsedDate := pkg.ParseDate(form.Birthday)
+	user.Birthday = &parsedDate
 
 	updatedUser, err := s.db.UserService().SaveUser(user)
 	if err != nil {

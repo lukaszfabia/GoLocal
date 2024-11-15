@@ -221,6 +221,7 @@ func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := pkg.DecodeJSON[forms.CodeRequest](r)
 	user, ok := r.Context().Value("user").(*models.User)
+
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 		return
@@ -244,11 +245,32 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.NewResponse(w, http.StatusOK, fmt.Sprintf("%s %s, you' ve been verifed", user.FirstName, user.LastName))
-
 }
 
 func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	//TODO implement
+	form, err := pkg.DecodeJSON[forms.NewPasswordRequest](r)
+	user, ok := r.Context().Value("user").(*models.User)
+
+	if !ok {
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
+	}
+
+	if err != nil {
+		s.InvalidFormResponse(w)
+		return
+	}
+
+	user.Password = &form.Password
+
+	_, err = s.db.UserService().SaveUser(user)
+
+	if err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Could not change password")
+		return
+	}
+
+	s.NewResponse(w, http.StatusOK, "Password changed!")
 }
 
 func (s *Server) PasswordResetHandler(w http.ResponseWriter, r *http.Request) {

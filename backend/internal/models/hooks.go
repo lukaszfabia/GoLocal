@@ -2,13 +2,15 @@ package models
 
 import (
 	"errors"
-	"log"
 	"net/mail"
 	"regexp"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+// Validation
 
 func hashPassword(password string) (string, error) {
 	if password == "" {
@@ -32,8 +34,8 @@ func isBetween(min, max int, str string) bool {
 }
 
 func isSecurePassword(password string) bool {
-	const midReg string = `^[A-Za-z\d]{8,}$`           // one big letter & one decimal & len = 8
-	const strongReg string = `^[A-Za-z\d@$!%#?&]{8,}$` // the same above + special char
+	const midReg string = `^[A-Za-z\d]{5,}$`           // one big letter & one decimal & len = 8
+	const strongReg string = `^[A-Za-z\d@$!%#?&]{5,}$` // the same above + special char
 
 	goodPasswordValidator := regexp.MustCompile(midReg)
 	strongPasswordValidator := regexp.MustCompile(strongReg)
@@ -42,9 +44,16 @@ func isSecurePassword(password string) bool {
 		strongPasswordValidator.MatchString(password))
 }
 
+func isHashed(password string) bool {
+	return strings.HasPrefix(password, "$2a$") || strings.HasPrefix(password, "$2b$")
+}
+
 // Hook for validation for really important data
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {
-	log.Println("Validating user data")
+	if u.SkipValidation {
+		return nil
+	}
+
 	if !isBetween(1, 255, u.FirstName) || !isBetween(1, 255, u.LastName) {
 		return errors.New("first name and last name are required")
 	}
@@ -53,15 +62,16 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 		return errors.New("invalid email format")
 	}
 
-	if u.Password != nil {
+	if u.Password != nil && !isHashed(*u.Password) {
 		if !isSecurePassword(*u.Password) {
-			return errors.New("password must be at least 8 characters")
+			return errors.New("password must be at least 5 characters")
+		} else {
+			hashedPassword, err := hashPassword(*u.Password)
+			if err != nil {
+				return err
+			}
+			u.Password = &hashedPassword
 		}
-		hashedPassword, err := hashPassword(*u.Password)
-		if err != nil {
-			return err
-		}
-		u.Password = &hashedPassword
 	}
 
 	return nil

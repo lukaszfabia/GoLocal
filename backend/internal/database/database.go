@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -24,17 +25,16 @@ var allModels []any = []any{
 	&models.Event{},
 	&models.Comment{},
 	&models.Vote{},
-	&models.Survey{},
-	&models.SurveyQuestion{},
+	&models.Opinion{},
 	&models.BlacklistedTokens{},
 }
 
 var (
-	database   = os.Getenv("DB_DATABASE")
-	password   = os.Getenv("DB_PASSWORD")
-	username   = os.Getenv("DB_USERNAME")
-	port       = os.Getenv("DB_PORT")
-	host       = os.Getenv("DB_HOST")
+	database   = strings.TrimSpace(os.Getenv("DB_DATABASE"))
+	password   = strings.TrimSpace(os.Getenv("DB_PASSWORD"))
+	username   = strings.TrimSpace(os.Getenv("DB_USERNAME"))
+	port       = strings.TrimSpace(os.Getenv("DB_PORT"))
+	host       = strings.TrimSpace(os.Getenv("DB_HOST"))
 	dbInstance *service
 )
 
@@ -52,6 +52,9 @@ type Service interface {
 	// If something go wrong, info is logeed in console.
 	Sync()
 
+	// Fill database with dummy data
+	DummyService() DummyService
+
 	UserService() UserService
 	TokenService() TokenService
 }
@@ -61,6 +64,7 @@ type service struct {
 
 	userService  UserService
 	tokenService TokenService
+	dummyService DummyService
 }
 
 // Initializes new database connection and services
@@ -79,11 +83,13 @@ func New() Service {
 
 		userService := NewUserService(db)
 		tokenService := NewTokenService(db)
+		dummyService := NewDummyService(db)
 
 		return &service{
 			db:           db,
 			userService:  userService,
 			tokenService: tokenService,
+			dummyService: dummyService,
 		}
 
 	}
@@ -174,4 +180,6 @@ func (s *service) Sync() {
 		}
 	}
 	log.Println("Migrating models has been done.")
+
+	s.dummyService.Cook()
 }
