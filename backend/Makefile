@@ -46,6 +46,10 @@ clean:
 	@echo "Cleaning..."
 	@rm -f main
 
+clean_db:
+	@echo "Clearing up database..."
+	@docker-compose down --volumes
+
 # Live Reload
 watch:
 	@if command -v air > /dev/null; then \
@@ -63,4 +67,4 @@ watch:
             fi; \
         fi
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean clean_db watch docker-run docker-down itest
