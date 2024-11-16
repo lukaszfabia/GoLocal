@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:golocal/src/auth/auth_service.dart';
+import 'package:golocal/src/login/auth/auth_service.dart';
 import 'package:golocal/src/user/domain/user.dart';
 import 'package:meta/meta.dart';
 part 'auth_event.dart';
@@ -13,7 +13,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignInWithEmail>(
       (event, emit) async {
         emit(AuthLoading());
-        final user = await signInWithEmail(
+        final user = await authSerivce.signInWithEmail(
           event.email,
           event.password,
         );
@@ -33,7 +33,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email, password, birthDate, firstName, lastName);
   }
 
-  Future<User?> signInWithEmail(String email, String password) async {
-    return authSerivce.signInWithEmail(email, password);
+  @override
+  void onEvent(AuthEvent event) {
+    print("event: $event called");
+    super.onEvent(event);
   }
 }
