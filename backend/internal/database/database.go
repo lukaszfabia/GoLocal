@@ -57,6 +57,7 @@ type Service interface {
 
 	UserService() UserService
 	TokenService() TokenService
+	EventService() EventService
 }
 
 type service struct {
@@ -65,6 +66,7 @@ type service struct {
 	userService  UserService
 	tokenService TokenService
 	dummyService DummyService
+	eventService EventService
 }
 
 // Initializes new database connection and services
@@ -84,12 +86,14 @@ func New() Service {
 		userService := NewUserService(db)
 		tokenService := NewTokenService(db)
 		dummyService := NewDummyService(db)
+		eventService := NewEventService(db)
 
 		return &service{
 			db:           db,
 			userService:  userService,
 			tokenService: tokenService,
 			dummyService: dummyService,
+			eventService: eventService,
 		}
 
 	}

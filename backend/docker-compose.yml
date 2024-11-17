@@ -1,7 +1,7 @@
 services:
   db:
     container_name: go_local_postgres
-    image: postgres:latest
+    image: postgis/postgis
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_DATABASE}

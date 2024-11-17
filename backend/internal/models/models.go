@@ -56,32 +56,33 @@ type Coords struct {
 	Model
 	Latitude  float64 `gorm:"not null" json:"latitude"`
 	Longitude float64 `gorm:"not null" json:"longitude"`
+	Geom      string  `gorm:"column:geom;type:geometry(Point,4326)" json:"-"`
 }
 
 type Address struct {
 	Model
 	Street         string `gorm:"not null;size:255" json:"street"`
-	StreetNumber   string `gorm:"null" json:"streetNumber"`
-	AdditionalInfo string `gorm:"null:size:512" json:"additionalInfo"`
+	StreetNumber   string `gorm:"null" json:"street_number"`
+	AdditionalInfo string `gorm:"null:size:512" json:"additional_info"`
 }
 
 type Event struct {
 	Model
-	EventOrganizers []*User `gorm:"many2many:event_organizers" json:"eventOrganizers"`
+	EventOrganizers []*User `gorm:"many2many:event_organizers" json:"event_organizers"`
 
 	Title       string    `gorm:"not null;size:255" json:"title"`
 	Description string    `gorm:"default:'';size:255" json:"description"`
 	ImageURL    *string   `gorm:"size:1024" json:"image"`
-	IsAdultOnly bool      `gorm:"default:true" json:"isAdultOnly"`
+	IsAdultOnly bool      `gorm:"default:true" json:"is_adult_only"`
 	EventType   EventType `gorm:"type:text;not null" json:"event_type"`
 	Tags        []*Tag    `gorm:"many2many:event_tags" json:"event_tags"` // for ml
 
 	// Timestamp with time zone
-	StartDate  *time.Time `gorm:"type:date;not null" json:"startDate"`
-	FinishDate *time.Time `gorm:"type:date;" json:"finishDate"`
+	StartDate  *time.Time `gorm:"type:date;not null" json:"start_date"`
+	FinishDate *time.Time `gorm:"type:date;" json:"finish_date"`
 
 	Location   *Location `gorm:"foreignKey:LocationID;references:ID;constraint:OnDelete:CASCADE" json:"location"`
-	LocationID uint      `json:"locationID"`
+	LocationID uint      `json:"location_id"`
 
 	Comments []*Comment `gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE" json:"comments"`
 	Votes    []*Vote    `gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE" json:"votes"`

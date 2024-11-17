@@ -47,6 +47,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	auth.HandleFunc("/account/", s.AccountHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
+	api.HandleFunc(`/event/{limit:[0-9]*}`, s.EventHandler).
+		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
+
 	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
 
 	return r

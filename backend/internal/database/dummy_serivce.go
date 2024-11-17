@@ -168,11 +168,19 @@ func (d *dummyServiceImpl) address() {
 
 func (d *dummyServiceImpl) coords() {
 	for i := 0; i < MAX_CAPACITY; i++ {
-		if err := d.db.Save(&models.Coords{
-			Longitude: d.f.Longitude(),
-			Latitude:  d.f.Latitude(),
-		}).Error; err != nil {
-			log.Println(err)
+		longitude := d.f.Longitude()
+		latitude := d.f.Latitude()
+
+		geom := fmt.Sprintf("POINT(%f %f)", longitude, latitude)
+
+		coords := &models.Coords{
+			Longitude: longitude,
+			Latitude:  latitude,
+			Geom:      geom,
+		}
+
+		if err := d.db.Save(coords).Error; err != nil {
+			log.Printf("Error saving coords: %v, Longitude: %f, Latitude: %f\n", err, longitude, latitude)
 		}
 	}
 }
