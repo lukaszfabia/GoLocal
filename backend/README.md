@@ -1,4 +1,4 @@
-# Backend for GoLocal
+# GoLocal - API
 
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](/backend/)
 [![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](/backend/internal/database/database.go)

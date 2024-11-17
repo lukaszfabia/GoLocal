@@ -70,8 +70,8 @@ type Event struct {
 	EventOrganizers []*User `gorm:"many2many:event_organizers" json:"eventOrganizers"`
 
 	Title       string    `gorm:"not null;size:255" json:"title"`
-	Description string    `gorm:"default:'';null;size:255" json:"description"`
-	ImageURL    *string   `gorm:"null;size:1024" json:"image"`
+	Description string    `gorm:"default:'';size:255" json:"description"`
+	ImageURL    *string   `gorm:"size:1024" json:"image"`
 	IsAdultOnly bool      `gorm:"default:true" json:"isAdultOnly"`
 	EventType   EventType `gorm:"type:text;not null" json:"event_type"`
 	Tags        []*Tag    `gorm:"many2many:event_tags" json:"event_tags"` // for ml
