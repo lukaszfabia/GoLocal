@@ -1,0 +1,6 @@
+{
+  "appTitle": "golocal",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}
