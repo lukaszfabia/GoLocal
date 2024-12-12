@@ -34,7 +34,7 @@ class BackgroundWidget extends StatelessWidget {
 }
 
 class ColorCircle extends StatelessWidget {
-  ColorCircle({
+  const ColorCircle({
     required this.color,
     this.opacity = 0.5,
     this.left,
