@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import 'jwt_token_storage.dart';
+import 'dart:io' show Platform;
 
 class DioClient {
   static final DioClient _instance = DioClient._internal();
@@ -12,7 +13,8 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'http://10.0.2.2:8080/api',
+        baseUrl:
+            'http://${Platform.isAndroid ? "10.0.2.2" : "127.0.0.1"}:8080/api',
         headers: {
           'Content-Type': 'application/json',
         },
