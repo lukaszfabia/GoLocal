@@ -34,7 +34,7 @@ class BackgroundWidget extends StatelessWidget {
 }
 
 class ColorCircle extends StatelessWidget {
-  const ColorCircle({
+  ColorCircle({
     required this.color,
     this.opacity = 0.5,
     this.left,
@@ -66,7 +66,7 @@ class ColorCircle extends StatelessWidget {
         width: size != null ? screenWidth * size! : 100,
         height: size != null ? screenWidth * size! : 100,
         decoration: BoxDecoration(
-          color: color.withValues(alpha: opacity),
+          color: color.withOpacity(opacity),
           shape: BoxShape.circle,
         ),
       ),
