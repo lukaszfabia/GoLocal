@@ -13,7 +13,7 @@ class GoLocalApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: BlocProvider(
-          create: (context) => AuthBloc(authSerivce: AuthService()),
+          create: (context) => AuthBloc(authService: AuthService()),
           child: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is AuthLoading) {
