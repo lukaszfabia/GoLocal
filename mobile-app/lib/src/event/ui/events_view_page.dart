@@ -6,7 +6,7 @@ import 'package:golocal/src/event/ui/event_detail.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
 class EventsViewPage extends StatelessWidget {
-  EventsViewPage({super.key});
+  const EventsViewPage({super.key});
 
   @override
   Widget build(BuildContext context) {
