@@ -6,7 +6,7 @@ import 'package:golocal/src/login/bloc/auth_bloc.dart';
 import 'package:golocal/src/login/login_page.dart';
 import 'package:golocal/src/navigation/navigation_bloc.dart';
 import 'package:golocal/src/preference_survey/preference_survey_view.dart';
-import 'package:golocal/src/shared/navbar.dart'; // Import the NavBar widget
+import 'package:golocal/src/shared/navbar.dart';
 
 class GoLocalApp extends StatelessWidget {
   const GoLocalApp({super.key});
@@ -40,7 +40,7 @@ class GoLocalApp extends StatelessWidget {
                   return Scaffold(
                     appBar: AppBar(title: Text('GoLocal')),
                     body: page,
-                    bottomNavigationBar: NavBar(), // Add the NavBar widget
+                    bottomNavigationBar: NavBar(),
                   );
                 },
               );

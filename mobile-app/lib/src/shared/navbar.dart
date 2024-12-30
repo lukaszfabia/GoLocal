@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/navigation/navigation_bloc.dart';
 
 class NavBar extends StatelessWidget {
+  const NavBar({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
