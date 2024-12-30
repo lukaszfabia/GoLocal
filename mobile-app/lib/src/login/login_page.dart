@@ -1,6 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/login/bloc/auth_bloc.dart';
 import 'package:golocal/src/shared/background.dart';
 
 class LoginPage extends StatelessWidget {
@@ -26,7 +26,11 @@ class LoginPage extends StatelessWidget {
 }
 
 class LoginForm extends StatelessWidget {
-  const LoginForm({super.key});
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  LoginForm({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -35,20 +39,28 @@ class LoginForm extends StatelessWidget {
         const Text('Login'),
         const SizedBox(height: 20),
         TextField(
+          controller: emailController,
           autofillHints: [AutofillHints.email],
           decoration: InputDecoration(
             labelText: 'Email',
           ),
         ),
         const SizedBox(height: 20),
-        const TextField(
+        TextField(
+          controller: passwordController,
           decoration: InputDecoration(
             labelText: 'Password',
           ),
         ),
         const SizedBox(height: 20),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            final email = emailController.text;
+            final password = passwordController.text;
+            context
+                .read<AuthBloc>()
+                .add(SignInWithEmail(email: email, password: password));
+          },
           child: const Text('Login'),
         ),
       ],
