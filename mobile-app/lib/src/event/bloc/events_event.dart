@@ -8,5 +8,9 @@ sealed class EventsEvent extends Equatable {
 }
 
 final class FetchEvents extends EventsEvent {
-  const FetchEvents();
+  const FetchEvents({this.refresh = false});
+  final bool refresh;
+
+  @override
+  List<Object> get props => [refresh];
 }

@@ -33,7 +33,8 @@ class GoLocalApp extends StatelessWidget {
                     .showSnackBar(SnackBar(content: Text(state.message)));
               }
               if (state is Authenticated) {
-                BlocProvider.of<EventsBloc>(context).add(const FetchEvents());
+                BlocProvider.of<EventsBloc>(context)
+                    .add(const FetchEvents(refresh: true));
               }
             },
             builder: (context, state) {

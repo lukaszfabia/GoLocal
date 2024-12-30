@@ -30,7 +30,7 @@ class EventsRepositoryDummy implements IEventsRepository {
   @override
   Future<List<Event>> getEvents() {
     var events = List.generate(
-      10,
+      5,
       (i) {
         return Event(
           id: i,

@@ -8,15 +8,27 @@ part 'events_state.dart';
 
 class EventsBloc extends Bloc<EventsEvent, EventsState> {
   final IEventsRepository _repository;
-  final List<Event> events = [];
-  EventsBloc(this._repository) : super(EventsInitial()) {
+  EventsBloc(this._repository) : super(EventsState(events: [])) {
     on<FetchEvents>((event, emit) async {
-      emit(EventsLoading());
-      await _repository.getEvents().then((events) {
-        emit(EventsLoaded(events));
-      }).catchError((e) {
-        emit(EventsError(message: e.toString()));
-      });
+      if (event.refresh) {
+        emit(state
+            .copyWith(events: [], status: EventsStatus.loading, nextPage: 1));
+      } else {
+        emit(state.copyWith(status: EventsStatus.loading));
+      }
+      try {
+        final events = await _repository.getEvents();
+        emit(state.copyWith(
+          events: state.events + events,
+          status: EventsStatus.loaded,
+          nextPage: state.nextPage + 1,
+        ));
+      } catch (e) {
+        emit(state.copyWith(
+          status: EventsStatus.error,
+          errorMessage: e.toString(),
+        ));
+      }
     });
   }
 }
