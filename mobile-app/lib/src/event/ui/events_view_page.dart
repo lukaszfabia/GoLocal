@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/auth/bloc/auth_bloc.dart';
+import 'package:golocal/src/event/bloc/events_bloc.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/ui/event_card.dart';
@@ -12,38 +15,35 @@ class EventsViewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () {
+              BlocProvider.of<AuthBloc>(context).add(AuthLogout());
+            },
+          ),
+        ],
         title: const Text('Events'),
       ),
-      // ignore: prefer_const_constructors
-      body: ListView.builder(
-        itemBuilder: (context, index) {
-          Event event = Event(
-            id: 1,
-            title: "Najazd na 16 tarnogaj",
-            eventOrganizers: [
-              User(
-                  id: 0,
-                  firstName: "Anna",
-                  lastName: "Robak",
-                  email: "AnnaRobak123",
-                  birthDate: DateTime(2000, 1, 11),
-                  isVerified: true,
-                  isPremium: false)
-            ],
-            description:
-                "A very nice eventA very nice eventA very nice eventA very nice eventA very nice eventA very nice eventA very nice eventA very nice eventA very nice eventA very nice eventA very A very nice eventA very nice eventA very nice eventA very nice eventnice eventA very nice eventA very nice event",
-            imageUrl:
-                "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png",
-            tags: [],
-            startDate: DateTime(2024, 11, 15),
-            eventType: EventType.party,
-          );
-          return GestureDetector(
-              onTap: () => showModalBottomSheet(
-                    context: context,
-                    builder: (context) => EventDetail(event: event),
-                  ),
-              child: EventCard(event: event));
+      body: BlocBuilder<EventsBloc, EventsState>(
+        builder: (context, state) {
+          if (state is EventsInitial) {
+            BlocProvider.of<EventsBloc>(context).add(const FetchEvents());
+          }
+          if (state is EventsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is EventsLoaded) {
+            return ListView.builder(
+              itemCount: state.events.length,
+              itemBuilder: (context, index) {
+                return EventCard(
+                  event: state.events[index],
+                );
+              },
+            );
+          }
+          return const Center(child: Text('No events found'));
         },
       ),
     );

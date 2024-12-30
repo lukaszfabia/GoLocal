@@ -12,12 +12,12 @@ class EventCard extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22.0),
+          borderRadius: BorderRadius.circular(14.0),
         ),
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: NetworkImage(event.imageUrl),
+              image: NetworkImage(event.imageUrl ?? ''),
               fit: BoxFit.cover,
             ),
           ),
@@ -29,10 +29,10 @@ class EventCard extends StatelessWidget {
                 right: 0,
                 child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.grey.withOpacity(0.8),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(6.0),
                       child: Column(
                         children: [
                           Text(event.title),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/auth/auth_repository.dart';
+import 'package:golocal/src/event/bloc/events_bloc.dart';
+import 'package:golocal/src/event/data/events_repository_dummy.dart';
 import 'package:golocal/src/event/ui/events_view_page.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
-import 'package:golocal/src/login/signin_page.dart';
+import 'package:golocal/src/auth/ui/signin_page.dart';
 
 class GoLocalApp extends StatelessWidget {
   const GoLocalApp({super.key});
@@ -12,9 +14,16 @@ class GoLocalApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepositoryProvider(
       create: (context) => AuthRepository(),
-      child: BlocProvider(
-        create: (context) => AuthBloc(context.read<AuthRepository>())
-          ..add(const AuthInitialCheck()),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AuthBloc(context.read<AuthRepository>())
+              ..add(const AuthInitialCheck()),
+          ),
+          BlocProvider(
+            create: (context) => EventsBloc(EventsRepositoryDummy()),
+          ),
+        ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           home: BlocConsumer<AuthBloc, AuthState>(
@@ -22,6 +31,9 @@ class GoLocalApp extends StatelessWidget {
               if (state is AuthError) {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(state.message)));
+              }
+              if (state is Authenticated) {
+                BlocProvider.of<EventsBloc>(context).add(const FetchEvents());
               }
             },
             builder: (context, state) {
