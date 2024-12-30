@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:golocal/src/auth/auth_service.dart';
 import 'package:golocal/src/user/domain/user.dart';
+import 'package:meta/meta.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
