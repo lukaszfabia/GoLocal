@@ -1,5 +1,5 @@
 name: golocal
-description: "A new Flutter project."
+description: 'A new Flutter project.'
 
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
@@ -16,6 +16,11 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.6
   bloc: ^8.1.4
+  dio: ^5.7.0
+  equatable: ^2.0.7
+  flutter_secure_storage: ^9.2.2
+  faker: ^2.2.0
+  meta: ^1.11.0
 
 dev_dependencies:
   flutter_test:
@@ -33,4 +38,3 @@ flutter:
   assets:
     # Add assets from the images directory to the application.
     - assets/images/
-    

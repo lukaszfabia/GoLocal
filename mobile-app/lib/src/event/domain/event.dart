@@ -8,7 +8,7 @@ class Event extends Model {
   List<User> eventOrganizers;
   String title;
   String description;
-  String imageUrl;
+  String? imageUrl;
   bool isAdultOnly;
   EventType eventType;
   List<Tag> tags;
@@ -22,10 +22,10 @@ class Event extends Model {
     required super.id,
     required this.title,
     required this.description,
-    required this.imageUrl,
     required this.tags,
     required this.startDate,
     required this.eventOrganizers,
+    this.imageUrl,
     this.eventType = EventType.other,
     this.isAdultOnly = false,
     this.location,
@@ -38,7 +38,7 @@ class Event extends Model {
   Event.fromJson(super.json)
       : title = json['title'],
         description = json['description'],
-        imageUrl = json['imageUrl'],
+        imageUrl = json['imageUrl'] ?? '',
         isAdultOnly = json['isAdultOnly'],
         eventType = json['eventType'],
         tags = json['tags'],
