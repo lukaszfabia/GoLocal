@@ -24,7 +24,7 @@ class PreferenceSurveyService {
           .toList();
     } catch (e) {
       print('Error fetching survey: $e');
-      throw e;
+      rethrow;
     }
   }
 }

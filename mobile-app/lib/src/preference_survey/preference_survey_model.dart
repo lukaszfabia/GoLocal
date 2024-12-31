@@ -1,35 +1,8 @@
-import 'package:golocal/src/shared/model_base.dart';
-
-class PreferenceSurvey extends Model {
-  List<PreferenceSurveyQuestion> questions;
-  PreferenceSurvey({
-    required super.id,
-    required this.questions,
-  });
-
-  factory PreferenceSurvey.fromJson(Map<String, dynamic> json) {
-    return PreferenceSurvey(
-      id: json['id'],
-      questions: (json['questions'] as List)
-          .map((question) => PreferenceSurveyQuestion.fromJson(question))
-          .toList(),
-    );
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'questions': questions.map((question) => question.toJson()).toList(),
-    };
-  }
-}
-
 class PreferenceSurveyQuestion {
   final int id;
   final String text;
-  final String type;
-  final List<String>? options;
+  final QuestionType type;
+  final List<Option>? options;
   final bool? toggle;
 
   PreferenceSurveyQuestion({
@@ -44,9 +17,12 @@ class PreferenceSurveyQuestion {
     return PreferenceSurveyQuestion(
       id: json['ID'],
       text: json['Text'],
-      type: json['Type'],
-      options:
-          json['Options'] != null ? List<String>.from(json['Options']) : null,
+      type: _questionTypeFromString(json['Type']),
+      options: json['Options'] != null
+          ? (json['Options'] as List)
+              .map((option) => Option.fromJson(option))
+              .toList()
+          : null,
       toggle: json['Toggle'],
     );
   }
@@ -55,25 +31,63 @@ class PreferenceSurveyQuestion {
     return {
       'ID': id,
       'Text': text,
-      'Type': type,
-      'Options': options,
+      'Type': _questionTypeToString(type),
+      'Options': options?.map((option) => option.toJson()).toList(),
       'Toggle': toggle,
     };
   }
-}
 
-class SurveyQuestion {
-  final String question;
-  final QuestionType type;
-  final List<String>? options;
-  final bool? initialValue;
+  static QuestionType _questionTypeFromString(String type) {
+    switch (type) {
+      case 'TOGGLE':
+        return QuestionType.toggle;
+      case 'SINGLE_CHOICE':
+        return QuestionType.singleChoice;
+      case 'MULTIPLE_CHOICE':
+        return QuestionType.multiSelect;
+      default:
+        throw Exception('Unknown question type: $type');
+    }
+  }
 
-  SurveyQuestion({
-    required this.question,
-    required this.type,
-    this.options,
-    this.initialValue,
-  });
+  static String _questionTypeToString(QuestionType type) {
+    switch (type) {
+      case QuestionType.toggle:
+        return 'TOGGLE';
+      case QuestionType.singleChoice:
+        return 'SINGLE_CHOICE';
+      case QuestionType.multiSelect:
+        return 'MULTIPLE_CHOICE';
+    }
+  }
 }
 
 enum QuestionType { toggle, singleChoice, multiSelect }
+
+class Option {
+  final int id;
+  final String text;
+  final bool isSelected;
+
+  Option({
+    required this.id,
+    required this.text,
+    required this.isSelected,
+  });
+
+  factory Option.fromJson(Map<String, dynamic> json) {
+    return Option(
+      id: json['ID'],
+      text: json['Text'],
+      isSelected: json['IsSelected'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ID': id,
+      'Text': text,
+      'IsSelected': isSelected,
+    };
+  }
+}

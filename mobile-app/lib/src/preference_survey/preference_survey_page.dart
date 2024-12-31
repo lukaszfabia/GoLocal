@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/preference_survey_bloc.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
-import 'bloc/preference_survey_bloc.dart';
 import 'package:golocal/src/preference_survey/preference_survey_model.dart';
 
 class PreferenceSurveyPage extends StatelessWidget {
@@ -81,13 +78,11 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                for (int i = 0; i < state.questions.length; i++)
-                  TextField(
-                    controller: _controllers[i],
-                    decoration: InputDecoration(
-                      labelText: state.questions[i].text,
-                    ),
-                  ),
+                ...state.questions.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  PreferenceSurveyQuestion question = entry.value;
+                  return _buildQuestion(index, question);
+                }),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitSurvey,
@@ -105,17 +100,17 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
     );
   }
 
-  Widget _buildQuestion(int index, SurveyQuestion question) {
+  Widget _buildQuestion(int index, PreferenceSurveyQuestion question) {
     switch (question.type) {
       case QuestionType.toggle:
         return _buildToggleQuestion(
-            index, question.question, question.initialValue!);
+            index, question.text, question.toggle ?? false);
       case QuestionType.singleChoice:
-        return _buildButtonQuestion(
-            index, question.question, question.options ?? [], 0);
+        return _buildButtonQuestion(index, question.text,
+            question.options?.map((option) => option.text).toList() ?? [], 0);
       case QuestionType.multiSelect:
-        return _buildMultiSelectQuestion(
-            index, question.question, question.options!);
+        return _buildMultiSelectQuestion(index, question.text,
+            question.options?.map((option) => option.text).toList() ?? []);
     }
   }
 
