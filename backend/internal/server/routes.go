@@ -41,6 +41,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	auth := api.PathPrefix("/auth").Subrouter()
 
+	// recommendation routes
+	api.HandleFunc("/change-preference-survey", s.handleSurvey)
+	api.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
+	api.HandleFunc("/preference-survey", s.getSurvey)
+
 	// setting middleware
 	auth.Use(s.isAuth)
 	// authenthicated endpoints

@@ -23,3 +23,11 @@ const (
 )
 
 var ParticipationStatuses = []ParticipationStatus{Interested, WillParticipate, NotInterested}
+
+type QuestionType string
+
+const (
+	Toggle         QuestionType = "TOGGLE"
+	SingleChoice   QuestionType = "SINGLE_CHOICE"
+	MultipleChoice QuestionType = "MULTIPLE_CHOICE"
+)
