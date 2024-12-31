@@ -32,17 +32,18 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	d.coords()
-	d.address()
-	d.location()
-	d.user1()
-	d.tags()
-	d.voteComment()
-	d.event1()
-	d.event2()
-	d.opinion()
-	d.followers()
-	d.user2()
+	//d.coords()
+	//d.address()
+	//d.location()
+	//d.user1()
+	//d.tags()
+	//d.voteComment()
+	//d.event1()
+	//d.event2()
+	//d.opinion()
+	//d.followers()
+	//d.user2()
+	d.generateMockSurvey()
 }
 
 // &models.Opinion{},
@@ -385,4 +386,87 @@ func generateEventTitle(eventType models.EventType) string {
 	}
 
 	return title
+}
+
+func (d *dummyServiceImpl) generateMockSurvey() {
+	mockSurvey := models.PreferenceSurvey{
+		Title:       "Sample Survey",
+		Description: "This is a sample survey for testing purposes.",
+	}
+
+	if err := d.db.Save(&mockSurvey).Error; err != nil {
+		log.Println("Error saving mock survey:", err)
+		return
+	}
+
+	questions := []models.Question{
+		{
+			Text:     "Are you interested in adult-only activities?",
+			Type:     models.Toggle,
+			Toggle:   new(bool), // Initial value is false
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "Do you prefer to relax, or spend time actively?",
+			Type:     models.SingleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "What are your age/family constraints for events and activities?",
+			Type:     models.SingleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "Do you prefer indoors or outdoors events and activities?",
+			Type:     models.SingleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "What more are you interested in?",
+			Type:     models.MultipleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+	}
+
+	for _, question := range questions {
+		if err := d.db.Save(&question).Error; err != nil {
+			log.Println("Error saving question:", err)
+			return
+		}
+
+		var options []models.Option
+		switch question.Text {
+		case "Do you prefer to relax, or spend time actively?":
+			options = []models.Option{
+				{Text: "High-energy", QuestionID: question.ID},
+				{Text: "Relaxation", QuestionID: question.ID},
+			}
+		case "What are your age/family constraints for events and activities?":
+			options = []models.Option{
+				{Text: "Family-friendly", QuestionID: question.ID},
+				{Text: "Couple-friendly", QuestionID: question.ID},
+				{Text: "Adult-only", QuestionID: question.ID},
+			}
+		case "Do you prefer indoors or outdoors events and activities?":
+			options = []models.Option{
+				{Text: "Indoors", QuestionID: question.ID},
+				{Text: "Outdoors", QuestionID: question.ID},
+			}
+		case "What more are you interested in?":
+			options = []models.Option{
+				{Text: "Learning", QuestionID: question.ID},
+				{Text: "Music", QuestionID: question.ID},
+				{Text: "Sports", QuestionID: question.ID},
+			}
+		}
+
+		for _, option := range options {
+			if err := d.db.Save(&option).Error; err != nil {
+				log.Println("Error saving option:", err)
+				return
+			}
+		}
+	}
+
+	log.Println("Mock survey saved successfully")
 }

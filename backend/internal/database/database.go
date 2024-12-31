@@ -26,6 +26,11 @@ var allModels []any = []any{
 	&models.Comment{},
 	&models.Vote{},
 	&models.Opinion{},
+	&models.PreferenceSurvey{},
+	&models.Question{},
+	&models.Tag{},
+	&models.Recommendation{},
+	&models.Answer{},
 	&models.BlacklistedTokens{},
 }
 
@@ -56,15 +61,17 @@ type Service interface {
 	DummyService() DummyService
 
 	UserService() UserService
+	PreferenceSurveyService() PreferenceSurveyService
 	TokenService() TokenService
 }
 
 type service struct {
 	db *gorm.DB
 
-	userService  UserService
-	tokenService TokenService
-	dummyService DummyService
+	userService             UserService
+	preferenceSurveyService PreferenceSurveyService
+	tokenService            TokenService
+	dummyService            DummyService
 }
 
 // Initializes new database connection and services
@@ -84,14 +91,15 @@ func New() Service {
 		userService := NewUserService(db)
 		tokenService := NewTokenService(db)
 		dummyService := NewDummyService(db)
+		prefenceSurveyService := NewPreferenceSurveyService(db)
 
 		return &service{
-			db:           db,
-			userService:  userService,
-			tokenService: tokenService,
-			dummyService: dummyService,
+			db:                      db,
+			userService:             userService,
+			tokenService:            tokenService,
+			dummyService:            dummyService,
+			preferenceSurveyService: prefenceSurveyService,
 		}
-
 	}
 }
 
@@ -181,5 +189,5 @@ func (s *service) Sync() {
 	}
 	log.Println("Migrating models has been done.")
 
-	// s.dummyService.Cook()
+	s.dummyService.Cook()
 }

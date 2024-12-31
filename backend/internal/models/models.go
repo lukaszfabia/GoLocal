@@ -121,3 +121,45 @@ type BlacklistedTokens struct {
 	Model
 	Token string `gorm:"not null;unique"`
 }
+
+// PreferenceSurvey represents the overall survey structure
+type PreferenceSurvey struct {
+	gorm.Model
+	Title       string
+	Description string
+	Questions   []Question `gorm:"foreignKey:SurveyID"`
+}
+
+// Question represents a survey question
+type Question struct {
+	gorm.Model
+	SurveyID uint
+	Text     string
+	Type     QuestionType
+	Options  []Option `gorm:"foreignKey:QuestionID"`
+	Toggle   *bool    // Only used if Type == Toggle
+}
+
+// Option represents an option for SingleChoice or MultipleChoice
+type Option struct {
+	gorm.Model
+	QuestionID uint
+	Text       string
+	IsSelected bool // Used for MultipleChoice answers
+}
+
+type Answer struct {
+	gorm.Model
+	SurveyID   uint
+	QuestionID uint
+	UserID     uint
+	Toggle     *bool    // For Toggle type
+	OptionID   *uint    // For SingleChoice
+	Options    []Option `gorm:"many2many:answer_options;"` // For MultipleChoice
+}
+
+type Recommendation struct {
+	Model
+	UserID uint   `json:"userID"`
+	Text   string `gorm:"not null;size:1024" json:"text"`
+}

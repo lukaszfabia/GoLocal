@@ -30,6 +30,18 @@ class DioClient {
           if (accessToken != null) {
             options.headers['Authorization'] = 'Bearer $accessToken';
           }
+          handler.next(options);
+        },
+      ),
+    );
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final accessToken = await _tokenStorage.getAccessToken();
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+          }
           return handler.next(options);
         },
         onError: (error, handler) async {

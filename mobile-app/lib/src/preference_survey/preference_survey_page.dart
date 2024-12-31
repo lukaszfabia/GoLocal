@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/preference_survey_bloc.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
+import 'bloc/preference_survey_bloc.dart';
+import 'package:golocal/src/preference_survey/preference_survey_model.dart';
+
 class PreferenceSurveyPage extends StatelessWidget {
   const PreferenceSurveyPage({super.key});
 
@@ -20,8 +26,8 @@ class PreferenceSurveyPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: BlocProvider(
-        create: (context) =>
-            PreferenceSurveyBloc()..add(LoadPreferenceSurvey()),
+        create: (context) => PreferenceSurveyBloc(PreferenceSurveyService())
+          ..add(LoadPreferenceSurvey()),
         child: const PreferenceSurveyForm(),
       ),
     );
@@ -38,6 +44,32 @@ class PreferenceSurveyForm extends StatefulWidget {
 class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
   final Map<int, dynamic> _answers = {};
 
+  final List<TextEditingController> _controllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers for each survey question
+    for (int i = 0; i < 5; i++) {
+      _controllers.add(TextEditingController());
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _submitSurvey() {
+    final answers = _controllers.map((controller) => controller.text).toList();
+    context
+        .read<PreferenceSurveyBloc>()
+        .add(SubmitPreferenceSurvey(answers: answers));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PreferenceSurveyBloc, PreferenceSurveyState>(
@@ -45,35 +77,29 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         if (state is PreferenceSurveyLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is PreferenceSurveyLoaded) {
-          return SingleChildScrollView(
+          return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...state.questions.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  SurveyQuestion question = entry.value;
-                  return _buildQuestion(index, question);
-                }),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Handle survey submission
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 12),
+                for (int i = 0; i < state.questions.length; i++)
+                  TextField(
+                    controller: _controllers[i],
+                    decoration: InputDecoration(
+                      labelText: state.questions[i].text,
                     ),
-                    child: const Text('Submit',
-                        style: TextStyle(color: Colors.white)),
                   ),
-                )
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _submitSurvey,
+                  child: const Text('Submit Survey'),
+                ),
               ],
             ),
           );
+        } else if (state is PreferenceSurveyError) {
+          return Center(child: Text('Error: ${state.message}'));
         } else {
-          return const Center(child: Text('Failed to load survey'));
+          return const Center(child: Text('Unknown state'));
         }
       },
     );

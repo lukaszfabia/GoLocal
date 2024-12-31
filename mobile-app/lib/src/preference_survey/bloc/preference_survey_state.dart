@@ -5,23 +5,12 @@ sealed class PreferenceSurveyState {}
 
 class PreferenceSurveyLoading extends PreferenceSurveyState {}
 
+class PreferenceSurveyError extends PreferenceSurveyState {
+  final String message;
+  PreferenceSurveyError(this.message);
+}
+
 class PreferenceSurveyLoaded extends PreferenceSurveyState {
-  final List<SurveyQuestion> questions;
+  final List<PreferenceSurveyQuestion> questions;
   PreferenceSurveyLoaded(this.questions);
 }
-
-class SurveyQuestion {
-  final String question;
-  final QuestionType type;
-  final List<String>? options;
-  final bool? initialValue;
-
-  SurveyQuestion({
-    required this.question,
-    required this.type,
-    this.options,
-    this.initialValue,
-  });
-}
-
-enum QuestionType { toggle, singleChoice, multiSelect }
