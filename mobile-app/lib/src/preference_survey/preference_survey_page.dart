@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/preference_survey_bloc.dart';
 
-class PreferenceSurveyView extends StatelessWidget {
-  const PreferenceSurveyView({super.key});
+class PreferenceSurveyPage extends StatelessWidget {
+  const PreferenceSurveyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +170,11 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
                 });
               },
               selectedColor: Colors.blue,
-              labelStyle: const TextStyle(color: Colors.white),
+              labelStyle: TextStyle(
+                color: _answers[index]?.contains(idx) ?? false
+                    ? Colors.white
+                    : Colors.black,
+              ),
             );
           }).toList(),
         )

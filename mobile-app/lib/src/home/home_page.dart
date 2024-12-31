@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:golocal/src/event/ui/events_view_page.dart';
 import 'package:golocal/src/user/profile_page.dart';
+import 'package:golocal/src/preference_survey/preference_survey_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +15,7 @@ class _HomePageState extends State<HomePage> {
     const Text('Map'),
     EventsViewPage(),
     ProfilePage(),
+    PreferenceSurveyPage(),
   ];
 
   @override
@@ -30,6 +32,7 @@ class _HomePageState extends State<HomePage> {
               const Tab(icon: Icon(Icons.map), text: 'Map'),
               const Tab(icon: Icon(Icons.event), text: 'Events'),
               const Tab(icon: Icon(Icons.person), text: 'Profile'),
+              const Tab(icon: Icon(Icons.settings), text: 'Settings'),
             ],
           ),
           body: TabBarView(
@@ -37,6 +40,7 @@ class _HomePageState extends State<HomePage> {
               Center(child: Text('Map')),
               EventsViewPage(),
               ProfilePage(),
+              PreferenceSurveyPage(),
             ],
           ),
         ),
