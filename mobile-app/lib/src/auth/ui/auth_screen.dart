@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:golocal/src/auth/ui/signin_form.dart';
 import 'package:golocal/src/auth/ui/signup_form.dart';

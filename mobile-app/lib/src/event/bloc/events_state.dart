@@ -3,7 +3,7 @@ part of 'events_bloc.dart';
 enum EventsStatus { initial, loading, loaded, error }
 
 class EventsState extends Equatable {
-  EventsState({
+  const EventsState({
     required this.events,
     this.status = EventsStatus.initial,
     this.hasNext = true,

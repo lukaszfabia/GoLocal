@@ -4,9 +4,7 @@ import 'package:golocal/src/auth/auth_repository.dart';
 import 'package:golocal/src/auth/ui/auth_screen.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
 import 'package:golocal/src/event/data/events_repository_dummy.dart';
-import 'package:golocal/src/event/ui/events_view_page.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
-import 'package:golocal/src/auth/ui/signin_form.dart';
 import 'package:golocal/src/home/home_page.dart';
 
 class GoLocalApp extends StatelessWidget {
