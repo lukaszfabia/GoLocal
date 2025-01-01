@@ -3,6 +3,7 @@ package server
 import (
 	"backend/internal/models"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -43,17 +44,25 @@ func (s *Server) handleSurvey(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		var answer models.PreferenceSurveyAnswer
-		if err := json.NewDecoder(r.Body).Decode(&answer); err != nil {
+		var payload struct {
+			Answers []models.PreferenceSurveyAnswer `json:"answers"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			log.Println("Error decoding JSON:", err)
 			s.InvalidFormResponse(w)
 			return
 		}
 
+		answers := payload.Answers
+
 		// TODO: Check if user has already answered the survey and other logic
 
-		s.db.PreferenceSurveyService().SaveAnswers(&answer)
+		for _, answer := range answers {
+			s.db.PreferenceSurveyService().SaveAnswers(&answer)
+		}
 
-		s.NewResponse(w, http.StatusCreated, answer)
+		s.NewResponse(w, http.StatusCreated, answers)
 	default:
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}

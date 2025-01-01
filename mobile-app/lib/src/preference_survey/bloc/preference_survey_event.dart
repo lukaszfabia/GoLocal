@@ -6,6 +6,7 @@ sealed class PreferenceSurveyEvent {}
 class LoadPreferenceSurvey extends PreferenceSurveyEvent {}
 
 class SubmitPreferenceSurvey extends PreferenceSurveyEvent {
-  final List<String> answers;
-  SubmitPreferenceSurvey({required this.answers});
+  final int surveyId;
+  final Map<int, String> answers;
+  SubmitPreferenceSurvey({required this.surveyId, required this.answers});
 }

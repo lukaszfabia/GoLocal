@@ -23,7 +23,8 @@ class PreferenceSurveyBloc
 
     on<SubmitPreferenceSurvey>((event, emit) async {
       try {
-        await _recommendationService.submitSurvey(event.answers);
+        await _recommendationService.submitSurvey(
+            event.surveyId, event.answers);
         emit(PreferenceSurveySubmitted());
       } catch (e) {
         emit(PreferenceSurveyError('Failed to submit survey'));

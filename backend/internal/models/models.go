@@ -151,9 +151,15 @@ type PreferenceSurveyAnswer struct {
 	SurveyID   uint
 	QuestionID uint
 	UserID     uint
-	Toggle     *bool                    // For Toggle type
-	OptionID   *uint                    // For SingleChoice
-	Options    []PreferenceSurveyOption `gorm:"many2many:answer_options;"` // For MultipleChoice
+	Toggle     *bool                          // For Toggle type
+	OptionID   *uint                          // For SingleChoice
+	Options    []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"` // For MultipleChoice, store option IDs
+}
+
+type PreferenceSurveyAnswerOption struct {
+	gorm.Model
+	AnswerID uint
+	OptionID uint
 }
 
 type Recommendation struct {

@@ -52,6 +52,15 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answer *models.PreferenceSurve
 		log.Printf("Couldn't save answer with id %d: %v", answer.ID, err)
 		return err
 	}
+
+	for _, option := range answer.Options {
+		option.AnswerID = answer.ID
+		if err := s.db.Save(&option).Error; err != nil {
+			log.Printf("Couldn't save option with id %d: %v", option.ID, err)
+			return err
+		}
+	}
+
 	return nil
 }
 

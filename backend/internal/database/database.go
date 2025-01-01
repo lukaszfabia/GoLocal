@@ -26,11 +26,12 @@ var allModels []any = []any{
 	&models.Comment{},
 	&models.Vote{},
 	&models.Opinion{},
+	&models.Tag{},
 	&models.PreferenceSurvey{},
 	&models.PreferenceSurveyQuestion{},
-	&models.Tag{},
-	&models.Recommendation{},
 	&models.PreferenceSurveyAnswer{},
+	&models.PreferenceSurveyOption{},
+	&models.Recommendation{},
 	&models.BlacklistedTokens{},
 }
 
