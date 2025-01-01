@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'bloc/preference_survey_bloc.dart';
+import '../bloc/preference_survey_bloc.dart';
 
 import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
-import 'package:golocal/src/preference_survey/preference_survey_model.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
 
 class PreferenceSurveyPage extends StatelessWidget {
   const PreferenceSurveyPage({super.key});
@@ -41,30 +41,21 @@ class PreferenceSurveyForm extends StatefulWidget {
 class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
   final Map<int, dynamic> _answers = {};
 
-  final List<TextEditingController> _controllers = [];
-
   @override
   void initState() {
     super.initState();
-    // Initialize controllers for each survey question
-    for (int i = 0; i < 5; i++) {
-      _controllers.add(TextEditingController());
-    }
   }
 
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  void _submitSurvey() {
-    final answers = _controllers.map((controller) => controller.text).toList();
+  void _submitSurvey(int surveyId) {
+    final answers = _answers.map((key, value) {
+      if (value is List) {
+        return MapEntry(key, value.join(', '));
+      }
+      return MapEntry(key, value.toString());
+    });
     context
         .read<PreferenceSurveyBloc>()
-        .add(SubmitPreferenceSurvey(answers: answers));
+        .add(SubmitPreferenceSurvey(surveyId: surveyId, answers: answers));
   }
 
   @override
@@ -78,14 +69,18 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                ...state.questions.asMap().entries.map((entry) {
+                Text(
+                  state.survey.description,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                ...state.survey.questions.asMap().entries.map((entry) {
                   int index = entry.key;
                   PreferenceSurveyQuestion question = entry.value;
                   return _buildQuestion(index, question);
                 }),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _submitSurvey,
+                  onPressed: () => _submitSurvey(state.survey.id),
                   child: const Text('Submit Survey'),
                 ),
               ],

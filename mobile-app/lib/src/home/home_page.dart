@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:golocal/src/event/ui/events_view_page.dart';
 import 'package:golocal/src/user/profile_page.dart';
-import 'package:golocal/src/preference_survey/preference_survey_page.dart';
+import 'package:golocal/src/preference_survey/ui/preference_survey_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

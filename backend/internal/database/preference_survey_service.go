@@ -11,6 +11,7 @@ type PreferenceSurveyService interface {
 	GetSurvey(id uint) (*models.PreferenceSurvey, error)
 	SaveSurvey(survey *models.PreferenceSurvey) (*models.PreferenceSurvey, error)
 	DeleteSurvey(survey *models.PreferenceSurvey) error
+	SaveAnswers(answer *models.PreferenceSurveyAnswer) error
 }
 
 func NewPreferenceSurveyService(db *gorm.DB) PreferenceSurveyService {
@@ -43,6 +44,23 @@ func (s *preferenceSurveyServiceImpl) DeleteSurvey(survey *models.PreferenceSurv
 		log.Printf("Couldn't delete survey with id %d: %v", survey.ID, err)
 		return err
 	}
+	return nil
+}
+
+func (s *preferenceSurveyServiceImpl) SaveAnswers(answer *models.PreferenceSurveyAnswer) error {
+	if err := s.db.Save(&answer).Error; err != nil {
+		log.Printf("Couldn't save answer with id %d: %v", answer.ID, err)
+		return err
+	}
+
+	for _, option := range answer.Options {
+		option.AnswerID = answer.ID
+		if err := s.db.Save(&option).Error; err != nil {
+			log.Printf("Couldn't save option with id %d: %v", option.ID, err)
+			return err
+		}
+	}
+
 	return nil
 }
 

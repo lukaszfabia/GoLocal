@@ -1,12 +1,14 @@
-class PreferenceSurveyQuestion {
-  final int id;
+import 'package:golocal/src/shared/model_base.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_option.dart';
+
+class PreferenceSurveyQuestion extends Model {
   final String text;
   final QuestionType type;
   final List<Option>? options;
   final bool? toggle;
 
   PreferenceSurveyQuestion({
-    required this.id,
+    required super.id,
     required this.text,
     required this.type,
     this.options,
@@ -27,16 +29,6 @@ class PreferenceSurveyQuestion {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'ID': id,
-      'Text': text,
-      'Type': _questionTypeToString(type),
-      'Options': options?.map((option) => option.toJson()).toList(),
-      'Toggle': toggle,
-    };
-  }
-
   static QuestionType _questionTypeFromString(String type) {
     switch (type) {
       case 'TOGGLE':
@@ -49,45 +41,6 @@ class PreferenceSurveyQuestion {
         throw Exception('Unknown question type: $type');
     }
   }
-
-  static String _questionTypeToString(QuestionType type) {
-    switch (type) {
-      case QuestionType.toggle:
-        return 'TOGGLE';
-      case QuestionType.singleChoice:
-        return 'SINGLE_CHOICE';
-      case QuestionType.multiSelect:
-        return 'MULTIPLE_CHOICE';
-    }
-  }
 }
 
 enum QuestionType { toggle, singleChoice, multiSelect }
-
-class Option {
-  final int id;
-  final String text;
-  final bool isSelected;
-
-  Option({
-    required this.id,
-    required this.text,
-    required this.isSelected,
-  });
-
-  factory Option.fromJson(Map<String, dynamic> json) {
-    return Option(
-      id: json['ID'],
-      text: json['Text'],
-      isSelected: json['IsSelected'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'ID': id,
-      'Text': text,
-      'IsSelected': isSelected,
-    };
-  }
-}

@@ -11,6 +11,8 @@ class PreferenceSurveyError extends PreferenceSurveyState {
 }
 
 class PreferenceSurveyLoaded extends PreferenceSurveyState {
-  final List<PreferenceSurveyQuestion> questions;
-  PreferenceSurveyLoaded(this.questions);
+  final PreferenceSurvey survey;
+  PreferenceSurveyLoaded(this.survey);
 }
+
+class PreferenceSurveySubmitted extends PreferenceSurveyState {}
