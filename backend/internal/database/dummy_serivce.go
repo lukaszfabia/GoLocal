@@ -389,9 +389,22 @@ func generateEventTitle(eventType models.EventType) string {
 }
 
 func (d *dummyServiceImpl) generateMockSurvey() {
+	// don't generate if survey already exists
+
+	var count int64
+	if err := d.db.Model(&models.PreferenceSurvey{}).Count(&count).Error; err != nil {
+		log.Println("Error counting surveys:", err)
+		return
+	}
+
+	if count > 0 {
+		log.Println("Mock survey already exists")
+		return
+	}
+
 	mockSurvey := models.PreferenceSurvey{
-		Title:       "Sample Survey",
-		Description: "This is a sample survey for testing purposes.",
+		Title:       "Preference survey",
+		Description: "Thanks to this quiz, we will be able to personalize our recommendations of events just for You",
 	}
 
 	if err := d.db.Save(&mockSurvey).Error; err != nil {
@@ -399,7 +412,7 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 		return
 	}
 
-	questions := []models.Question{
+	questions := []models.PreferenceSurveyQuestion{
 		{
 			Text:     "Are you interested in adult-only activities?",
 			Type:     models.Toggle,
@@ -434,26 +447,26 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 			return
 		}
 
-		var options []models.Option
+		var options []models.PreferenceSurveyOption
 		switch question.Text {
 		case "Do you prefer to relax, or spend time actively?":
-			options = []models.Option{
+			options = []models.PreferenceSurveyOption{
 				{Text: "High-energy", QuestionID: question.ID},
 				{Text: "Relaxation", QuestionID: question.ID},
 			}
 		case "What are your age/family constraints for events and activities?":
-			options = []models.Option{
+			options = []models.PreferenceSurveyOption{
 				{Text: "Family-friendly", QuestionID: question.ID},
 				{Text: "Couple-friendly", QuestionID: question.ID},
 				{Text: "Adult-only", QuestionID: question.ID},
 			}
 		case "Do you prefer indoors or outdoors events and activities?":
-			options = []models.Option{
+			options = []models.PreferenceSurveyOption{
 				{Text: "Indoors", QuestionID: question.ID},
 				{Text: "Outdoors", QuestionID: question.ID},
 			}
 		case "What more are you interested in?":
-			options = []models.Option{
+			options = []models.PreferenceSurveyOption{
 				{Text: "Learning", QuestionID: question.ID},
 				{Text: "Music", QuestionID: question.ID},
 				{Text: "Sports", QuestionID: question.ID},

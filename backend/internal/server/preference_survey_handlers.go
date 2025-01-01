@@ -16,6 +16,8 @@ func (s *Server) getSurvey(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// TODO: check if user did not fill out survey
+
 		s.NewResponse(w, http.StatusOK, survey)
 	default:
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -41,13 +43,16 @@ func (s *Server) handleSurvey(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		var answer models.Answer
+		var answer models.PreferenceSurveyAnswer
 		if err := json.NewDecoder(r.Body).Decode(&answer); err != nil {
 			s.InvalidFormResponse(w)
 			return
 		}
-		// Store survey answer in database
-		// ...store survey answer logic...
+
+		// TODO: Check if user has already answered the survey and other logic
+
+		s.db.PreferenceSurveyService().SaveAnswers(&answer)
+
 		s.NewResponse(w, http.StatusCreated, answer)
 	default:
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
