@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'jwt_token_storage.dart';
 import 'dart:io' show Platform;
 
@@ -29,23 +29,12 @@ class DioClient {
           final accessToken = await _tokenStorage.getAccessToken();
           if (accessToken != null) {
             options.headers['Authorization'] = 'Bearer $accessToken';
+            Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
+            options.headers['User-Id'] = decodedToken['sub'];
           }
           handler.next(options);
         },
-      ),
-    );
-
-    dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final accessToken = await _tokenStorage.getAccessToken();
-          if (accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $accessToken';
-          }
-          return handler.next(options);
-        },
         onError: (error, handler) async {
-          // Unauthorized, try to refresh token if exists
           if (error.response?.statusCode == 401) {
             final refreshToken = await _tokenStorage.getRefreshToken();
             if (refreshToken != null) {
@@ -60,6 +49,9 @@ class DioClient {
 
                 final options = error.response!.requestOptions;
                 options.headers['Authorization'] = 'Bearer $newAccessToken';
+                Map<String, dynamic> decodedToken =
+                    JwtDecoder.decode(newAccessToken);
+                options.headers['User-Id'] = decodedToken['sub'];
                 final retryResponse = await dio.fetch(options);
                 return handler.resolve(retryResponse);
               } catch (e) {

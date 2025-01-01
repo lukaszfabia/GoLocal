@@ -21,6 +21,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   faker: ^2.2.0
   meta: ^1.11.0
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:
