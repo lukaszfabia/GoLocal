@@ -10,9 +10,9 @@ class PreferenceSurveyService {
   Future<void> submitSurvey(
       int preferenceSurveyId, Map<int, String> answers) async {
     try {
-      print(answers);
       final accessToken = await TokenStorage().getAccessToken();
-      final userId = int.parse(JwtDecoder.decode(accessToken!)['sub']);
+      final decodedToken = JwtDecoder.decode(accessToken!);
+      final userId = int.parse(decodedToken['sub'].toString());
       final List<PreferenceSurveyAnswer> answerList =
           answers.entries.map((entry) {
         final questionId = entry.key;
