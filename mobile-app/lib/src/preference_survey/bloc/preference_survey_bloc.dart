@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
-import 'package:golocal/src/preference_survey/preference_survey_model.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 
 part 'preference_survey_event.dart';
 part 'preference_survey_state.dart';
@@ -18,6 +18,15 @@ class PreferenceSurveyBloc
         emit(PreferenceSurveyLoaded(questions));
       } catch (e) {
         emit(PreferenceSurveyError('Failed to load survey'));
+      }
+    });
+
+    on<SubmitPreferenceSurvey>((event, emit) async {
+      try {
+        await _recommendationService.submitSurvey(event.answers);
+        emit(PreferenceSurveySubmitted());
+      } catch (e) {
+        emit(PreferenceSurveyError('Failed to submit survey'));
       }
     });
   }

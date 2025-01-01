@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'bloc/preference_survey_bloc.dart';
+import '../bloc/preference_survey_bloc.dart';
 
 import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
-import 'package:golocal/src/preference_survey/preference_survey_model.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
 
 class PreferenceSurveyPage extends StatelessWidget {
   const PreferenceSurveyPage({super.key});
@@ -78,7 +78,11 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                ...state.questions.asMap().entries.map((entry) {
+                Text(
+                  state.survey.description,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                ...state.survey.questions.asMap().entries.map((entry) {
                   int index = entry.key;
                   PreferenceSurveyQuestion question = entry.value;
                   return _buildQuestion(index, question);
