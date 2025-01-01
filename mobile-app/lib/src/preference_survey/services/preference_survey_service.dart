@@ -1,6 +1,8 @@
 import 'package:golocal/src/dio_client.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_answer.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
+import 'package:golocal/src/jwt_token_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class PreferenceSurveyService {
   final DioClient _dioClient = DioClient();
@@ -9,6 +11,8 @@ class PreferenceSurveyService {
       int preferenceSurveyId, Map<int, String> answers) async {
     try {
       print(answers);
+      final accessToken = await TokenStorage().getAccessToken();
+      final userId = int.parse(JwtDecoder.decode(accessToken!)['sub']);
       final List<PreferenceSurveyAnswer> answerList =
           answers.entries.map((entry) {
         final questionId = entry.key;
@@ -18,7 +22,7 @@ class PreferenceSurveyService {
           return PreferenceSurveyAnswer(
             surveyId: preferenceSurveyId,
             questionId: questionId,
-            userId: 0, // Replace with actual user ID
+            userId: userId,
             toggle: value == 'true',
           );
         } else if (value.contains(',')) {
@@ -29,14 +33,14 @@ class PreferenceSurveyService {
           return PreferenceSurveyAnswer(
             surveyId: preferenceSurveyId,
             questionId: questionId,
-            userId: 0, // Replace with actual user ID
+            userId: userId,
             options: options,
           );
         } else {
           return PreferenceSurveyAnswer(
             surveyId: preferenceSurveyId,
             questionId: questionId,
-            userId: 0, // Replace with actual user ID
+            userId: userId,
             optionId: int.tryParse(value),
           );
         }

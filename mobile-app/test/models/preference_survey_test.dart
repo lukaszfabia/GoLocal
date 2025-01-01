@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
-import 'package:golocal/src/preference_survey/domain/preference_survey_option.dart';
 
 void main() {
   group('PreferenceSurvey', () {
