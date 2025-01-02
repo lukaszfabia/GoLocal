@@ -15,6 +15,8 @@ import 'package:golocal/src/user/ui/profile_page.dart';
 // just add another route to the enum and go to the statefull shelll branch
 
 abstract class AppRouter {
+  static GoRouter? _router;
+
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: "root");
   static final GlobalKey<NavigatorState> shellNavigatorKeyHome =
@@ -22,85 +24,87 @@ abstract class AppRouter {
   static final GlobalKey<NavigatorState> shellNavigatorKeyProfile =
       GlobalKey<NavigatorState>();
 
-  static GoRouter router(AuthBloc authBloc) => GoRouter(
-        navigatorKey: rootNavigatorKey,
-        initialLocation: AppRoute.splash.path,
-        routes: [
-          GoRoute(
-            path: AppRoute.auth.path,
-            name: AppRoute.auth.name,
-            builder: (context, state) => const AuthScreen(),
-          ),
-          GoRoute(
-            path: AppRoute.splash.path,
-            name: AppRoute.splash.name,
-            builder: (context, state) => const SplashScreen(),
-          ),
-          // shell for main screens with navbar
-          StatefulShellRoute.indexedStack(
-            parentNavigatorKey: rootNavigatorKey,
-            builder: (context, state, navigationShell) =>
-                ScaffoldShell(navigationShell: navigationShell),
-            branches: [
-              // []
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                    path: AppRoute.map.path,
+  static GoRouter router(AuthBloc authBloc) {
+    _router ??= GoRouter(
+      navigatorKey: rootNavigatorKey,
+      initialLocation: AppRoute.splash.path,
+      routes: [
+        GoRoute(
+          path: AppRoute.auth.path,
+          name: AppRoute.auth.name,
+          builder: (context, state) => const AuthScreen(),
+        ),
+        GoRoute(
+          path: AppRoute.splash.path,
+          name: AppRoute.splash.name,
+          builder: (context, state) => const SplashScreen(),
+        ),
+        // shell for main screens with navbar
+        StatefulShellRoute.indexedStack(
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state, navigationShell) =>
+              ScaffoldShell(navigationShell: navigationShell),
+          branches: [
+            // []
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.map.path,
+                  builder: (context, state) {
+                    return const EventsMap();
+                  },
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoute.home.path,
+                  builder: (context, state) {
+                    return const EventsViewPage();
+                  },
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                    path: AppRoute.profile.path,
                     builder: (context, state) {
-                      return const EventsMap();
+                      return const ProfilePage();
                     },
-                  ),
-                ],
-              ),
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                    path: AppRoute.home.path,
-                    builder: (context, state) {
-                      return const EventsViewPage();
-                    },
-                  ),
-                ],
-              ),
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                      path: AppRoute.profile.path,
-                      builder: (context, state) {
-                        return const ProfilePage();
-                      },
-                      routes: [
-                        GoRoute(
-                          path: AppRoute.survey.path,
-                          builder: (context, state) {
-                            return const PreferenceSurveyPage();
-                          },
-                        ),
-                      ]),
-                ],
-              ),
-            ],
-          ),
-        ],
-        redirect: (context, state) {
-          final bool isLoggingIn =
-              (state.matchedLocation == AppRoute.auth.path ||
-                  state.matchedLocation == AppRoute.splash.path);
-          final AuthState authState = context.read<AuthBloc>().state;
-
-          if (authState is AuthInitial) {
-            return AppRoute.splash.path;
-          } else if (authState is Authenticated && isLoggingIn) {
-            return AppRoute.home.path;
-          } else if (authState is Unathenticated) {
-            return AppRoute.auth.path;
-          }
-          return null;
-        },
-        // Listen to the authBloc stream to refresh the current screen (e.g., if the user logs in or out)
-        refreshListenable: StreamToListenable([authBloc.stream]),
-      );
+                    routes: [
+                      GoRoute(
+                        path: AppRoute.survey.path,
+                        builder: (context, state) {
+                          return const PreferenceSurveyPage();
+                        },
+                      ),
+                    ]),
+              ],
+            ),
+          ],
+        ),
+      ],
+      redirect: (context, state) {
+        final bool isLoggingIn = (state.matchedLocation == AppRoute.auth.path ||
+            state.matchedLocation == AppRoute.splash.path);
+        final AuthState authState = authBloc.state;
+        final bool isLoggedIn = authState is Authenticated;
+        print(authState.toString());
+        print(state.matchedLocation);
+        if (authState is Authenticated && isLoggingIn) {
+          return AppRoute.home.path;
+        } else if (authState is Unathenticated) {
+          return AppRoute.auth.path;
+        }
+        return null;
+      },
+      // Listen to the authBloc stream to refresh the current screen (e.g., if the user logs in or out)
+      refreshListenable: StreamToListenable([authBloc.stream]),
+    );
+    return _router!;
+  }
 }
 
 // Much easier to maintain and add new routes
