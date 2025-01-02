@@ -37,6 +37,7 @@ var allModels []any = []any{
 	&models.PreferenceSurveyQuestion{},
 	&models.PreferenceSurveyAnswer{},
 	&models.PreferenceSurveyOption{},
+	&models.PreferenceSurveyAnswerOption{},
 
 	&models.Recommendation{},
 	&models.BlacklistedTokens{},
