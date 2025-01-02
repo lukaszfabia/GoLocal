@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:golocal/src/event/ui/events_view_page.dart';
-import 'package:golocal/src/user/ui/profile_page.dart';
-import 'package:golocal/src/routing/router.dart';
 
 class ScaffoldShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -25,6 +22,7 @@ class _ScaffoldShellState extends State<ScaffoldShell> {
         destinations: [
           NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
           NavigationDestination(icon: Icon(Icons.event), label: 'Events'),
+          NavigationDestination(icon: Icon(Icons.how_to_vote), label: "Votes"),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onDestinationSelected: _goBranch,

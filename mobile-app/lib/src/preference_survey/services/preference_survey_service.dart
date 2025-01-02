@@ -17,33 +17,8 @@ class PreferenceSurveyService {
           answers.entries.map((entry) {
         final questionId = entry.key;
         final value = entry.value;
-
-        if (value == 'true' || value == 'false') {
-          return PreferenceSurveyAnswer(
-            surveyId: preferenceSurveyId,
-            questionId: questionId,
-            userId: userId,
-            toggle: value == 'true',
-          );
-        } else if (value.contains(',')) {
-          final options = value
-              .split(',')
-              .map((e) => {'OptionID': int.parse(e.trim())})
-              .toList();
-          return PreferenceSurveyAnswer(
-            surveyId: preferenceSurveyId,
-            questionId: questionId,
-            userId: userId,
-            options: options,
-          );
-        } else {
-          return PreferenceSurveyAnswer(
-            surveyId: preferenceSurveyId,
-            questionId: questionId,
-            userId: userId,
-            optionId: int.tryParse(value),
-          );
-        }
+        return PreferenceSurveyAnswer.fromJson(
+            preferenceSurveyId, questionId, userId, value);
       }).toList();
 
       final response =

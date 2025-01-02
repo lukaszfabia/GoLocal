@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/preference_survey_bloc.dart';
-
 import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
 
@@ -82,6 +81,8 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
               ],
             ),
           );
+        } else if (state is PreferenceSurveySubmitted) {
+          return const Center(child: Text('Survey submitted successfully!'));
         } else if (state is PreferenceSurveyError) {
           return Center(child: Text('Error: ${state.message}'));
         } else {
@@ -97,7 +98,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         return _buildToggleQuestion(
             index, question.text, question.toggle ?? false);
       case QuestionType.singleChoice:
-        return _buildButtonQuestion(index, question.text,
+        return _buildSingleSelectQuestion(index, question.text,
             question.options?.map((option) => option.text).toList() ?? [], 0);
       case QuestionType.multiSelect:
         return _buildMultiSelectQuestion(index, question.text,
@@ -107,7 +108,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
 
   Widget _buildToggleQuestion(int index, String question, bool initialValue) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(question, style: const TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
@@ -123,10 +124,14 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
     );
   }
 
-  Widget _buildButtonQuestion(
+  Widget _buildSingleSelectQuestion(
       int index, String question, List<String> options, int selectedIndex) {
+    if (_answers[index] == null) {
+      _answers[index] = selectedIndex;
+    }
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(question, style: const TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
@@ -157,7 +162,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
   Widget _buildMultiSelectQuestion(
       int index, String question, List<String> options) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(question, style: const TextStyle(fontSize: 16)),
         const SizedBox(height: 8),

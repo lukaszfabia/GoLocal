@@ -30,8 +30,8 @@ type User struct {
 	Followers []*User `gorm:"many2many:user_followers;constraint:OnDelete:CASCADE" json:"followers"`
 	Following []*User `gorm:"many2many:user_following;constraint:OnDelete:CASCADE" json:"following"`
 
-	Comments []*Comment `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
-	Votes    []*Vote    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
+	Comments []*Comment    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
+	Votes    []*VoteAnswer `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
 
 	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
 	LocationID *uint     `json:"locationID"`
@@ -101,9 +101,25 @@ type Comment struct {
 
 type Vote struct {
 	Model
-	UserID  uint                `json:"userID"`
-	EventID uint                `json:"eventID"`
-	State   ParticipationStatus `gorm:"type:text;not null" json:"state"`
+	Event    Event        `gorm:"foreignKey:EventID;references:ID;constraint:OnDelete:RESTRICT" json:"event"`
+	EventID  uint         `json:"eventID"`
+	Text     string       `gorm:"not null;size:255" json:"text"`
+	VoteType VoteType     `gorm:"not null" json:"voteType"`
+	Options  []VoteOption `gorm:"foreignKey:VoteID" json:"options"`
+}
+
+type VoteAnswer struct {
+	gorm.Model
+	VoteID       uint       `json:"voteId"`
+	UserID       uint       `json:"userId"`
+	VoteOptionID uint       `json:"optionSelectedId"`
+	VoteOption   VoteOption `json:"optionSelected"`
+}
+
+type VoteOption struct {
+	gorm.Model
+	VoteID uint   `json:"voteId"`
+	Text   string `gorm:"not null;size:255" json:"text"`
 }
 
 type Opinion struct {
@@ -124,42 +140,42 @@ type BlacklistedTokens struct {
 
 type PreferenceSurvey struct {
 	gorm.Model
-	Title       string
-	Description string
-	Questions   []PreferenceSurveyQuestion `gorm:"foreignKey:SurveyID"`
+	Title       string                     `gorm:"not null;size:255" json:"title"`
+	Description string                     `gorm:"size:1024" json:"description"`
+	Questions   []PreferenceSurveyQuestion `gorm:"foreignKey:SurveyID" json:"questions"`
 }
 
 type PreferenceSurveyQuestion struct {
 	gorm.Model
-	SurveyID uint
-	Text     string
-	Type     QuestionType
-	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID"`
-	Toggle   *bool                    // Only used if Type == Toggle
+	SurveyID uint                     `json:"surveyID"`
+	Text     string                   `gorm:"not null;size:1024" json:"text"`
+	Type     QuestionType             `gorm:"not null" json:"type"`
+	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID" json:"options"`
+	Toggle   *bool                    `json:"toggle"` // Only used if Type == Toggle
 }
 
 // PreferenceSurveyOption represents an option for SingleChoice or MultipleChoice
 type PreferenceSurveyOption struct {
 	gorm.Model
-	QuestionID uint
-	Text       string
-	IsSelected bool // Used for MultipleChoice answers
+	QuestionID uint   `json:"questionID"`
+	Text       string `gorm:"not null;size:1024" json:"text"`
+	IsSelected bool   `json:"isSelected"` // Used for MultipleChoice answers
 }
 
 type PreferenceSurveyAnswer struct {
 	gorm.Model
-	SurveyID   uint
-	QuestionID uint
-	UserID     uint
-	Toggle     *bool                          // For Toggle type
-	OptionID   *uint                          // For SingleChoice
+	SurveyID   uint                           `json:"surveyID"`
+	QuestionID uint                           `json:"questionID"`
+	UserID     uint                           `json:"userID"`
+	Toggle     *bool                          `json:"toggle"`                             // For Toggle type
+	OptionID   *uint                          `json:"optionID"`                           // For SingleChoice
 	Options    []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"` // For MultipleChoice, store option IDs
 }
 
 type PreferenceSurveyAnswerOption struct {
 	gorm.Model
-	AnswerID uint
-	OptionID uint
+	AnswerID uint `json:"answerID"`
+	OptionID uint `json:"optionID"`
 }
 
 type Recommendation struct {

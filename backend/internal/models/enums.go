@@ -24,6 +24,13 @@ const (
 
 var ParticipationStatuses = []ParticipationStatus{Interested, WillParticipate, NotInterested}
 
+type VoteType string
+
+const (
+	CanChangeVote    VoteType = "CAN_CHANGE_VOTE"
+	CannotChangeVote VoteType = "CANNOT_CHANGE_VOTE"
+)
+
 type QuestionType string
 
 const (
