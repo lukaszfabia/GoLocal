@@ -3,8 +3,8 @@ import 'package:meta/meta.dart';
 import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 
-part 'preference_survey_event.dart';
-part 'preference_survey_state.dart';
+part 'vote_event.dart';
+part 'vote_state.dart';
 
 class PreferenceSurveyBloc
     extends Bloc<PreferenceSurveyEvent, PreferenceSurveyState> {

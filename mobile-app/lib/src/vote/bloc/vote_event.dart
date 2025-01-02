@@ -1,4 +1,4 @@
-part of 'preference_survey_bloc.dart';
+part of 'vote_bloc.dart';
 
 @immutable
 sealed class PreferenceSurveyEvent {}
