@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:golocal/src/app.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
 
 import 'package:golocal/src/event/ui/event_card.dart';
+import 'package:golocal/src/routing/router.dart';
 
 class EventsViewPage extends StatelessWidget {
   const EventsViewPage({super.key});
@@ -29,8 +32,12 @@ class EventsViewPage extends StatelessWidget {
           itemBuilder: (context, i) {
             if (i < state.events.length) {
               final event = state.events[i];
-              return EventCard(
-                event: event,
+              return GestureDetector(
+                child: EventCard(
+                  event: event,
+                ),
+                onTap: () => context.push('${AppRoute.events.path}/${event.id}',
+                    extra: event),
               );
             } else {
               if (state.hasNext) {
