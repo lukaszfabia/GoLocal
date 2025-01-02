@@ -11,10 +11,6 @@ class PreferenceSurveyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'Preference survey',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
