@@ -1,12 +1,21 @@
 part of 'vote_bloc.dart';
 
 @immutable
-sealed class PreferenceSurveyEvent {}
+sealed class VoteEvent {}
 
-class LoadPreferenceSurvey extends PreferenceSurveyEvent {}
+class LoadVotes extends VoteEvent {}
 
-class SubmitPreferenceSurvey extends PreferenceSurveyEvent {
-  final int surveyId;
-  final Map<int, String> answers;
-  SubmitPreferenceSurvey({required this.surveyId, required this.answers});
+class CreateVote extends VoteEvent {
+  final Vote vote;
+  CreateVote(this.vote);
+}
+
+class UpdateVote extends VoteEvent {
+  final Vote vote;
+  UpdateVote(this.vote);
+}
+
+class DeleteVote extends VoteEvent {
+  final String id;
+  DeleteVote(this.id);
 }

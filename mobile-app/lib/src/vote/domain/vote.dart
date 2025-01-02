@@ -1,26 +1,37 @@
 import 'package:golocal/src/shared/model_base.dart';
-import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
+import 'package:golocal/src/vote/domain/vote_option.dart';
+import 'package:golocal/src/event/domain/event.dart';
 
-class PreferenceSurvey extends Model {
-  final String title;
-  final String description;
-  final List<PreferenceSurveyQuestion> questions;
+class Vote extends Model {
+  final Event event;
+  final String text;
+  final List<VoteOption> options;
 
-  PreferenceSurvey({
+  Vote({
     required super.id,
-    this.title = '',
-    this.description = '',
-    required this.questions,
+    this.text = '',
+    required this.options,
+    required this.event,
   });
 
-  factory PreferenceSurvey.fromJson(Map<String, dynamic> json) {
-    return PreferenceSurvey(
+  factory Vote.fromJson(Map<String, dynamic> json) {
+    return Vote(
       id: json['ID'],
-      questions: (json['Questions'] as List)
-          .map((question) => PreferenceSurveyQuestion.fromJson(question))
+      options: (json['options'] as List)
+          .map((option) => VoteOption.fromJson(option))
           .toList(),
-      title: json['Title'],
-      description: json['Description'],
+      text: json['text'],
+      event: Event.fromJson(json['event']),
     );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'ID': id,
+      'text': text,
+      'options': options.map((option) => option.toJson()).toList(),
+      'event': event.toJson(),
+    };
   }
 }

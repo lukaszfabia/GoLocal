@@ -1,34 +1,60 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:golocal/src/vote/data/ivotes_repository.dart';
+import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:meta/meta.dart';
-import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
-import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 
 part 'vote_event.dart';
 part 'vote_state.dart';
 
-class PreferenceSurveyBloc
-    extends Bloc<PreferenceSurveyEvent, PreferenceSurveyState> {
-  final PreferenceSurveyService _recommendationService;
+class VoteBloc extends Bloc<VoteEvent, VoteState> {
+  final IVotesRepository votesRepository;
 
-  PreferenceSurveyBloc(this._recommendationService)
-      : super(PreferenceSurveyLoading()) {
-    on<LoadPreferenceSurvey>((event, emit) async {
-      try {
-        final questions = await _recommendationService.fetchSurvey();
-        emit(PreferenceSurveyLoaded(questions));
-      } catch (e) {
-        emit(PreferenceSurveyError('Failed to load survey'));
-      }
-    });
+  VoteBloc(this.votesRepository) : super(const VoteState(votes: [])) {
+    on<LoadVotes>(_onLoadVotes);
+    on<CreateVote>(_onCreateVote);
+    on<UpdateVote>(_onUpdateVote);
+    on<DeleteVote>(_onDeleteVote);
+  }
 
-    on<SubmitPreferenceSurvey>((event, emit) async {
-      try {
-        await _recommendationService.submitSurvey(
-            event.surveyId, event.answers);
-        emit(PreferenceSurveySubmitted());
-      } catch (e) {
-        emit(PreferenceSurveyError('Failed to submit survey'));
-      }
-    });
+  Future<void> _onLoadVotes(LoadVotes event, Emitter<VoteState> emit) async {
+    emit(state.copyWith(status: VoteStatus.loading));
+    try {
+      final votes = await votesRepository.getVotes();
+      emit(state.copyWith(votes: votes, status: VoteStatus.loaded));
+    } catch (e) {
+      emit(
+          state.copyWith(status: VoteStatus.error, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onCreateVote(CreateVote event, Emitter<VoteState> emit) async {
+    try {
+      await votesRepository.createVote(event.vote);
+      add(LoadVotes());
+    } catch (e) {
+      emit(
+          state.copyWith(status: VoteStatus.error, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateVote(UpdateVote event, Emitter<VoteState> emit) async {
+    try {
+      await votesRepository.updateVote(event.vote);
+      add(LoadVotes());
+    } catch (e) {
+      emit(
+          state.copyWith(status: VoteStatus.error, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteVote(DeleteVote event, Emitter<VoteState> emit) async {
+    try {
+      await votesRepository.deleteVote(event.id);
+      add(LoadVotes());
+    } catch (e) {
+      emit(
+          state.copyWith(status: VoteStatus.error, errorMessage: e.toString()));
+    }
   }
 }

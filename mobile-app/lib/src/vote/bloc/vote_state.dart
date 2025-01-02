@@ -1,18 +1,30 @@
 part of 'vote_bloc.dart';
 
-@immutable
-sealed class PreferenceSurveyState {}
+enum VoteStatus { initial, loading, loaded, error }
 
-class PreferenceSurveyLoading extends PreferenceSurveyState {}
+class VoteState extends Equatable {
+  const VoteState({
+    required this.votes,
+    this.status = VoteStatus.initial,
+    this.errorMessage,
+  });
 
-class PreferenceSurveyError extends PreferenceSurveyState {
-  final String message;
-  PreferenceSurveyError(this.message);
+  final List<Vote> votes;
+  final VoteStatus status;
+  final String? errorMessage;
+
+  VoteState copyWith({
+    List<Vote>? votes,
+    VoteStatus? status,
+    String? errorMessage,
+  }) {
+    return VoteState(
+      votes: votes ?? this.votes,
+      status: status ?? this.status,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+
+  @override
+  List<Object?> get props => [votes, status, errorMessage];
 }
-
-class PreferenceSurveyLoaded extends PreferenceSurveyState {
-  final PreferenceSurvey survey;
-  PreferenceSurveyLoaded(this.survey);
-}
-
-class PreferenceSurveySubmitted extends PreferenceSurveyState {}

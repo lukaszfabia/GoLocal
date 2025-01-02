@@ -10,6 +10,7 @@ import 'package:golocal/src/preference_survey/ui/preference_survey_page.dart';
 import 'package:golocal/src/shared/scaffold_shell.dart';
 import 'package:golocal/src/shared/streamtolistenable.dart';
 import 'package:golocal/src/user/ui/profile_page.dart';
+import 'package:golocal/src/vote/ui/votes_page.dart';
 
 // if you want to add new routes eg. /home/addevent or /home/event/:id/report you can do it here
 // just add another route to the enum and go to the statefull shelll branch
@@ -63,6 +64,13 @@ abstract class AppRouter {
                   ),
                 ],
               ),
+              StatefulShellBranch(routes: [
+                GoRoute(
+                    path: AppRoute.votes.path,
+                    builder: (context, state) {
+                      return const VotesPage();
+                    })
+              ]),
               StatefulShellBranch(
                 routes: [
                   GoRoute(
@@ -107,9 +115,10 @@ abstract class AppRouter {
 enum AppRoute {
   splash(path: '/splash', name: 'splash'),
   home(path: '/home', name: 'home'),
+  map(path: '/map', name: 'map'),
+  votes(path: '/votes', name: 'votes'),
   profile(path: '/profile', name: 'profile'),
   survey(path: '/profile/survey', name: 'survey'),
-  map(path: '/map', name: 'map'),
   auth(path: '/auth', name: 'auth');
 
   const AppRoute({required this.path, required this.name});
