@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestSignleSave(t *testing.T) {
+func TestSingleSave(t *testing.T) {
 	store := store.New()
 	email0 := "email"
 
