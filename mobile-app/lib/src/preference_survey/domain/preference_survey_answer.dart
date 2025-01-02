@@ -15,6 +15,36 @@ class PreferenceSurveyAnswer {
     this.options,
   });
 
+  factory PreferenceSurveyAnswer.fromJson(
+      int preferenceSurveyId, int questionId, int userId, String value) {
+    if (value == 'true' || value == 'false') {
+      return PreferenceSurveyAnswer(
+        surveyId: preferenceSurveyId,
+        questionId: questionId,
+        userId: userId,
+        toggle: value == 'true',
+      );
+    } else if (value.contains(',')) {
+      final options = value
+          .split(',')
+          .map((e) => {'OptionID': int.parse(e.trim())})
+          .toList();
+      return PreferenceSurveyAnswer(
+        surveyId: preferenceSurveyId,
+        questionId: questionId,
+        userId: userId,
+        options: options,
+      );
+    } else {
+      return PreferenceSurveyAnswer(
+        surveyId: preferenceSurveyId,
+        questionId: questionId,
+        userId: userId,
+        optionId: int.tryParse(value),
+      );
+    }
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'SurveyID': surveyId,
