@@ -28,7 +28,6 @@ var allModels []any = []any{
 	&models.Vote{},
 	&models.VoteOption{},
 	&models.VoteAnswer{},
-	&models.VoteAnswerOption{},
 
 	&models.Opinion{},
 	&models.Tag{},
