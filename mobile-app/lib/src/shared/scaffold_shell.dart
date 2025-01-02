@@ -16,6 +16,7 @@ class ScaffoldShell extends StatelessWidget {
         destinations: [
           NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
           NavigationDestination(icon: Icon(Icons.event), label: 'Events'),
+          NavigationDestination(icon: Icon(Icons.how_to_vote), label: "Votes"),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onDestinationSelected: _goBranch,

@@ -1,20 +1,25 @@
 import 'package:golocal/src/shared/model_base.dart';
 
-class Option extends Model {
+class VoteOption extends Model {
   final String text;
-  final bool isSelected;
 
-  Option({
+  VoteOption({
     required super.id,
     required this.text,
-    required this.isSelected,
   });
 
-  factory Option.fromJson(Map<String, dynamic> json) {
-    return Option(
+  factory VoteOption.fromJson(Map<String, dynamic> json) {
+    return VoteOption(
       id: json['ID'],
       text: json['Text'],
-      isSelected: json['IsSelected'],
     );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'ID': id,
+      'Text': text,
+    };
   }
 }

@@ -1,9 +1,9 @@
+import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
-import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/event/data/events_repository_dummy.dart';
 
-class VoteService implements IVotesRepository {
+class DummyVotesRepository implements IVotesRepository {
   @override
   Future<void> createVote(Vote vote) async {
     // Dummy implementation

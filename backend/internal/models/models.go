@@ -101,33 +101,25 @@ type Comment struct {
 
 type Vote struct {
 	Model
-	EventID        uint           `json:"eventID"`
-	Text           string         `gorm:"not null;size:255" json:"text"`
-	VoteType       VoteType       `gorm:"not null" json:"voteType"`
-	VoteChangeType VoteChangeType `gorm:"not null" json:"voteChangeType"`
-	Options        []VoteOption   `gorm:"foreignKey:QuestionID" json:"options"`
+	Event    Event        `gorm:"foreignKey:EventID;references:ID;constraint:OnDelete:RESTRICT" json:"event"`
+	EventID  uint         `json:"eventID"`
+	Text     string       `gorm:"not null;size:255" json:"text"`
+	VoteType VoteType     `gorm:"not null" json:"voteType"`
+	Options  []VoteOption `gorm:"foreignKey:VoteID" json:"options"`
 }
 
 type VoteAnswer struct {
 	gorm.Model
-	Vote       Vote               `json:"vote"`
-	VoteID     uint               `json:"voteId"`
-	QuestionID uint               `json:"questionId"`
-	UserID     uint               `json:"userId"`
-	Options    []VoteAnswerOption `gorm:"foreignKey:AnswerID" json:"options"`
+	VoteID       uint       `json:"voteId"`
+	UserID       uint       `json:"userId"`
+	VoteOptionID uint       `json:"optionSelectedId"`
+	VoteOption   VoteOption `json:"optionSelected"`
 }
 
 type VoteOption struct {
 	gorm.Model
-	VoteQuestion Vote   `gorm:"foreignKey:QuestionID" json:"voteQuestion"`
-	QuestionID   uint   `json:"questionId"`
-	Text         string `gorm:"not null;size:255" json:"text"`
-}
-
-type VoteAnswerOption struct {
-	gorm.Model
-	AnswerID uint `json:"answerID"`
-	OptionID uint `json:"optionID"`
+	VoteID uint   `json:"voteId"`
+	Text   string `gorm:"not null;size:255" json:"text"`
 }
 
 type Opinion struct {
