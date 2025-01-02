@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:golocal/src/event/ui/events_view_page.dart';
-import 'package:golocal/src/user/ui/profile_page.dart';
-import 'package:golocal/src/routing/router.dart';
 
 class ScaffoldShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;

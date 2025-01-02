@@ -18,14 +18,14 @@ class PreferenceSurveyQuestion extends Model {
   factory PreferenceSurveyQuestion.fromJson(Map<String, dynamic> json) {
     return PreferenceSurveyQuestion(
       id: json['ID'],
-      text: json['Text'],
-      type: _questionTypeFromString(json['Type']),
-      options: json['Options'] != null
-          ? (json['Options'] as List)
+      text: json['text'],
+      type: _questionTypeFromString(json['type']),
+      options: json['options'] != null
+          ? (json['options'] as List)
               .map((option) => Option.fromJson(option))
               .toList()
           : null,
-      toggle: json['Toggle'],
+      toggle: json['toggle'],
     );
   }
 

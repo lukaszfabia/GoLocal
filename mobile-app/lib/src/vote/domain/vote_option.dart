@@ -13,8 +13,8 @@ class Option extends Model {
   factory Option.fromJson(Map<String, dynamic> json) {
     return Option(
       id: json['ID'],
-      text: json['text'],
-      isSelected: json['isSelected'],
+      text: json['Text'],
+      isSelected: json['IsSelected'],
     );
   }
 }

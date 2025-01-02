@@ -16,11 +16,11 @@ class PreferenceSurvey extends Model {
   factory PreferenceSurvey.fromJson(Map<String, dynamic> json) {
     return PreferenceSurvey(
       id: json['ID'],
-      questions: (json['questions'] as List)
+      questions: (json['Questions'] as List)
           .map((question) => PreferenceSurveyQuestion.fromJson(question))
           .toList(),
-      title: json['title'],
-      description: json['description'],
+      title: json['Title'],
+      description: json['Description'],
     );
   }
 }
