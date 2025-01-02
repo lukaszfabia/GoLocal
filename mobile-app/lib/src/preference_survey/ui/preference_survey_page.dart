@@ -101,7 +101,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         return _buildToggleQuestion(
             index, question.text, question.toggle ?? false);
       case QuestionType.singleChoice:
-        return _buildButtonQuestion(index, question.text,
+        return _buildSingeSelectQuestion(index, question.text,
             question.options?.map((option) => option.text).toList() ?? [], 0);
       case QuestionType.multiSelect:
         return _buildMultiSelectQuestion(index, question.text,
@@ -127,8 +127,9 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
     );
   }
 
-  Widget _buildButtonQuestion(
+  Widget _buildSingeSelectQuestion(
       int index, String question, List<String> options, int selectedIndex) {
+    _answers[index] = selectedIndex;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

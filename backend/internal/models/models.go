@@ -158,7 +158,7 @@ type PreferenceSurveyQuestion struct {
 	SurveyID uint                     `json:"surveyID"`
 	Text     string                   `gorm:"not null;size:1024" json:"text"`
 	Type     QuestionType             `gorm:"not null" json:"type"`
-	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID"`
+	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID" json:"options"`
 	Toggle   *bool                    `json:"toggle"` // Only used if Type == Toggle
 }
 
