@@ -148,42 +148,42 @@ type BlacklistedTokens struct {
 
 type PreferenceSurvey struct {
 	gorm.Model
-	Title       string
-	Description string
-	Questions   []PreferenceSurveyQuestion `gorm:"foreignKey:SurveyID"`
+	Title       string                     `gorm:"not null;size:255" json:"title"`
+	Description string                     `gorm:"size:1024" json:"description"`
+	Questions   []PreferenceSurveyQuestion `gorm:"foreignKey:SurveyID" json:"questions"`
 }
 
 type PreferenceSurveyQuestion struct {
 	gorm.Model
-	SurveyID uint
-	Text     string
-	Type     QuestionType
+	SurveyID uint                     `json:"surveyID"`
+	Text     string                   `gorm:"not null;size:1024" json:"text"`
+	Type     QuestionType             `gorm:"not null" json:"type"`
 	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID"`
-	Toggle   *bool                    // Only used if Type == Toggle
+	Toggle   *bool                    `json:"toggle"` // Only used if Type == Toggle
 }
 
 // PreferenceSurveyOption represents an option for SingleChoice or MultipleChoice
 type PreferenceSurveyOption struct {
 	gorm.Model
-	QuestionID uint
-	Text       string
-	IsSelected bool // Used for MultipleChoice answers
+	QuestionID uint   `json:"questionID"`
+	Text       string `gorm:"not null;size:1024" json:"text"`
+	IsSelected bool   `json:"isSelected"` // Used for MultipleChoice answers
 }
 
 type PreferenceSurveyAnswer struct {
 	gorm.Model
-	SurveyID   uint
-	QuestionID uint
-	UserID     uint
-	Toggle     *bool                          // For Toggle type
-	OptionID   *uint                          // For SingleChoice
+	SurveyID   uint                           `json:"surveyID"`
+	QuestionID uint                           `json:"questionID"`
+	UserID     uint                           `json:"userID"`
+	Toggle     *bool                          `json:"toggle"`                             // For Toggle type
+	OptionID   *uint                          `json:"optionID"`                           // For SingleChoice
 	Options    []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"` // For MultipleChoice, store option IDs
 }
 
 type PreferenceSurveyAnswerOption struct {
 	gorm.Model
-	AnswerID uint
-	OptionID uint
+	AnswerID uint `json:"answerID"`
+	OptionID uint `json:"optionID"`
 }
 
 type Recommendation struct {
