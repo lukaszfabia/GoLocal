@@ -101,9 +101,33 @@ type Comment struct {
 
 type Vote struct {
 	Model
-	UserID  uint                `json:"userID"`
-	EventID uint                `json:"eventID"`
-	State   ParticipationStatus `gorm:"type:text;not null" json:"state"`
+	EventID        uint           `json:"eventID"`
+	Text           string         `gorm:"not null;size:255" json:"text"`
+	VoteType       VoteType       `gorm:"not null" json:"voteType"`
+	VoteChangeType VoteChangeType `gorm:"not null" json:"voteChangeType"`
+	Options        []VoteOption   `gorm:"foreignKey:QuestionID" json:"options"`
+}
+
+type VoteAnswer struct {
+	gorm.Model
+	Vote       Vote               `json:"vote"`
+	VoteID     uint               `json:"voteId"`
+	QuestionID uint               `json:"questionId"`
+	UserID     uint               `json:"userId"`
+	Options    []VoteAnswerOption `gorm:"foreignKey:AnswerID" json:"options"`
+}
+
+type VoteOption struct {
+	gorm.Model
+	VoteQuestion Vote   `json:"voteQuestion"`
+	QuestionID   uint   `json:"questionId"`
+	Text         string `gorm:"not null;size:255" json:"text"`
+}
+
+type VoteAnswerOption struct {
+	gorm.Model
+	AnswerID uint `json:"answerID"`
+	OptionID uint `json:"optionID"`
 }
 
 type Opinion struct {
