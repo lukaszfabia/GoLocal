@@ -30,8 +30,8 @@ type User struct {
 	Followers []*User `gorm:"many2many:user_followers;constraint:OnDelete:CASCADE" json:"followers"`
 	Following []*User `gorm:"many2many:user_following;constraint:OnDelete:CASCADE" json:"following"`
 
-	Comments []*Comment `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
-	Votes    []*Vote    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
+	Comments []*Comment    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
+	Votes    []*VoteAnswer `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
 
 	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
 	LocationID *uint     `json:"locationID"`
@@ -119,7 +119,7 @@ type VoteAnswer struct {
 
 type VoteOption struct {
 	gorm.Model
-	VoteQuestion Vote   `json:"voteQuestion"`
+	VoteQuestion Vote   `gorm:"foreignKey:QuestionID" json:"voteQuestion"`
 	QuestionID   uint   `json:"questionId"`
 	Text         string `gorm:"not null;size:255" json:"text"`
 }

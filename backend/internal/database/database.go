@@ -24,13 +24,20 @@ var allModels []any = []any{
 	&models.Address{},
 	&models.Event{},
 	&models.Comment{},
+
 	&models.Vote{},
+	&models.VoteOption{},
+	&models.VoteAnswer{},
+	&models.VoteAnswerOption{},
+
 	&models.Opinion{},
 	&models.Tag{},
+
 	&models.PreferenceSurvey{},
 	&models.PreferenceSurveyQuestion{},
 	&models.PreferenceSurveyAnswer{},
 	&models.PreferenceSurveyOption{},
+
 	&models.Recommendation{},
 	&models.BlacklistedTokens{},
 }
