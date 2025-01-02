@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
-import 'package:golocal/src/preference_survey/ui/preference_survey_page.dart';
 import 'package:golocal/src/routing/router.dart';
-import 'package:golocal/src/shared/scaffold_shell.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
