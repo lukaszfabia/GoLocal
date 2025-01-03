@@ -84,7 +84,21 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         } else if (state is PreferenceSurveySubmitted) {
           return const Center(child: Text('Survey submitted successfully!'));
         } else if (state is PreferenceSurveyError) {
-          return Center(child: Text('Error: ${state.message}'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Error: ${state.message}'),
+                ElevatedButton(
+                  onPressed: () => context
+                      .read<PreferenceSurveyBloc>()
+                      .add(LoadPreferenceSurvey()),
+                  child: const Text('Retry'),
+                )
+              ],
+            ),
+          );
         } else {
           return const Center(child: Text('Unknown state'));
         }
