@@ -1,9 +1,14 @@
-# Get started
+# Getting started
 
-Jak tu wejdziecie za pierwszym razem to będzie wszystko na czerwono:
+First compilation tips:
 
-- flutter doctor # zalezy nam zeby to co trzeba bylo na zielono
-- flutter upgrade (--force) # jeśli trzeba
+- flutter doctor # we need only what we want in green
+- flutter upgrade (--force) # if needed
 - flutter pub get
 - flutter run
-i powinno dzialac
+and it should work
+
+## Tips
+
+- impeller error something something -> flutter run --no-enable-impeller
+- if you have a ton of system messages, if using VSCode run in debug mode (f5) and in debug console you can filter by "I/flutter"

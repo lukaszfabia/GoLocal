@@ -7,18 +7,18 @@ void main() {
     test('fromJson creates a valid PreferenceSurvey object', () {
       final json = {
         'ID': 1,
-        'Title': 'Survey Title',
-        'Description': 'Survey Description',
-        'Questions': [
+        'title': 'Survey Title',
+        'description': 'Survey Description',
+        'questions': [
           {
             'ID': 1,
-            'Text': 'Question 1',
-            'Type': 'SINGLE_CHOICE',
-            'Options': [
-              {'ID': 1, 'Text': 'Option 1', 'IsSelected': false},
-              {'ID': 2, 'Text': 'Option 2', 'IsSelected': true},
+            'text': 'Question 1',
+            'type': 'SINGLE_CHOICE',
+            'options': [
+              {'ID': 1, 'text': 'Option 1', 'isSelected': false},
+              {'ID': 2, 'text': 'Option 2', 'isSelected': true},
             ],
-            'Toggle': null,
+            'toggle': null,
           },
         ],
       };
@@ -50,9 +50,9 @@ void main() {
     test('fromJson handles missing optional fields', () {
       final json = {
         'ID': 2,
-        'Title': 'Survey Title 2',
-        'Description': 'Survey Description 2',
-        'Questions': [],
+        'title': 'Survey Title 2',
+        'description': 'Survey Description 2',
+        'questions': [],
       };
 
       final survey = PreferenceSurvey.fromJson(json);

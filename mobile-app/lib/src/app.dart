@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:golocal/src/auth/auth_repository.dart';
-import 'package:golocal/src/auth/ui/auth_screen.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
 import 'package:golocal/src/event/data/events_repository_dummy.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/routing/router.dart';
-import 'package:golocal/src/shared/streamtolistenable.dart';
 
 class GoLocalApp extends StatelessWidget {
-  GoLocalApp({super.key});
+  const GoLocalApp({super.key});
 
   @override
   Widget build(BuildContext context) {

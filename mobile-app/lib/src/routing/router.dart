@@ -1,17 +1,17 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/app.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/auth/ui/auth_screen.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/ui/event_detail_page.dart';
+import 'package:golocal/src/event/ui/event_detail.dart';
 import 'package:golocal/src/event/ui/events_map.dart';
 import 'package:golocal/src/event/ui/events_view_page.dart';
 import 'package:golocal/src/preference_survey/ui/preference_survey_page.dart';
 import 'package:golocal/src/shared/scaffold_shell.dart';
 import 'package:golocal/src/shared/streamtolistenable.dart';
 import 'package:golocal/src/user/ui/profile_page.dart';
+import 'package:golocal/src/vote/ui/votes_page.dart';
 
 // if you want to add new routes eg. /home/addevent or /home/event/:id/report you can do it here
 // just add another route to the enum and go to the statefull shelll branch
@@ -25,6 +25,8 @@ abstract class AppRouter {
       GlobalKey<NavigatorState>(debugLabel: 'home');
   static final GlobalKey<NavigatorState> shellNavigatorKeyProfile =
       GlobalKey<NavigatorState>(debugLabel: 'profile');
+  static final GlobalKey<NavigatorState> shellNavigatorKeyVotes =
+      GlobalKey<NavigatorState>(debugLabel: 'votes');
 
   static GoRouter router(AuthBloc authBloc) {
     _router ??= GoRouter(
@@ -80,13 +82,20 @@ abstract class AppRouter {
                       path: AppRoute.eventDetail.path,
                       builder: (context, state) {
                         final event = state.extra as Event;
-                        return EventDetailPage(event: event);
+                        return EventDetail(event: event);
                       },
                     ),
                   ],
                 ),
               ],
             ),
+            StatefulShellBranch(navigatorKey: shellNavigatorKeyVotes, routes: [
+              GoRoute(
+                  path: AppRoute.votes.path,
+                  builder: (context, state) {
+                    return const VotesPage();
+                  })
+            ]),
             StatefulShellBranch(
               navigatorKey: shellNavigatorKeyProfile,
               routes: [
@@ -138,6 +147,7 @@ enum AppRoute {
   profile(path: '/profile', name: 'profile'),
   survey(path: '/survey', name: 'survey', title: "Preference Survey"),
   map(path: '/map', name: 'map'),
+  votes(path: '/votes', name: 'votes'),
   auth(path: '/auth', name: 'auth');
 
   const AppRoute({required this.path, required this.name, this.title});

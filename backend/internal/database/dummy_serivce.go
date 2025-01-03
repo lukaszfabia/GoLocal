@@ -54,7 +54,7 @@ func (d *dummyServiceImpl) user2() {
 		return
 	}
 	for _, user := range users {
-		var votes []*models.Vote
+		var votes []*models.VoteAnswer
 		var comments []*models.Comment
 
 		if err := d.db.Model(&models.Vote{}).Where("user_id = ?", user.ID).Find(&votes).Error; err != nil {
@@ -206,15 +206,16 @@ func (d *dummyServiceImpl) voteComment() {
 				log.Println(err)
 			}
 
-			vote := &models.Vote{
-				State:   models.ParticipationStatuses[d.f.Number(0, 2)],
-				EventID: events[i].ID,
-				UserID:  users[d.f.Number(0, len(users)-1)].ID,
-			}
+			// why was vote here
+			// vote := &models.Vote{
+			// 	State:   models.ParticipationStatuses[d.f.Number(0, 2)],
+			// 	EventID: events[i].ID,
+			// 	UserID:  users[d.f.Number(0, len(users)-1)].ID,
+			// }
 
-			if err := d.db.Save(vote).Error; err != nil {
-				log.Println(err)
-			}
+			// if err := d.db.Save(vote).Error; err != nil {
+			// 	log.Println(err)
+			// }
 
 		}
 	}
