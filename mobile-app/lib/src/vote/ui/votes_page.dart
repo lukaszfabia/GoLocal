@@ -44,13 +44,14 @@ class VotesPage extends StatelessWidget {
       itemBuilder: (context, index) {
         final vote = votes[index];
         return _buildVoteCard(
+          context,
           vote,
         );
       },
     );
   }
 
-  Widget _buildVoteCard(Vote vote) {
+  Widget _buildVoteCard(BuildContext context, Vote vote) {
     var optionCounts = vote.options.map((option) => option.votesCount).toList();
     var totalVotes = optionCounts.reduce((a, b) => a + b);
 
@@ -79,8 +80,8 @@ class VotesPage extends StatelessWidget {
               children: [
                 Text(vote.text, style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                ...vote.options
-                    .map((option) => _buildOptionCard(option, totalVotes)),
+                ...vote.options.map((option) =>
+                    _buildOptionCard(context, option, totalVotes, vote)),
               ],
             ),
           ),
@@ -90,11 +91,24 @@ class VotesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionCard(VoteOption option, int totalVotes) {
+  Widget _buildOptionCard(
+      BuildContext context, VoteOption option, int totalVotes, Vote vote) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
+        leading: CircleAvatar(
+          child: IconButton(
+            icon: option.isSelected
+                ? Icon(Icons.circle)
+                : Icon(Icons.circle_outlined),
+            onPressed: () {
+              context
+                  .read<VoteBloc>()
+                  .add(VoteOnOption(vote.id, option.id, !option.isSelected));
+            },
+          ),
+        ),
         title: Text(option.text),
         subtitle: LinearProgressIndicator(
           value: option.votesCount / totalVotes,
