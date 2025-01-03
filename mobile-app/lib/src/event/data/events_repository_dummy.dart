@@ -104,4 +104,12 @@ class EventsRepositoryDummy implements IEventsRepository {
     // TODO: implement updateEvent
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> reportEvent(int id, String category, String description) async {
+    print(
+        "reporting event $id with category $category and description $description");
+    await Future.delayed(Duration(seconds: 1));
+    return;
+  }
 }
