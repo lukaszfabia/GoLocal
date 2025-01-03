@@ -9,6 +9,42 @@ import 'package:golocal/src/user/domain/user.dart';
 class EventsRepositoryDummy implements IEventsRepository {
   var faker = Faker();
 
+  List<Event> dummyEvents() {
+    var events = List.generate(
+      5,
+      (i) {
+        return Event(
+          id: i,
+          title: faker.lorem.words(3).join(' '),
+          description: faker.lorem.sentence(),
+          imageUrl: faker.image
+              .loremPicsum(random: faker.randomGenerator.integer(1000)),
+          tags: [Tag(id: i, name: faker.lorem.word())],
+          startDate: DateTime.now(),
+          eventOrganizers: [
+            User(
+              id: i,
+              firstName: faker.person.firstName(),
+              lastName: faker.person.lastName(),
+              email: faker.internet.safeEmail(),
+              birthDate: faker.date.dateTime(),
+              isVerified: faker.randomGenerator.boolean(),
+              isPremium: faker.randomGenerator.boolean(),
+            )
+          ],
+          eventType: faker.randomGenerator.element(EventType.values),
+          location: Location(
+            id: i,
+            city: faker.address.city(),
+            country: faker.address.country(),
+          ),
+        );
+      },
+    );
+
+    return events;
+  }
+
   @override
   Future<void> createEvent(Event event) {
     // TODO: implement createEvent

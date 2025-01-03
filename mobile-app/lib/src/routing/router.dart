@@ -1,11 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/app.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/auth/ui/auth_screen.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/ui/event_detail_page.dart';
+import 'package:golocal/src/event/ui/event_detail.dart';
 import 'package:golocal/src/event/ui/events_map.dart';
 import 'package:golocal/src/event/ui/events_view_page.dart';
 import 'package:golocal/src/preference_survey/ui/preference_survey_page.dart';
@@ -83,7 +82,7 @@ abstract class AppRouter {
                       path: AppRoute.eventDetail.path,
                       builder: (context, state) {
                         final event = state.extra as Event;
-                        return EventDetailPage(event: event);
+                        return EventDetail(event: event);
                       },
                     ),
                   ],

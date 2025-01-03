@@ -34,4 +34,17 @@ class Vote extends Model {
       'event': event.toJson(),
     };
   }
+
+  Vote copyWith({
+    String? text,
+    List<VoteOption>? options,
+    Event? event,
+  }) {
+    return Vote(
+      id: id,
+      text: text ?? this.text,
+      options: options ?? this.options,
+      event: event ?? this.event,
+    );
+  }
 }

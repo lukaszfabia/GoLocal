@@ -6,4 +6,5 @@ abstract class IVotesRepository {
   Future<void> createVote(Vote vote);
   Future<void> updateVote(Vote vote);
   Future<void> deleteVote(String id);
+  Future<void> voteOnOption(int voteId, int optionId);
 }
