@@ -19,3 +19,10 @@ class DeleteVote extends VoteEvent {
   final String id;
   DeleteVote(this.id);
 }
+
+class VoteOnOption extends VoteEvent {
+  final int voteId;
+  final int optionId;
+  final bool newValue;
+  VoteOnOption(this.voteId, this.optionId, this.newValue);
+}
