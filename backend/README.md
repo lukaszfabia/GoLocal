@@ -6,8 +6,6 @@
 
 **REST API** server which powers `Flutter App`. Server provides _CRUD_ operations on database, supports _email sending_, creating _account_ by providers such as _Google_, _Facebook_. Verification is handled by **JWT**(JSON Web Tokens). Potential images are stored in [media](/backend/media/) directory.
 
-**Not implemented**(but in plans): ML server(service) on **Fast API** which will help to make event recommendations for users.
-
 ## Environment Configuration
 
 Set the following environment variables in your `.env` file:
@@ -55,7 +53,7 @@ GMAIL_PASSWORD=       # Gmail password for authentication
 
 ## MakeFile
 
-Down below, there're some commands which will help you to run the app.
+Down below, there are some commands which will help you to run the app.
 
 Run build make command with tests
 
@@ -110,3 +108,7 @@ Clean up binary from the last build:
 ```bash
 make clean
 ```
+
+## Tips
+
+- if firewall is bugging you on Windows, you can add an [Inbound Rule](https://stackoverflow.com/a/65393403)
