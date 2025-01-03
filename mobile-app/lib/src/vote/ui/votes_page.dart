@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/vote/data/votes_repository_dummy.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
+import 'package:go_router/go_router.dart';
+import 'package:golocal/src/event/ui/event_detail.dart';
 
 class VotesPage extends StatelessWidget {
   const VotesPage({super.key});
@@ -72,6 +75,10 @@ class VotesPage extends StatelessWidget {
             subtitle: Text(vote.event.location?.address?.toString() ??
                 'No address available'),
             trailing: Icon(Icons.star_border),
+            onTap: () {
+              context.push('${AppRoute.events.path}/${vote.event.id}',
+                  extra: vote.event);
+            },
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
