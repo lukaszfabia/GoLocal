@@ -30,19 +30,6 @@ class _ScaffoldShellState extends State<ScaffoldShell> {
     );
   }
 
-  Widget? _buildBackButton(BuildContext context) {
-    if (Navigator.of(context).canPop()) {
-      return IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      );
-    } else {
-      return null; // No back button if we can't pop the stack
-    }
-  }
-
   void _goBranch(int index) {
     widget.navigationShell.goBranch(index,
         initialLocation: index == widget.navigationShell.currentIndex);
