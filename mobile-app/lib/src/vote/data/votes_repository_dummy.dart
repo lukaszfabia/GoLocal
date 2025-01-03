@@ -21,8 +21,8 @@ class DummyVotesRepository implements IVotesRepository {
       id: 1,
       text: 'Dummy Vote',
       options: [
-        VoteOption(id: 1, text: 'Option 1'),
-        VoteOption(id: 2, text: 'Option 2'),
+        VoteOption(id: 1, text: 'Option 1', votesCount: 4),
+        VoteOption(id: 2, text: 'Option 2', votesCount: 2),
       ],
       event: (await EventsRepositoryDummy().getEvents())[0],
     );
@@ -36,8 +36,8 @@ class DummyVotesRepository implements IVotesRepository {
         id: 1,
         text: 'Dummy Vote',
         options: [
-          VoteOption(id: 1, text: 'Option 1'),
-          VoteOption(id: 2, text: 'Option 2'),
+          VoteOption(id: 1, text: 'Option 1', votesCount: 4),
+          VoteOption(id: 2, text: 'Option 2', votesCount: 2),
         ],
         event: (await EventsRepositoryDummy().getEvents())[0],
       ),
@@ -45,8 +45,8 @@ class DummyVotesRepository implements IVotesRepository {
         id: 2,
         text: 'Dummy Vote 2',
         options: [
-          VoteOption(id: 3, text: 'Option 2.1'),
-          VoteOption(id: 4, text: 'Option 2.2'),
+          VoteOption(id: 3, text: 'Option 2.1', votesCount: 3421),
+          VoteOption(id: 4, text: 'Option 2.2', votesCount: 123),
         ],
         event: (await EventsRepositoryDummy().getEvents())[1],
       )
