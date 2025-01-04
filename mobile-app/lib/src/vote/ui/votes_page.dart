@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
-import 'package:golocal/src/vote/data/votes_repository_dummy.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
+import 'package:go_router/go_router.dart';
+import 'package:golocal/src/vote/data/ivotes_repository.dart';
 
 class VotesPage extends StatelessWidget {
   const VotesPage({super.key});
@@ -11,7 +13,8 @@ class VotesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => VoteBloc(DummyVotesRepository())..add(LoadVotes()),
+      create: (context) =>
+          VoteBloc(context.read<IVotesRepository>())..add(LoadVotes()),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Votes'),
@@ -72,6 +75,10 @@ class VotesPage extends StatelessWidget {
             subtitle: Text(vote.event.location?.address?.toString() ??
                 'No address available'),
             trailing: Icon(Icons.star_border),
+            onTap: () {
+              context.push('${AppRoute.events.path}/${vote.event.id}',
+                  extra: vote.event);
+            },
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),

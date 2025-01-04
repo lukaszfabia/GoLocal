@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
+import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 
 part 'preference_survey_event.dart';
@@ -8,7 +8,7 @@ part 'preference_survey_state.dart';
 
 class PreferenceSurveyBloc
     extends Bloc<PreferenceSurveyEvent, PreferenceSurveyState> {
-  final PreferenceSurveyService _recommendationService;
+  final PreferenceSurveyRepository _recommendationService;
 
   PreferenceSurveyBloc(this._recommendationService)
       : super(PreferenceSurveyLoading()) {

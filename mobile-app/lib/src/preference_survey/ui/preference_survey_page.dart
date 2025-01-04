@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/preference_survey_bloc.dart';
-import 'package:golocal/src/preference_survey/services/preference_survey_service.dart';
+import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
 
 class PreferenceSurveyPage extends StatelessWidget {
@@ -18,7 +18,7 @@ class PreferenceSurveyPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: BlocProvider(
-        create: (context) => PreferenceSurveyBloc(PreferenceSurveyService())
+        create: (context) => PreferenceSurveyBloc(PreferenceSurveyRepository())
           ..add(LoadPreferenceSurvey()),
         child: const PreferenceSurveyForm(),
       ),
