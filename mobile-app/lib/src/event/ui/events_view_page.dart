@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:golocal/src/app.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
 
 import 'package:golocal/src/event/ui/event_card.dart';
