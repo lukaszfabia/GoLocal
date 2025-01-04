@@ -9,6 +9,9 @@ import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/data/votes_repository_dummy.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
+import 'package:golocal/src/preference_survey/data/ipreference_survey_repository.dart';
+import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
+import 'package:golocal/src/preference_survey/bloc/preference_survey_bloc.dart';
 import 'package:golocal/src/routing/router.dart';
 
 class GoLocalApp extends StatelessWidget {
@@ -18,6 +21,8 @@ class GoLocalApp extends StatelessWidget {
   IEventsRepository get eventsRepository => EventsRepositoryDummy();
   IAuthRepository get authRepository => AuthRepositoryDummy();
   IVotesRepository get votesRepository => VotesRepositoryDummy();
+  IPreferenceSurveyRepository get preferenceSurveyRepository =>
+      PreferenceSurveyRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,9 @@ class GoLocalApp extends StatelessWidget {
         ),
         RepositoryProvider(
           create: (context) => votesRepository,
+        ),
+        RepositoryProvider(
+          create: (context) => preferenceSurveyRepository,
         ),
       ],
       child: MultiBlocProvider(
@@ -46,6 +54,9 @@ class GoLocalApp extends StatelessWidget {
           BlocProvider(
             create: (context) => VoteBloc(context.read<IVotesRepository>()),
           ),
+          BlocProvider(
+              create: (context) => PreferenceSurveyBloc(
+                  context.read<IPreferenceSurveyRepository>())),
         ],
         child: Builder(
           builder: (context) => MaterialApp.router(

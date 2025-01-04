@@ -3,10 +3,12 @@ import 'package:golocal/src/preference_survey/domain/preference_survey_answer.da
 import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 import 'package:golocal/src/jwt_token_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:golocal/src/preference_survey/data/ipreference_survey_repository.dart';
 
-class PreferenceSurveyRepository {
+class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
   final DioClient _dioClient = DioClient();
 
+  @override
   Future<void> submitSurvey(
       int preferenceSurveyId, Map<int, String> answers) async {
     try {
@@ -31,6 +33,7 @@ class PreferenceSurveyRepository {
     }
   }
 
+  @override
   Future<PreferenceSurvey> fetchSurvey() async {
     try {
       final response = await _dioClient.dio.get('/preference-survey');
