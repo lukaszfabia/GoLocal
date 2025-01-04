@@ -1,14 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:golocal/src/auth/auth_exceptions.dart';
-
-import '../auth_repository.dart';
+import 'package:golocal/src/auth/data/iauth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
   AuthBloc(this._authRepository) : super(AuthInitial()) {
     on<AuthSignIn>((event, emit) async {
       try {

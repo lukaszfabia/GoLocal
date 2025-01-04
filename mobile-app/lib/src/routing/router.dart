@@ -5,6 +5,7 @@ import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/auth/ui/auth_screen.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/report/report_event_page.dart';
+import 'package:golocal/src/event/ui/event_create_page.dart';
 import 'package:golocal/src/event/ui/event_detail_page.dart';
 import 'package:golocal/src/event/ui/events_map.dart';
 import 'package:golocal/src/event/ui/events_view_page.dart';
@@ -80,6 +81,19 @@ abstract class AppRouter {
                   },
                   routes: [
                     GoRoute(
+                      path: 'create',
+                      builder: (context, state) {
+                        return EventCreatePage();
+                      },
+                    ),
+                    GoRoute(
+                      path: 'edit',
+                      builder: (context, state) {
+                        final event = state.extra as Event;
+                        return EventCreatePage(event: event);
+                      },
+                    ),
+                    GoRoute(
                       path: AppRoute.eventDetail.path,
                       builder: (context, state) {
                         final event = state.extra as Event;
@@ -92,7 +106,7 @@ abstract class AppRouter {
                             final event = state.extra as Event;
                             return ReportEventPage(event: event);
                           },
-                        )
+                        ),
                       ],
                     ),
                   ],
