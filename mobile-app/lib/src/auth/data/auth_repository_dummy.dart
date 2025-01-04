@@ -1,5 +1,4 @@
 import 'package:golocal/src/auth/auth_exceptions.dart';
-import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 
 import 'auth_repository.dart';
 

@@ -3,7 +3,7 @@ import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
 import 'package:golocal/src/event/data/events_repository_dummy.dart';
 
-class DummyVotesRepository implements IVotesRepository {
+class VotesRepositoryDummy implements IVotesRepository {
   final List<Vote> _votes = dummyVotes();
 
   static List<Vote> dummyVotes() {

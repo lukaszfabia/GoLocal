@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
-import 'package:golocal/src/event/domain/event.dart';
 
 part 'report_event_event.dart';
 part 'report_event_state.dart';
