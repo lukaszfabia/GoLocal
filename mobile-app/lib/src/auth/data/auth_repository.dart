@@ -3,10 +3,13 @@ import 'package:golocal/src/auth/auth_exceptions.dart';
 import 'package:golocal/src/auth/auth_service.dart';
 import 'package:golocal/src/jwt_token_storage.dart';
 
-class AuthRepository {
+import 'iauth_repository.dart';
+
+class AuthRepository implements IAuthRepository {
   final AuthService _authService = AuthService();
   AuthRepository();
 
+  @override
   Future<void> signUpWithEmail(
       String email, String firstName, String lastName, String password) async {
     final data = {
@@ -30,6 +33,7 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<void> signInWithEmail(String email, String password) async {
     final data = {
       'email': email,
@@ -46,11 +50,13 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<void> logout() async {
     await _authService.logout();
     await TokenStorage().clearTokens();
   }
 
+  @override
   Future<bool> initialCheck() async {
     return await TokenStorage().hasTokens();
   }
