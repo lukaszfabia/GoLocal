@@ -4,7 +4,7 @@ import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 import 'package:golocal/src/jwt_token_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-class PreferenceSurveyService {
+class PreferenceSurveyRepository {
   final DioClient _dioClient = DioClient();
 
   Future<void> submitSurvey(
