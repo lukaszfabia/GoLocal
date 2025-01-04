@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/report/bloc/report_event_bloc.dart';
-import 'package:golocal/src/event/ui/event_detail_page.dart';
 
 enum ReportCategory {
   inappropriate("Inappropriate content"),

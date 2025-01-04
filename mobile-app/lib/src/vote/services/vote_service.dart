@@ -15,23 +15,23 @@ class VoteService implements IVotesRepository {
 
   @override
   Future<Vote> getVote(String id) async {
-    return DummyVotesRepository().getVote(id);
+    return VotesRepositoryDummy().getVote(id);
   }
 
   @override
   Future<List<Vote>> getVotes() async {
-    return DummyVotesRepository().getVotes();
+    return VotesRepositoryDummy().getVotes();
   }
 
   @override
   Future<void> updateVote(Vote vote) async {
     print("Updating vote: $vote, vote service");
-    return DummyVotesRepository().updateVote(vote);
+    return VotesRepositoryDummy().updateVote(vote);
   }
 
   @override
   Future<void> voteOnOption(int voteId, int optionId) async {
     print("Voting on option: $optionId for vote: $voteId");
-    return DummyVotesRepository().voteOnOption(voteId, optionId);
+    return VotesRepositoryDummy().voteOnOption(voteId, optionId);
   }
 }

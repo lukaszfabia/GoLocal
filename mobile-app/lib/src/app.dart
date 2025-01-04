@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:golocal/src/auth/data/auth_repository.dart';
 import 'package:golocal/src/auth/data/auth_repository_dummy.dart';
 import 'package:golocal/src/auth/data/iauth_repository.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
 import 'package:golocal/src/event/data/events_repository_dummy.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
+import 'package:golocal/src/vote/data/ivotes_repository.dart';
+import 'package:golocal/src/vote/data/votes_repository_dummy.dart';
+import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/routing/router.dart';
 
 class GoLocalApp extends StatelessWidget {
@@ -15,6 +17,7 @@ class GoLocalApp extends StatelessWidget {
   // change the eventsRepository to EventsRepository() to use the real repository
   IEventsRepository get eventsRepository => EventsRepositoryDummy();
   IAuthRepository get authRepository => AuthRepositoryDummy();
+  IVotesRepository get votesRepository => VotesRepositoryDummy();
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +29,9 @@ class GoLocalApp extends StatelessWidget {
         RepositoryProvider(
           create: (context) => eventsRepository,
         ),
+        RepositoryProvider(
+          create: (context) => votesRepository,
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -36,6 +42,9 @@ class GoLocalApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => EventsBloc(context.read<IEventsRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => VoteBloc(context.read<IVotesRepository>()),
           ),
         ],
         child: Builder(
