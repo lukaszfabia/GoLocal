@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:golocal/src/auth/auth_repository.dart';
+import 'package:golocal/src/auth/data/auth_repository.dart';
+import 'package:golocal/src/auth/data/auth_repository_dummy.dart';
+import 'package:golocal/src/auth/data/iauth_repository.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
 import 'package:golocal/src/event/data/events_repository_dummy.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
@@ -12,13 +14,14 @@ class GoLocalApp extends StatelessWidget {
 
   // change the eventsRepository to EventsRepository() to use the real repository
   IEventsRepository get eventsRepository => EventsRepositoryDummy();
+  IAuthRepository get authRepository => AuthRepositoryDummy();
 
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (context) => AuthRepository(),
+          create: (context) => authRepository,
         ),
         RepositoryProvider(
           create: (context) => eventsRepository,
@@ -28,7 +31,7 @@ class GoLocalApp extends StatelessWidget {
         providers: [
           BlocProvider(
             lazy: false,
-            create: (context) => AuthBloc(context.read<AuthRepository>())
+            create: (context) => AuthBloc(context.read<IAuthRepository>())
               ..add(const AuthInitialCheck()),
           ),
           BlocProvider(
