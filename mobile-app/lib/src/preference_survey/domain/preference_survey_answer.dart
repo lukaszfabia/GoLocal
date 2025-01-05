@@ -15,7 +15,7 @@ class PreferenceSurveyAnswer {
     this.options,
   });
 
-  factory PreferenceSurveyAnswer.fromJson(
+  factory PreferenceSurveyAnswer.factory(
       int preferenceSurveyId, int questionId, int userId, String value) {
     if (value == 'true' || value == 'false') {
       return PreferenceSurveyAnswer(
