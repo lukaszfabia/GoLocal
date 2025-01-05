@@ -109,7 +109,7 @@ type Vote struct {
 }
 
 type VoteAnswer struct {
-	gorm.Model
+	Model
 	VoteID       uint       `json:"voteId"`
 	UserID       uint       `json:"userId"`
 	VoteOptionID uint       `json:"optionSelectedId"`
@@ -117,7 +117,7 @@ type VoteAnswer struct {
 }
 
 type VoteOption struct {
-	gorm.Model
+	Model
 	VoteID uint   `json:"voteId"`
 	Text   string `gorm:"not null;size:255" json:"text"`
 }
@@ -139,14 +139,14 @@ type BlacklistedTokens struct {
 }
 
 type PreferenceSurvey struct {
-	gorm.Model
+	Model
 	Title       string                     `gorm:"not null;size:255" json:"title"`
 	Description string                     `gorm:"size:1024" json:"description"`
 	Questions   []PreferenceSurveyQuestion `gorm:"foreignKey:SurveyID" json:"questions"`
 }
 
 type PreferenceSurveyQuestion struct {
-	gorm.Model
+	Model
 	SurveyID uint                     `json:"surveyID"`
 	Text     string                   `gorm:"not null;size:1024" json:"text"`
 	Type     QuestionType             `gorm:"not null" json:"type"`
@@ -156,14 +156,14 @@ type PreferenceSurveyQuestion struct {
 
 // PreferenceSurveyOption represents an option for SingleChoice or MultipleChoice
 type PreferenceSurveyOption struct {
-	gorm.Model
+	Model
 	QuestionID uint   `json:"questionID"`
 	Text       string `gorm:"not null;size:1024" json:"text"`
 	IsSelected bool   `json:"isSelected"` // Used for MultipleChoice answers
 }
 
 type PreferenceSurveyAnswer struct {
-	gorm.Model
+	Model
 	SurveyID   uint                           `json:"surveyID"`
 	QuestionID uint                           `json:"questionID"`
 	UserID     uint                           `json:"userID"`
@@ -173,7 +173,7 @@ type PreferenceSurveyAnswer struct {
 }
 
 type PreferenceSurveyAnswerOption struct {
-	gorm.Model
+	Model
 	AnswerID uint `json:"answerID"`
 	OptionID uint `json:"optionID"`
 }
