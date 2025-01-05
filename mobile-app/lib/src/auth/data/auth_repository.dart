@@ -41,6 +41,7 @@ class AuthRepository implements IAuthRepository {
     };
     try {
       Response response = await _authService.signInWithEmail(data);
+      print(response);
       await TokenStorage().saveAccessToken(response.data['data']['access']);
       await TokenStorage().saveRefreshToken(response.data['data']['refresh']);
     } on DioException catch (e) {

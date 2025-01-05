@@ -64,11 +64,12 @@ class EventDetailPage extends StatelessWidget {
                       ? [
                           event.location!.city,
                           event.location!.address != null
-                              ? "${event.location!.address!.street}"
+                              ? event.location!.address!.street
                               : "",
                           event.location!.country,
                         ]
                       : null),
+              _buildVotesCard("Related votes", "View", context),
             ],
           ),
         ),
@@ -120,6 +121,32 @@ class EventDetailPage extends StatelessWidget {
               style: TextStyle(fontSize: 16.0, color: Colors.black87),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVotesCard(
+      String label, String buttonText, BuildContext context) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              label,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.push('/events/${event.id}/votes', extra: event);
+              },
+              child: Text(buttonText),
             ),
           ],
         ),

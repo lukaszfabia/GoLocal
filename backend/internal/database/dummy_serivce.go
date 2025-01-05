@@ -44,6 +44,7 @@ func (d *dummyServiceImpl) Cook() {
 	//d.followers()
 	//d.user2()
 	d.generateMockSurvey()
+	d.easyLoginUser()
 }
 
 // &models.Opinion{},
@@ -110,6 +111,48 @@ func (d *dummyServiceImpl) user1() {
 		if err := d.db.Save(user).Error; err != nil {
 			log.Println("error przy user1")
 		}
+	}
+}
+
+func (d *dummyServiceImpl) easyLoginUser() {
+	var count int64
+	if err := d.db.Model(&models.User{}).Where("email = ?", "a@a.a").Count(&count).Error; err != nil {
+		log.Println("Error checking user existence:", err)
+		return
+	}
+	if count > 0 {
+		log.Println("Easy login user already exists")
+		return
+	}
+
+	p := d.f.Person()
+	email := "a@a.a"
+	password := "Passw0rd!"
+	date := pkg.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
+	rURL := "https://i.pravatar.cc/300"
+	bio := d.f.HipsterSentence(10)
+
+	var location models.Location
+	if err := d.db.Order("RANDOM()").First(&location).Error; err != nil {
+		log.Println(err)
+		return
+	}
+
+	user := &models.User{
+		FirstName:  p.FirstName,
+		LastName:   p.LastName,
+		Email:      email,
+		Password:   &password,
+		Birthday:   &date,
+		IsVerified: d.f.Bool(),
+		Bio:        &bio,
+		AvatarURL:  &rURL,
+		Location:   &location,
+		LocationID: &location.ID,
+	}
+
+	if err := d.db.Save(user).Error; err != nil {
+		log.Println("error at easy login user")
 	}
 }
 
