@@ -19,7 +19,7 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
           answers.entries.map((entry) {
         final questionId = entry.key;
         final value = entry.value;
-        return PreferenceSurveyAnswer.fromJson(
+        return PreferenceSurveyAnswer.factory(
             preferenceSurveyId, questionId, userId, value);
       }).toList();
 

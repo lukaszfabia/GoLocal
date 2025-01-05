@@ -17,7 +17,7 @@ class PreferenceSurveyQuestion extends Model {
 
   factory PreferenceSurveyQuestion.fromJson(Map<String, dynamic> json) {
     return PreferenceSurveyQuestion(
-      id: json['ID'],
+      id: json['id'],
       text: json['text'],
       type: _questionTypeFromString(json['type']),
       options: json['options'] != null

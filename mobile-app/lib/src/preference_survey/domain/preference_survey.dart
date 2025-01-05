@@ -15,7 +15,7 @@ class PreferenceSurvey extends Model {
 
   factory PreferenceSurvey.fromJson(Map<String, dynamic> json) {
     return PreferenceSurvey(
-      id: json['ID'],
+      id: json['id'],
       questions: (json['questions'] as List)
           .map((question) => PreferenceSurveyQuestion.fromJson(question))
           .toList(),

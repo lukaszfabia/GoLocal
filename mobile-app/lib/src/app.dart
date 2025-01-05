@@ -20,7 +20,7 @@ class GoLocalApp extends StatelessWidget {
 
   // change the eventsRepository to EventsRepository() to use the real repository
   IEventsRepository get eventsRepository => EventsRepositoryDummy();
-  IAuthRepository get authRepository => AuthRepository();
+  IAuthRepository get authRepository => AuthRepositoryDummy();
   IVotesRepository get votesRepository => VotesRepositoryDummy();
   IPreferenceSurveyRepository get preferenceSurveyRepository =>
       PreferenceSurveyRepository();
