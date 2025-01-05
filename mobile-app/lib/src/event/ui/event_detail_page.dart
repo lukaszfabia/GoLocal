@@ -64,7 +64,7 @@ class EventDetailPage extends StatelessWidget {
                       ? [
                           event.location!.city,
                           event.location!.address != null
-                              ? "${event.location!.address!.street}"
+                              ? event.location!.address!.street
                               : "",
                           event.location!.country,
                         ]

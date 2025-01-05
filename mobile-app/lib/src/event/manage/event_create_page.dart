@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
@@ -8,7 +6,7 @@ import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/manage/bloc/manage_event_bloc.dart';
 
 class EventCreatePage extends StatefulWidget {
-  EventCreatePage({super.key, this.event});
+  const EventCreatePage({super.key, this.event});
   final Event? event;
 
   @override
@@ -233,6 +231,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
               if (value.isBefore(state.startDate!)) {
                 return "Must be after start date";
               }
+              return null;
             },
             initialValue: state.endDate,
             autovalidateMode: AutovalidateMode.onUserInteraction,
