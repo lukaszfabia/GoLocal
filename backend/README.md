@@ -8,46 +8,7 @@
 
 ## Environment Configuration
 
-Set the following environment variables in your `.env` file:
-
-```bash
-# ============ Server Configuration ============
-# Application port and environment
-PORT=                 # Application port (e.g., 3000)
-APP_ENV=              # Environment (e.g., development, production)
-
-# ============ Database Configuration ============
-# Database connection settings
-DB_HOST=              # Database host (e.g., localhost)
-DB_PORT=              # Database port (e.g., 5432)
-DB_DATABASE=          # Database name
-DB_USERNAME=          # Database username
-DB_PASSWORD=          # Database password
-
-# ============ pgAdmin Configuration ============
-# pgAdmin settings for database management
-PGADMIN_EMAIL=        # pgAdmin login email
-PGADMIN_PASSWORD=     # pgAdmin login password
-PGADMIN_PORT=         # Port for accessing pgAdmin
-
-# ============ Google OAuth 2.0 ============
-# Google OAuth credentials for user authentication
-GOOGLE_CLIENT_ID=     # Google OAuth Client ID
-GOOGLE_CLIENT_SECRET= # Google OAuth Client Secret
-
-# ============ Session Management ============
-# Session secret for secure session handling
-SESSION_SECRET=       # Secret key for session encryption
-
-# ============ JWT Configuration ============
-# JWT (JSON Web Token) configuration for secure authentication
-JWT_SECRET=           # Secret key for JWT signing and verification
-
-# ============ Email Sending Configuration ============
-# Gmail credentials for sending emails from the application
-GMAIL_MAIL=           # Gmail address used for sending emails
-GMAIL_PASSWORD=       # Gmail password for authentication
-```
+Set the following environment variables in your `.env` file using [.env.sample](/backend/.env.sample)
 
 **Remember**: you should insert `.env` file in backend directory.
 

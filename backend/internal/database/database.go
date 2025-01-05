@@ -80,6 +80,8 @@ type service struct {
 	preferenceSurveyService PreferenceSurveyService
 	tokenService            TokenService
 	dummyService            DummyService
+
+	eventService EventService
 }
 
 // Initializes new database connection and services
@@ -100,6 +102,7 @@ func New() Service {
 		tokenService := NewTokenService(db)
 		dummyService := NewDummyService(db)
 		prefenceSurveyService := NewPreferenceSurveyService(db)
+		eventService := NewEventService(db)
 
 		return &service{
 			db:                      db,
@@ -107,6 +110,7 @@ func New() Service {
 			tokenService:            tokenService,
 			dummyService:            dummyService,
 			preferenceSurveyService: prefenceSurveyService,
+			eventService:            eventService,
 		}
 	}
 }
@@ -133,7 +137,7 @@ func (s *service) Health() map[string]string {
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Fatalf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
+		log.Fatal(stats["error"]) // Log the error and terminate the program
 		return stats
 	}
 
