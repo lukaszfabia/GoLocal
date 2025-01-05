@@ -14,6 +14,7 @@ import 'package:golocal/src/shared/scaffold_shell.dart';
 import 'package:golocal/src/shared/streamtolistenable.dart';
 import 'package:golocal/src/user/ui/profile_page.dart';
 import 'package:golocal/src/vote/ui/votes_page.dart';
+import 'package:golocal/src/vote/ui/votes_for_event_page.dart';
 
 // if you want to add new routes eg. /home/addevent or /home/event/:id/report you can do it here
 // just add another route to the enum and go to the statefull shelll branch
@@ -105,6 +106,13 @@ abstract class AppRouter {
                           builder: (context, state) {
                             final event = state.extra as Event;
                             return ReportEventPage(event: event);
+                          },
+                        ),
+                        GoRoute(
+                          path: "votes",
+                          builder: (context, state) {
+                            final event = state.extra as Event;
+                            return VotesForEventPage(event);
                           },
                         ),
                       ],

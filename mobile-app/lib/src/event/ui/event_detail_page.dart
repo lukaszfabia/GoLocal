@@ -69,6 +69,14 @@ class EventDetailPage extends StatelessWidget {
                           event.location!.country,
                         ]
                       : null),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.push('/events/${event.id}/votes', extra: event);
+                  },
+                  child: Text('View Votes'),
+                ),
+              ),
             ],
           ),
         ),
