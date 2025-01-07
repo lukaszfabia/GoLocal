@@ -1,35 +1,20 @@
-import 'package:golocal/src/user/domain/user.dart';
+import 'package:dio/dio.dart';
+import 'package:golocal/src/dio_client.dart';
 
-// TODO: implement real auth service
 class AuthService {
-  Future<User?> signUpWithEmail(String email, String password,
-      DateTime birthDate, String firstName, String lastName) async {
-    return Future.delayed(Duration(seconds: 1), () {
-      return User(
-          id: 1,
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          birthDate: birthDate,
-          isVerified: true,
-          isPremium: false);
-    });
+  final Dio _dio = DioClient().dio;
+
+  Future<Response> signInWithEmail(Map<String, dynamic> data) {
+    return _dio.post('/login/', data: data);
   }
 
-  Future<User?> signInWithEmail(String email, String password) {
-    return Future.delayed(Duration(seconds: 1), () {
-      return User(
-          id: 1,
-          email: email,
-          firstName: 'Peter',
-          lastName: 'Fun',
-          birthDate: DateTime(1965, 7, 27),
-          isVerified: true,
-          isPremium: false);
-    });
+  Future<Response> signUpWithEmail(Map<String, dynamic> data) {
+    return _dio.post('/sign-up/', data: data);
   }
 
-  Future<void> signOut() {
-    return Future.delayed(Duration(milliseconds: 500), () {});
+  //TODO
+  Future<Response> logout() {
+    return Future<Response>.value(
+        Response(requestOptions: RequestOptions(path: '')));
   }
 }

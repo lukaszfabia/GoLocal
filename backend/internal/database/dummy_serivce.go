@@ -32,17 +32,19 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	d.coords()
-	d.address()
-	d.location()
-	d.user1()
-	d.tags()
-	d.voteComment()
-	d.event1()
-	d.event2()
-	d.opinion()
-	d.followers()
-	d.user2()
+	//d.coords()
+	//d.address()
+	//d.location()
+	//d.user1()
+	//d.tags()
+	//d.voteComment()
+	//d.event1()
+	//d.event2()
+	//d.opinion()
+	//d.followers()
+	//d.user2()
+	d.generateMockSurvey()
+	d.easyLoginUser()
 }
 
 // &models.Opinion{},
@@ -53,7 +55,7 @@ func (d *dummyServiceImpl) user2() {
 		return
 	}
 	for _, user := range users {
-		var votes []*models.Vote
+		var votes []*models.VoteAnswer
 		var comments []*models.Comment
 
 		if err := d.db.Model(&models.Vote{}).Where("user_id = ?", user.ID).Find(&votes).Error; err != nil {
@@ -109,6 +111,48 @@ func (d *dummyServiceImpl) user1() {
 		if err := d.db.Save(user).Error; err != nil {
 			log.Println("error przy user1")
 		}
+	}
+}
+
+func (d *dummyServiceImpl) easyLoginUser() {
+	var count int64
+	if err := d.db.Model(&models.User{}).Where("email = ?", "a@a.a").Count(&count).Error; err != nil {
+		log.Println("Error checking user existence:", err)
+		return
+	}
+	if count > 0 {
+		log.Println("Easy login user already exists")
+		return
+	}
+
+	p := d.f.Person()
+	email := "a@a.a"
+	password := "Passw0rd!"
+	date := pkg.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
+	rURL := "https://i.pravatar.cc/300"
+	bio := d.f.HipsterSentence(10)
+
+	var location models.Location
+	if err := d.db.Order("RANDOM()").First(&location).Error; err != nil {
+		log.Println(err)
+		return
+	}
+
+	user := &models.User{
+		FirstName:  p.FirstName,
+		LastName:   p.LastName,
+		Email:      email,
+		Password:   &password,
+		Birthday:   &date,
+		IsVerified: d.f.Bool(),
+		Bio:        &bio,
+		AvatarURL:  &rURL,
+		Location:   &location,
+		LocationID: &location.ID,
+	}
+
+	if err := d.db.Save(user).Error; err != nil {
+		log.Println("error at easy login user")
 	}
 }
 
@@ -205,15 +249,16 @@ func (d *dummyServiceImpl) voteComment() {
 				log.Println(err)
 			}
 
-			vote := &models.Vote{
-				State:   models.ParticipationStatuses[d.f.Number(0, 2)],
-				EventID: events[i].ID,
-				UserID:  users[d.f.Number(0, len(users)-1)].ID,
-			}
+			// why was vote here
+			// vote := &models.Vote{
+			// 	State:   models.ParticipationStatuses[d.f.Number(0, 2)],
+			// 	EventID: events[i].ID,
+			// 	UserID:  users[d.f.Number(0, len(users)-1)].ID,
+			// }
 
-			if err := d.db.Save(vote).Error; err != nil {
-				log.Println(err)
-			}
+			// if err := d.db.Save(vote).Error; err != nil {
+			// 	log.Println(err)
+			// }
 
 		}
 	}
@@ -385,4 +430,100 @@ func generateEventTitle(eventType models.EventType) string {
 	}
 
 	return title
+}
+
+func (d *dummyServiceImpl) generateMockSurvey() {
+	// don't generate if survey already exists
+
+	var count int64
+	if err := d.db.Model(&models.PreferenceSurvey{}).Count(&count).Error; err != nil {
+		log.Println("Error counting surveys:", err)
+		return
+	}
+
+	if count > 0 {
+		log.Println("Mock survey already exists")
+		return
+	}
+
+	mockSurvey := models.PreferenceSurvey{
+		Title:       "Preference survey",
+		Description: "Thanks to this quiz, we will be able to personalize our recommendations of events just for You",
+	}
+
+	if err := d.db.Save(&mockSurvey).Error; err != nil {
+		log.Println("Error saving mock survey:", err)
+		return
+	}
+
+	questions := []models.PreferenceSurveyQuestion{
+		{
+			Text:     "Are you interested in adult-only activities?",
+			Type:     models.Toggle,
+			Toggle:   new(bool), // Initial value is false
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "Do you prefer to relax, or spend time actively?",
+			Type:     models.SingleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "What are your age/family constraints for events and activities?",
+			Type:     models.SingleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "Do you prefer indoors or outdoors events and activities?",
+			Type:     models.SingleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+		{
+			Text:     "What more are you interested in?",
+			Type:     models.MultipleChoice,
+			SurveyID: mockSurvey.ID,
+		},
+	}
+
+	for _, question := range questions {
+		if err := d.db.Save(&question).Error; err != nil {
+			log.Println("Error saving question:", err)
+			return
+		}
+
+		var options []models.PreferenceSurveyOption
+		switch question.Text {
+		case "Do you prefer to relax, or spend time actively?":
+			options = []models.PreferenceSurveyOption{
+				{Text: "High-energy", QuestionID: question.ID},
+				{Text: "Relaxation", QuestionID: question.ID},
+			}
+		case "What are your age/family constraints for events and activities?":
+			options = []models.PreferenceSurveyOption{
+				{Text: "Family-friendly", QuestionID: question.ID},
+				{Text: "Couple-friendly", QuestionID: question.ID},
+				{Text: "Adult-only", QuestionID: question.ID},
+			}
+		case "Do you prefer indoors or outdoors events and activities?":
+			options = []models.PreferenceSurveyOption{
+				{Text: "Indoors", QuestionID: question.ID},
+				{Text: "Outdoors", QuestionID: question.ID},
+			}
+		case "What more are you interested in?":
+			options = []models.PreferenceSurveyOption{
+				{Text: "Learning", QuestionID: question.ID},
+				{Text: "Music", QuestionID: question.ID},
+				{Text: "Sports", QuestionID: question.ID},
+			}
+		}
+
+		for _, option := range options {
+			if err := d.db.Save(&option).Error; err != nil {
+				log.Println("Error saving option:", err)
+				return
+			}
+		}
+	}
+
+	log.Println("Mock survey saved successfully")
 }

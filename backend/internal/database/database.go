@@ -24,8 +24,21 @@ var allModels []any = []any{
 	&models.Address{},
 	&models.Event{},
 	&models.Comment{},
+
 	&models.Vote{},
+	&models.VoteOption{},
+	&models.VoteAnswer{},
+
 	&models.Opinion{},
+	&models.Tag{},
+
+	&models.PreferenceSurvey{},
+	&models.PreferenceSurveyQuestion{},
+	&models.PreferenceSurveyAnswer{},
+	&models.PreferenceSurveyOption{},
+	&models.PreferenceSurveyAnswerOption{},
+
+	&models.Recommendation{},
 	&models.BlacklistedTokens{},
 }
 
@@ -56,15 +69,19 @@ type Service interface {
 	DummyService() DummyService
 
 	UserService() UserService
+	PreferenceSurveyService() PreferenceSurveyService
 	TokenService() TokenService
 }
 
 type service struct {
 	db *gorm.DB
 
-	userService  UserService
-	tokenService TokenService
-	dummyService DummyService
+	userService             UserService
+	preferenceSurveyService PreferenceSurveyService
+	tokenService            TokenService
+	dummyService            DummyService
+
+	eventService EventService
 }
 
 // Initializes new database connection and services
@@ -84,14 +101,17 @@ func New() Service {
 		userService := NewUserService(db)
 		tokenService := NewTokenService(db)
 		dummyService := NewDummyService(db)
+		prefenceSurveyService := NewPreferenceSurveyService(db)
+		eventService := NewEventService(db)
 
 		return &service{
-			db:           db,
-			userService:  userService,
-			tokenService: tokenService,
-			dummyService: dummyService,
+			db:                      db,
+			userService:             userService,
+			tokenService:            tokenService,
+			dummyService:            dummyService,
+			preferenceSurveyService: prefenceSurveyService,
+			eventService:            eventService,
 		}
-
 	}
 }
 
@@ -117,7 +137,7 @@ func (s *service) Health() map[string]string {
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
-		log.Fatalf(fmt.Sprintf("db down: %v", err)) // Log the error and terminate the program
+		log.Fatal(stats["error"]) // Log the error and terminate the program
 		return stats
 	}
 
@@ -181,5 +201,5 @@ func (s *service) Sync() {
 	}
 	log.Println("Migrating models has been done.")
 
-	// s.dummyService.Cook()
+	s.dummyService.Cook()
 }

@@ -8,9 +8,10 @@ import (
 )
 
 type TokenService interface {
+	IsTokenBlacklisted(token string) bool
+
 	// Creates user if it does not exists in db
 	// Returns occured error
-	IsTokenBlacklisted(token string) bool
 	SetAsBlacklisted(token string) error
 }
 

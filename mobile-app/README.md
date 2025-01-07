@@ -1,6 +1,18 @@
-# Get started
-Jak tu wejdziecie za pierwszym razem to będzie wszystko na czerwono:
-- flutter doctor # zalezy nam zeby to co trzeba bylo na zielono 
-- flutter upgrade (--force) # jeśli trzeba
+# Getting started
+
+First compilation tips:
+
+- flutter doctor # we need only what we want in green
+- flutter upgrade (--force) # if needed
 - flutter pub get
-i powinno dzialac
+- flutter run
+and it should work
+
+## Tips
+
+- impeller error something something -> flutter run --no-enable-impeller
+- if you have a ton of system messages, if using VSCode run in debug mode (f5) and in debug console you can filter by "I/flutter". Another approach is to run
+
+```cmd
+flutter run | sed '/^\(V\|I\|W\|E\)\/flutter/!d'
+```

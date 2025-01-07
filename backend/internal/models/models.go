@@ -30,8 +30,8 @@ type User struct {
 	Followers []*User `gorm:"many2many:user_followers;constraint:OnDelete:CASCADE" json:"followers"`
 	Following []*User `gorm:"many2many:user_following;constraint:OnDelete:CASCADE" json:"following"`
 
-	Comments []*Comment `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
-	Votes    []*Vote    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
+	Comments []*Comment    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
+	Votes    []*VoteAnswer `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
 
 	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
 	LocationID *uint     `json:"locationID"`
@@ -101,9 +101,25 @@ type Comment struct {
 
 type Vote struct {
 	Model
-	UserID  uint                `json:"userID"`
-	EventID uint                `json:"eventID"`
-	State   ParticipationStatus `gorm:"type:text;not null" json:"state"`
+	Event    Event        `gorm:"foreignKey:EventID;references:ID;constraint:OnDelete:RESTRICT" json:"event"`
+	EventID  uint         `json:"eventID"`
+	Text     string       `gorm:"not null;size:255" json:"text"`
+	VoteType VoteType     `gorm:"not null" json:"voteType"`
+	Options  []VoteOption `gorm:"foreignKey:VoteID" json:"options"`
+}
+
+type VoteAnswer struct {
+	Model
+	VoteID       uint       `json:"voteId"`
+	UserID       uint       `json:"userId"`
+	VoteOptionID uint       `json:"optionSelectedId"`
+	VoteOption   VoteOption `json:"optionSelected"`
+}
+
+type VoteOption struct {
+	Model
+	VoteID uint   `json:"voteId"`
+	Text   string `gorm:"not null;size:255" json:"text"`
 }
 
 type Opinion struct {
@@ -120,4 +136,50 @@ type Opinion struct {
 type BlacklistedTokens struct {
 	Model
 	Token string `gorm:"not null;unique"`
+}
+
+type PreferenceSurvey struct {
+	Model
+	Title       string                     `gorm:"not null;size:255" json:"title"`
+	Description string                     `gorm:"size:1024" json:"description"`
+	Questions   []PreferenceSurveyQuestion `gorm:"foreignKey:SurveyID" json:"questions"`
+}
+
+type PreferenceSurveyQuestion struct {
+	Model
+	SurveyID uint                     `json:"surveyID"`
+	Text     string                   `gorm:"not null;size:1024" json:"text"`
+	Type     QuestionType             `gorm:"not null" json:"type"`
+	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID" json:"options"`
+	Toggle   *bool                    `json:"toggle"` // Only used if Type == Toggle
+}
+
+// PreferenceSurveyOption represents an option for SingleChoice or MultipleChoice
+type PreferenceSurveyOption struct {
+	Model
+	QuestionID uint   `json:"questionID"`
+	Text       string `gorm:"not null;size:1024" json:"text"`
+	IsSelected bool   `json:"isSelected"` // Used for MultipleChoice answers
+}
+
+type PreferenceSurveyAnswer struct {
+	Model
+	SurveyID   uint                           `json:"surveyID"`
+	QuestionID uint                           `json:"questionID"`
+	UserID     uint                           `json:"userID"`
+	Toggle     *bool                          `json:"toggle"`                             // For Toggle type
+	OptionID   *uint                          `json:"optionID"`                           // For SingleChoice
+	Options    []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"` // For MultipleChoice, store option IDs
+}
+
+type PreferenceSurveyAnswerOption struct {
+	Model
+	AnswerID uint `json:"answerID"`
+	OptionID uint `json:"optionID"`
+}
+
+type Recommendation struct {
+	Model
+	UserID uint   `json:"userID"`
+	Text   string `gorm:"not null;size:1024" json:"text"`
 }

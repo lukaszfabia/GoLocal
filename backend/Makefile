@@ -23,6 +23,10 @@ docker-run:
 		docker-compose --env-file .env up; \
 	fi
 
+# Create DB container for Windows
+docker-run-windows:
+	@docker compose --env-file .env up
+
 # Shutdown DB container
 docker-down:
 	@if docker compose down 2>/dev/null; then \
