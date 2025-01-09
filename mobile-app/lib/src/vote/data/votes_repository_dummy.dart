@@ -18,6 +18,8 @@ class VotesRepositoryDummy implements IVotesRepository {
           VoteOption(id: 2, text: 'Option 2', votesCount: 2, isSelected: false),
         ],
         event: mockEvents[0],
+        type: VoteType.single,
+        endsAt: DateTime.now().add(Duration(days: 1)),
       ),
       Vote(
         id: 2,
@@ -28,7 +30,9 @@ class VotesRepositoryDummy implements IVotesRepository {
           VoteOption(
               id: 4, text: 'Option 2.2', votesCount: 123, isSelected: true),
         ],
+        type: VoteType.multiple,
         event: mockEvents[1],
+        endsAt: DateTime.now().add(Duration(days: 2)),
       )
     ];
   }
