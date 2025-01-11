@@ -156,8 +156,11 @@ type PreferenceSurveyQuestion struct {
 
 type PreferenceSurveyOption struct {
 	Model
-	QuestionID uint   `json:"questionID"`
-	Text       string `gorm:"not null;size:1024" json:"text"`
+	QuestionID  uint   `json:"questionID"`
+	Text        string `gorm:"not null;size:1024" json:"text"`
+	TagID       uint   `json:"tagID"`
+	Tag         Tag    `gorm:"foreignKey:TagID" json:"tag"`
+	TagPositive bool   `json:"tagPositive"`
 }
 
 type PreferenceSurveyAnswer struct {
