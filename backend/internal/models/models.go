@@ -106,6 +106,7 @@ type Vote struct {
 	Text     string       `gorm:"not null;size:255" json:"text"`
 	VoteType VoteType     `gorm:"not null" json:"voteType"`
 	Options  []VoteOption `gorm:"foreignKey:VoteID" json:"options"`
+	EndDate  *time.Time   `gorm:"type:date" json:"endDate"`
 }
 
 type VoteAnswer struct {
@@ -151,25 +152,20 @@ type PreferenceSurveyQuestion struct {
 	Text     string                   `gorm:"not null;size:1024" json:"text"`
 	Type     QuestionType             `gorm:"not null" json:"type"`
 	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID" json:"options"`
-	Toggle   *bool                    `json:"toggle"` // Only used if Type == Toggle
 }
 
-// PreferenceSurveyOption represents an option for SingleChoice or MultipleChoice
 type PreferenceSurveyOption struct {
 	Model
 	QuestionID uint   `json:"questionID"`
 	Text       string `gorm:"not null;size:1024" json:"text"`
-	IsSelected bool   `json:"isSelected"` // Used for MultipleChoice answers
 }
 
 type PreferenceSurveyAnswer struct {
 	Model
-	SurveyID   uint                           `json:"surveyID"`
-	QuestionID uint                           `json:"questionID"`
-	UserID     uint                           `json:"userID"`
-	Toggle     *bool                          `json:"toggle"`                             // For Toggle type
-	OptionID   *uint                          `json:"optionID"`                           // For SingleChoice
-	Options    []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"` // For MultipleChoice, store option IDs
+	SurveyID        uint                           `json:"surveyID"`
+	QuestionID      uint                           `json:"questionID"`
+	UserID          uint                           `json:"userID"`
+	SelectedOptions []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"`
 }
 
 type PreferenceSurveyAnswerOption struct {

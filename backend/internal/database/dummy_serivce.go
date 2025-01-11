@@ -460,7 +460,6 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 		{
 			Text:     "Are you interested in adult-only activities?",
 			Type:     models.Toggle,
-			Toggle:   new(bool), // Initial value is false
 			SurveyID: mockSurvey.ID,
 		},
 		{
@@ -493,6 +492,11 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 
 		var options []models.PreferenceSurveyOption
 		switch question.Text {
+		case "Are you interested in adult-only activities?":
+			options = []models.PreferenceSurveyOption{
+				{Text: "Yes", QuestionID: question.ID},
+				{Text: "No", QuestionID: question.ID},
+			}
 		case "Do you prefer to relax, or spend time actively?":
 			options = []models.PreferenceSurveyOption{
 				{Text: "High-energy", QuestionID: question.ID},
