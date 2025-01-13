@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:golocal/src/event/location/location.dart';
-import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
-import 'package:golocal/src/vote/domain/vote.dart';
-import 'package:golocal/src/vote/domain/vote_option.dart';
-import 'package:go_router/go_router.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
+import 'package:golocal/src/vote/ui/vote_list.dart';
 
 class VotesPage extends StatelessWidget {
   const VotesPage({super.key});
@@ -33,7 +29,7 @@ class VotesPage extends StatelessWidget {
             } else if (state.status == VoteStatus.error) {
               return Center(child: Text('Error: ${state.errorMessage}'));
             } else if (state.status == VoteStatus.loaded) {
-              return _buildVoteList(state.votes);
+              return VoteList(votes: state.votes);
             }
             return const SizedBox.shrink();
           },
