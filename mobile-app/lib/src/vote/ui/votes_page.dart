@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/event/location/location.dart';
 import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
@@ -54,6 +55,16 @@ class VotesPage extends StatelessWidget {
     );
   }
 
+  String __formatLocation(Location? location) {
+    return location != null
+        ? [
+            location.city,
+            location.address != null ? location.address!.street : "",
+            location.country,
+          ].where((element) => element.isNotEmpty).join(", ")
+        : "No location available";
+  }
+
   Widget _buildVoteCard(BuildContext context, Vote vote) {
     var optionCounts = vote.options.map((option) => option.votesCount).toList();
     var totalVotes = optionCounts.reduce((a, b) => a + b);
@@ -72,8 +83,7 @@ class VotesPage extends StatelessWidget {
             ),
             title: Text(vote.event.title,
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(vote.event.location?.address?.toString() ??
-                'No address available'),
+            subtitle: Text(__formatLocation(vote.event.location)),
             trailing: Icon(Icons.star_border),
             onTap: () {
               context.push('${AppRoute.events.path}/${vote.event.id}',

@@ -1,8 +1,8 @@
 import 'package:golocal/src/auth/auth_exceptions.dart';
 
-import 'auth_repository.dart';
+import 'iauth_repository.dart';
 
-class AuthRepositoryDummy implements AuthRepository {
+class AuthRepositoryDummy implements IAuthRepository {
   bool _isAuthenticated = false;
   Map<String, String> dummyCredentials = {
     'golocal@gmail.com': "Golocal1!",
