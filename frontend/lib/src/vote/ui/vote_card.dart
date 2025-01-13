@@ -3,58 +3,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
-import 'package:golocal/src/vote/domain/vote_option.dart';
 import 'package:go_router/go_router.dart';
-import 'package:golocal/src/vote/data/ivotes_repository.dart';
+import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/vote/domain/vote_option.dart';
 
-class VotesPage extends StatelessWidget {
-  const VotesPage({super.key});
+class VoteCard extends StatelessWidget {
+  final Vote vote;
+  const VoteCard({required this.vote, super.key});
+
+  String __formatLocation(Location? location) {
+    return location != null
+        ? [
+            location.city,
+            location.address != null ? location.address!.street : "",
+            location.country,
+          ].where((element) => element.isNotEmpty).join(", ")
+        : "No location available";
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          VoteBloc(context.read<IVotesRepository>())..add(LoadVotes()),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Votes'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: BlocBuilder<VoteBloc, VoteState>(
-          builder: (context, state) {
-            if (state.status == VoteStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state.status == VoteStatus.error) {
-              return Center(child: Text('Error: ${state.errorMessage}'));
-            } else if (state.status == VoteStatus.loaded) {
-              return _buildVoteList(state.votes);
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVoteList(List<Vote> votes) {
-    return ListView.builder(
-      itemCount: votes.length,
-      itemBuilder: (context, index) {
-        final vote = votes[index];
-        return _buildVoteCard(
-          context,
-          vote,
-        );
-      },
-    );
-  }
-
-  Widget _buildVoteCard(BuildContext context, Vote vote) {
     var optionCounts = vote.options.map((option) => option.votesCount).toList();
     var totalVotes = optionCounts.reduce((a, b) => a + b);
 
@@ -72,8 +40,7 @@ class VotesPage extends StatelessWidget {
             ),
             title: Text(vote.event.title,
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(vote.event.location?.address?.toString() ??
-                'No address available'),
+            subtitle: Text(__formatLocation(vote.event.location)),
             trailing: Icon(Icons.star_border),
             onTap: () {
               context.push('${AppRoute.events.path}/${vote.event.id}',

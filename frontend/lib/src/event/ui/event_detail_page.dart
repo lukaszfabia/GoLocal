@@ -67,7 +67,7 @@ class EventDetailPage extends StatelessWidget {
                               ? event.location!.address!.street
                               : "",
                           event.location!.country,
-                        ]
+                        ].where((element) => element.isNotEmpty).toList()
                       : null),
               _buildVotesCard("Related votes", "View", context),
             ],

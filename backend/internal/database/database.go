@@ -92,7 +92,7 @@ func New() Service {
 	if db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	}); err != nil {
-		panic("Can't connect to db!")
+		panic("Can't connect to db!" + err.Error())
 	} else {
 		log.Println("Successfully connected to db!")
 
