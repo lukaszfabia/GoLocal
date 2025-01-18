@@ -34,25 +34,33 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api.HandleFunc("/password-reset/", s.PasswordResetHandler).Methods(http.MethodPost)
 	api.HandleFunc("/verify/callback/", s.VerifyCallbackHandler).Methods(http.MethodPost)
 	api.HandleFunc("/password-reset/callback", s.PasswordResetCallbackHandler).Methods(http.MethodPost)
+	api.HandleFunc("/device-token-registration/", s.DeviceTokenRegistrationHandler).Methods(http.MethodPost)
 
 	provider := api.PathPrefix("/{provider}").Subrouter()
 	provider.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodGet) // handles signing up
 	provider.HandleFunc("/callback/", s.Callback).Methods(http.MethodGet)
 
 	auth := api.PathPrefix("/auth").Subrouter()
+	// setting middleware
+	// authenthicated endpoints
+	auth.Use(s.isAuth)
 
 	// recommendation routes
-	api.HandleFunc("/change-preference-survey", s.handleSurvey)
-	api.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
-	api.HandleFunc("/preference-survey", s.getSurvey)
+	auth.HandleFunc("/change-preference-survey", s.handleSurvey)
+	auth.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
+	auth.HandleFunc("/preference-survey", s.getSurvey)
 
-	// setting middleware
-	auth.Use(s.isAuth)
-	// authenthicated endpoints
 	auth.HandleFunc("/account/", s.AccountHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
+
+	// events
+	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
+
+	event := auth.PathPrefix("/event").Subrouter()
+	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
+		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	return r
 }

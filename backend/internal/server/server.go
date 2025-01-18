@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,7 +11,10 @@ import (
 	"strings"
 	"time"
 
+	firebase "firebase.google.com/go"
+	"firebase.google.com/go/messaging"
 	_ "github.com/joho/godotenv/autoload"
+	"google.golang.org/api/option"
 
 	"backend/internal/database"
 	"backend/internal/store"
@@ -21,6 +25,8 @@ type Server struct {
 
 	db    database.Service
 	store store.Store
+	// Firebase messaging provider
+	notificationProvider *messaging.Client
 }
 
 type response struct {
@@ -53,11 +59,22 @@ func (s *Server) InvalidFormResponse(w http.ResponseWriter) {
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(strings.TrimSpace(os.Getenv("PORT")))
+
+	opt := option.WithCredentialsFile("./golocal-firebase.json")
+
+	fApp, err := firebase.NewApp(context.Background(), nil, opt)
+	client, _ := fApp.Messaging(context.Background())
+
+	if err != nil {
+		log.Printf("Failed to init firebase app: %s", err.Error())
+	}
+
 	NewServer := &Server{
 		port: port,
 
-		db:    database.New(),
-		store: store.New(),
+		db:                   database.New(),
+		store:                store.New(),
+		notificationProvider: client,
 	}
 
 	NewServer.db.Sync()

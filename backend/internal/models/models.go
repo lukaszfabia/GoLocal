@@ -33,8 +33,9 @@ type User struct {
 	Comments []*Comment    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
 	Votes    []*VoteAnswer `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
 
-	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
-	LocationID *uint     `json:"locationID"`
+	Location   *Location      `gorm:"constraint:OnDelete:CASCADE" json:"location"`
+	LocationID *uint          `json:"locationID"`
+	Devices    []*DeviceToken `gorm:"many2many:devices;constraint:OnDelete:CASCADE" json:"devices"`
 
 	SkipValidation bool `gorm:"-" json:"-"`
 }
@@ -181,4 +182,13 @@ type Recommendation struct {
 	Model
 	UserID uint   `json:"userID"`
 	Text   string `gorm:"not null;size:1024" json:"text"`
+}
+
+type DeviceToken struct {
+	Model
+	// FMC token
+	Token     string  `gorm:"not null;size:1024" json:"token"`
+	OSVersion *string `gorm:"size:32" json:"os"`
+	Platform  *string `gorm:"size:32" json:"platform"`
+	Users     []*User `gorm:"many2many:user_devices;" json:"users"`
 }

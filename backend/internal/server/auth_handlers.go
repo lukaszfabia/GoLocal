@@ -21,6 +21,11 @@ import (
 func (s *Server) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := pkg.DecodeJSON[forms.RefreshTokenRequest](r)
 
+	if err != nil {
+		s.NewResponse(w, http.StatusBadRequest, "Failed to decode form")
+		return
+	}
+
 	// decode the refresh token
 	sub, err := auth.DecodeJWT(form.Token)
 	if err != nil {
@@ -306,4 +311,21 @@ func (s *Server) PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.NewResponse(w, http.StatusOK, "")
+}
+
+func (s *Server) DeviceTokenRegistrationHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO: assign new device token to user
+	form, err := pkg.DecodeJSON[forms.Device](r)
+
+	if err != nil {
+		s.NewResponse(w, http.StatusBadRequest, "Failed to decode form")
+		return
+	}
+
+	if err := s.db.UserService().AddDevice(form); err != nil {
+		s.NewResponse(w, http.StatusInternalServerError, "Failed to add device to user")
+		return
+	}
+
+	s.NewResponse(w, http.StatusOK, "Successfully added new device!")
 }

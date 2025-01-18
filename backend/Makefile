@@ -14,8 +14,6 @@ run:
 	@go run cmd/api/main.go
 # Create DB container
 docker-run:
-	@sudo systemctl stop postgresql
-
 	@if docker compose --env-file .env up 2>/dev/null; then \
 		: ; \
 	else \

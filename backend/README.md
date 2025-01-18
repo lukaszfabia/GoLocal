@@ -10,6 +10,12 @@
 
 Set the following environment variables in your `.env` file using [.env.sample](/backend/.env.sample)
 
+### Hint
+
+```bash
+cp .env.sample .env
+```
+
 **Remember**: you should insert `.env` file in backend directory.
 
 ## MakeFile
