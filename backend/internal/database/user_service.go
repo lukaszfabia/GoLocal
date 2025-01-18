@@ -1,6 +1,7 @@
 package database
 
 import (
+	"backend/internal/forms"
 	"backend/internal/models"
 	"log"
 
@@ -17,6 +18,7 @@ type UserService interface {
 
 	SaveUser(user *models.User) (*models.User, error)
 	DeleteUser(user *models.User) error
+	AddDevice(device *forms.Device) error
 }
 
 func NewUserService(db *gorm.DB) UserService {
@@ -69,4 +71,26 @@ func (u *userServiceImpl) DeleteUser(user *models.User) error {
 		return err
 	}
 	return nil
+}
+
+func (u *userServiceImpl) AddDevice(device *forms.Device) error {
+
+	token := models.DeviceToken{
+		Token:     device.Token,
+		OSVersion: device.OSVersion,
+		Platform:  device.Platform,
+	}
+
+	return u.db.Transaction(func(tx *gorm.DB) error {
+		var user models.User = models.User{}
+		if err := u.db.Model(user).First(user, "id = ?", device.UserID).Error; err != nil {
+			return err
+		}
+
+		if err := u.db.Model(&user).Association("Devices").Append(&token); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
