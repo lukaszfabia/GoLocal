@@ -180,8 +180,8 @@ type PreferenceSurveyAnswerOption struct {
 
 type Recommendation struct {
 	Model
-	UserID uint   `json:"userID"`
-	Text   string `gorm:"not null;size:1024" json:"text"`
+	UserID uint  `json:"userID"`
+	Tags   []Tag `gorm:"many2many:recommendation_tags" json:"tags"`
 }
 
 type DeviceToken struct {
@@ -191,4 +191,9 @@ type DeviceToken struct {
 	OSVersion *string `gorm:"size:32" json:"os"`
 	Platform  *string `gorm:"size:32" json:"platform"`
 	Users     []*User `gorm:"many2many:user_devices;" json:"users"`
+}
+
+type ErrorResponse struct {
+	Type    int    `json:"type"`
+	Message string `json:"message"`
 }

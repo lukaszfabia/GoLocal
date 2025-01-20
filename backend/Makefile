@@ -52,6 +52,10 @@ clean_db:
 	@echo "Clearing up database..."
 	@docker-compose down --volumes
 
+swagger:
+	@echo "Generating Swagger..."
+	@swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal
+
 # Live Reload
 watch:
 	@if command -v air > /dev/null; then \

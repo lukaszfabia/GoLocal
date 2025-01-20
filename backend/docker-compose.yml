@@ -15,24 +15,24 @@ services:
       retries: 3
     networks:
       - go_local_network
-  api:
-    container_name: go_local_api
-    restart: always
-    build:
-      context: .
-    ports:
-      - ${PORT}:${PORT}
-    environment:
-      PORT: ${PORT}
-      DB_HOST: go_local_postgres
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on:
-      - db
-    networks:
-      - go_local_network
+  # api:
+  #   container_name: go_local_api
+  #   restart: always
+  #   build:
+  #     context: .
+  #   ports:
+  #     - ${PORT}:${PORT}
+  #   environment:
+  #     PORT: ${PORT}
+  #     DB_HOST: go_local_postgres
+  #     DB_PORT: ${DB_PORT}
+  #     DB_DATABASE: ${DB_DATABASE}
+  #     DB_USERNAME: ${DB_USERNAME}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - go_local_network
 
 networks:
   go_local_network:
