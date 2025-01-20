@@ -46,7 +46,7 @@ class EventsRepositoryDummy implements IEventsRepository {
   }
 
   @override
-  Future<void> createEvent(Event event) {
+  Future<Event> createEvent(Event event) {
     // TODO: implement createEvent
     throw UnimplementedError();
   }
@@ -100,7 +100,7 @@ class EventsRepositoryDummy implements IEventsRepository {
   }
 
   @override
-  Future<void> updateEvent(Event event) {
+  Future<Event> updateEvent(Event event) {
     // TODO: implement updateEvent
     throw UnimplementedError();
   }

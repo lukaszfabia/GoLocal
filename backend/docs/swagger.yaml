@@ -53,6 +53,17 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/event:
+    get:
+      consumes:
+      - application/json
+      description: Get events based on query parameters
+      produces:
+      - application/json
+      responses: {}
+      summary: Get Events
+      tags:
+      - event
   /api/preference/change-preference-survey:
     post:
       consumes:

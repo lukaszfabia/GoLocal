@@ -6,6 +6,7 @@ class VoteList extends StatelessWidget {
   final List<Vote> votes;
   const VoteList({required this.votes, super.key});
 
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: votes.length,

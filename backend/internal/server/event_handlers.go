@@ -10,6 +10,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// @Summary Get Events
+// @Description Get events based on query parameters
+// @Tags event
+// @Accept json
+// @Produce json
+// @Router /api/event [get]
 func (s *Server) EventHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -81,7 +87,6 @@ func (s *Server) getEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.NewResponse(w, http.StatusOK, res)
-
 }
 
 func (s *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
