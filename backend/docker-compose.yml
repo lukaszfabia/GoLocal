@@ -1,6 +1,7 @@
 services:
   db:
     container_name: go_local_postgres
+    #container_name: ${CONTAINER_NAME}
     image: postgis/postgis
     restart: unless-stopped
     environment:
@@ -15,22 +16,35 @@ services:
       retries: 3
     networks:
       - go_local_network
-  api:
-    container_name: go_local_api
+  # api:
+  #   container_name: go_local_api
+  #   restart: always
+  #   build:
+  #     context: .
+  #   ports:
+  #     - ${PORT}:${PORT}
+  #   environment:
+  #     PORT: ${PORT}
+  #     DB_HOST: go_local_postgres
+  #     DB_PORT: ${DB_PORT}
+  #     DB_DATABASE: ${DB_DATABASE}
+  #     DB_USERNAME: ${DB_USERNAME}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - go_local_network
+
+  # temp
+  pgadmin:
+    container_name: go_local_pgadmin
+    image: dpage/pgadmin4
     restart: always
-    build:
-      context: .
-    ports:
-      - ${PORT}:${PORT}
     environment:
-      PORT: ${PORT}
-      DB_HOST: go_local_postgres
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on:
-      - db
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
     networks:
       - go_local_network
 

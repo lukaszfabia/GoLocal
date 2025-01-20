@@ -2,6 +2,7 @@ package database
 
 import (
 	"backend/internal/models"
+	"backend/internal/recommendation"
 	"context"
 	"database/sql"
 	"fmt"
@@ -71,6 +72,7 @@ type Service interface {
 
 	UserService() UserService
 	PreferenceSurveyService() PreferenceSurveyService
+	RecommendationService() recommendation.RecommendationService
 	EventService() EventService
 	TokenService() TokenService
 	NotificationService() NotificationService
@@ -81,6 +83,7 @@ type service struct {
 
 	userService             UserService
 	preferenceSurveyService PreferenceSurveyService
+	recommendationService   recommendation.RecommendationService
 	tokenService            TokenService
 	dummyService            DummyService
 	notificationService     NotificationService
@@ -107,6 +110,7 @@ func New() Service {
 		tokenService := NewTokenService(db)
 		dummyService := NewDummyService(db)
 		prefenceSurveyService := NewPreferenceSurveyService(db)
+		recommendationService := recommendation.NewRecommendationService(db)
 		eventService := NewEventService(db)
 		notificationService := NewNotificationService(db)
 
@@ -116,6 +120,7 @@ func New() Service {
 			tokenService:            tokenService,
 			dummyService:            dummyService,
 			preferenceSurveyService: prefenceSurveyService,
+			recommendationService:   recommendationService,
 			eventService:            eventService,
 			notificationService:     notificationService,
 		}
@@ -209,4 +214,8 @@ func (s *service) Sync() {
 	log.Println("Migrating models has been done.")
 
 	s.dummyService.Cook()
+}
+
+func (s *service) RecommendationService() recommendation.RecommendationService {
+	return s.recommendationService
 }
