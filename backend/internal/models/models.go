@@ -57,6 +57,7 @@ type Coords struct {
 	Model
 	Latitude  float64 `gorm:"not null" json:"latitude"`
 	Longitude float64 `gorm:"not null" json:"longitude"`
+	Geom      string  `gorm:"column:geom;type:geometry(Point,4326)" json:"-"`
 }
 
 type Address struct {
