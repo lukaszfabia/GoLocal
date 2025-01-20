@@ -15,6 +15,22 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/event": {
+            "get": {
+                "description": "Get events based on query parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "event"
+                ],
+                "summary": "Get Events",
+                "responses": {}
+            }
+        },
         "/api/preference/change-preference-survey": {
             "post": {
                 "description": "Handle the submission of a preference survey",

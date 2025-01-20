@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
-import 'package:golocal/src/vote/domain/vote_option.dart';
-import 'package:go_router/go_router.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/data/votes_repository_event_filter.dart';
 import 'package:golocal/src/event/domain/event.dart';
