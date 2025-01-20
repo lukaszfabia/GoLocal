@@ -12,6 +12,7 @@ build:
 # Run the application
 run:
 	@go run cmd/api/main.go
+	
 # Create DB container
 docker-run:
 	@if docker compose --env-file .env up 2>/dev/null; then \
@@ -38,6 +39,7 @@ docker-down:
 test:
 	@echo "Testing..."
 	@go test ./... -v
+
 # Integrations Tests for the application
 itest:
 	@echo "Running integration tests..."
@@ -72,5 +74,9 @@ watch:
                 exit 1; \
             fi; \
         fi
+
+# Create test DB container
+docker-test-run:
+	docker-compose --env-file .env.test up; \
 
 .PHONY: all build run test clean clean_db watch docker-run docker-down itest

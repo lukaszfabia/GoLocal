@@ -43,8 +43,9 @@ func (d *dummyServiceImpl) Cook() {
 	//d.opinion()
 	//d.followers()
 	//d.user2()
-	d.generateMockSurvey()
-	d.easyLoginUser()
+	//d.generateMockSurvey()
+	//d.easyLoginUser()
+	//d.generateRecommendations()
 }
 
 // &models.Opinion{},
@@ -212,9 +213,14 @@ func (d *dummyServiceImpl) address() {
 
 func (d *dummyServiceImpl) coords() {
 	for i := 0; i < MAX_CAPACITY; i++ {
+		longitude := d.f.Longitude()
+		latitude := d.f.Latitude()
+		point := fmt.Sprintf("SRID=4326;POINT(%f %f)", longitude, latitude)
+
 		if err := d.db.Save(&models.Coords{
-			Longitude: d.f.Longitude(),
-			Latitude:  d.f.Latitude(),
+			Longitude: longitude,
+			Latitude:  latitude,
+			Geom:      point,
 		}).Error; err != nil {
 			log.Println(err)
 		}
@@ -304,6 +310,18 @@ func (d *dummyServiceImpl) opinion() {
 }
 
 func (d *dummyServiceImpl) tags() {
+	// check if there are already 300 tags
+	tags := []*models.Tag{}
+	if err := d.db.Find(&tags).Error; err != nil {
+		log.Println(err)
+		return
+	}
+
+	if len(tags) >= 300 {
+		log.Println("Tags already exist")
+		return
+	}
+
 	var i = 0
 	for i < 300 {
 		t := &models.Tag{
@@ -530,4 +548,35 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 	}
 
 	log.Println("Mock survey saved successfully")
+}
+
+func (d *dummyServiceImpl) generateRecommendations() error {
+	var users []*models.User
+	if err := d.db.Find(&users).Error; err != nil {
+		return fmt.Errorf("error fetching users: %w", err)
+	}
+
+	var tags []*models.Tag
+	if err := d.db.Find(&tags).Error; err != nil {
+		return fmt.Errorf("error fetching tags: %w", err)
+	}
+
+	for _, user := range users {
+		recommendation := &models.Recommendation{
+			UserID: user.ID,
+			Tags:   []models.Tag{},
+		}
+
+		numTags := d.f.Number(3, 8)
+		for i := 0; i < numTags; i++ {
+			tag := tags[d.f.Number(0, len(tags)-1)]
+			recommendation.Tags = append(recommendation.Tags, *tag)
+		}
+
+		if err := d.db.Save(recommendation).Error; err != nil {
+			log.Println("error saving recommendation for user", user.ID, err)
+		}
+	}
+
+	return nil
 }

@@ -1,51 +1,56 @@
 package recommendation
 
 import (
+	"backend/internal/models"
+	"log"
 	"math"
 	"sort"
+
+	"gorm.io/gorm"
 )
 
-// Event represents an event with tags
-type Event struct {
-	ID   string
-	Tags []string
+type RecommendationService interface {
+	Predict([]*models.Event, uint) ([]uint, error)
 }
 
-// UserPreferredTags represents the user's preferred tags
-type UserPreferredTags struct {
-	Tags []string
+type recommendationServiceImpl struct {
+	db *gorm.DB
 }
 
-// RecommendationService provides event recommendations based on user preferred tags
-type RecommendationService struct {
-	AllEvents       []Event
-	UserPreferences UserPreferredTags
+func NewRecommendationService(db *gorm.DB) RecommendationService {
+	return &recommendationServiceImpl{db: db}
 }
 
-// NewRecommendationService creates a new RecommendationService
-func NewRecommendationService(allEvents []Event, userPreferences UserPreferredTags) *RecommendationService {
-	return &RecommendationService{
-		AllEvents:       allEvents,
-		UserPreferences: userPreferences,
+func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId uint) ([]uint, error) {
+	// TODO: temp hack while getting events doesnt work
+	var events []*models.Event
+	if err := s.db.Preload("Tags").Find(&events).Error; err != nil {
+		return nil, err
 	}
-}
+	allEvents = events
 
-// Predict recommends events based on user preferred tags
-func (s *RecommendationService) Predict() []string {
+	userPreferences, err := s.getUserPreferences(userId)
+	if err != nil {
+		log.Printf("Error getting userPreferences: %v", err)
+		return nil, err
+	}
+
 	userTags := make(map[string]struct{})
-	for _, tag := range s.UserPreferences.Tags {
-		userTags[tag] = struct{}{}
+	for _, tag := range userPreferences.Tags {
+		userTags[tag.Name] = struct{}{}
 	}
 
 	allTags := []string{}
-	for _, event := range s.AllEvents {
-		allTags = append(allTags, event.Tags...)
+	for _, event := range allEvents {
+		for _, tag := range event.Tags {
+			allTags = append(allTags, tag.Name)
+		}
 	}
 	for tag := range userTags {
 		allTags = append(allTags, tag)
 	}
 
-	vectors := s.countVectorizer(s.AllEvents)
+	vectors := s.countVectorizer(allEvents, userPreferences)
 
 	userVector := vectors[len(vectors)-1]
 	eventVectors := vectors[:len(vectors)-1]
@@ -63,26 +68,35 @@ func (s *RecommendationService) Predict() []string {
 		return cosineSim[sortedIndices[i]] > cosineSim[sortedIndices[j]]
 	})
 
-	recommendedEvents := []string{}
+	recommendedEvents := []uint{}
 	for _, idx := range sortedIndices {
 		if len(recommendedEvents) >= 3 {
 			break
 		}
 
-		if idx < len(s.AllEvents) {
-			eventId := s.AllEvents[idx].ID
+		if idx < len(allEvents) {
+			eventId := allEvents[idx].ID
 			recommendedEvents = append(recommendedEvents, eventId)
+			log.Printf("Added recommended event ID: %d", eventId)
 		}
 	}
 
-	return recommendedEvents
+	return recommendedEvents, nil
 }
 
-func (s *RecommendationService) countVectorizer(events []Event) [][]int {
+func (s *recommendationServiceImpl) getUserPreferences(userId uint) (*models.Recommendation, error) {
+	var userPreferences models.Recommendation
+	if err := s.db.Preload("Tags").First(&userPreferences, "id = ?", userId).Error; err != nil {
+		return nil, err
+	}
+	return &userPreferences, nil
+}
+
+func (s *recommendationServiceImpl) countVectorizer(events []*models.Event, userPreferences *models.Recommendation) [][]int {
 	tagSet := make(map[string]struct{})
 	for _, event := range events {
 		for _, tag := range event.Tags {
-			tagSet[tag] = struct{}{}
+			tagSet[tag.Name] = struct{}{}
 		}
 	}
 
@@ -96,7 +110,7 @@ func (s *RecommendationService) countVectorizer(events []Event) [][]int {
 		vector := make([]int, len(tagArray))
 		for _, tag := range event.Tags {
 			for j, t := range tagArray {
-				if t == tag {
+				if t == tag.Name {
 					vector[j]++
 				}
 			}
@@ -106,9 +120,9 @@ func (s *RecommendationService) countVectorizer(events []Event) [][]int {
 
 	// Add user preferences as the last vector
 	userVector := make([]int, len(tagArray))
-	for _, tag := range s.UserPreferences.Tags {
+	for _, tag := range userPreferences.Tags {
 		for j, t := range tagArray {
-			if t == tag {
+			if t == tag.Name {
 				userVector[j]++
 			}
 		}
@@ -118,7 +132,7 @@ func (s *RecommendationService) countVectorizer(events []Event) [][]int {
 	return vectors
 }
 
-func (s *RecommendationService) cosineSimilarity(vec1, vec2 []int) float64 {
+func (s *recommendationServiceImpl) cosineSimilarity(vec1, vec2 []int) float64 {
 	dotProduct := 0
 	for i := range vec1 {
 		dotProduct += vec1[i] * vec2[i]

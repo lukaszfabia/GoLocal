@@ -72,10 +72,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	preference.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
 	preference.HandleFunc("/preference-survey", s.getSurvey)
 
-	recommendation := api.PathPrefix("/recommendation").Subrouter()
-
 	// recommendation routes
-	recommendation.HandleFunc("/recommendation", s.getRecommendations)
+	api.HandleFunc("/recommendation/{userID:[0-9]+}", s.getRecommendations)
 
 	auth.HandleFunc("/account/", s.AccountHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)

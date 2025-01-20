@@ -1,6 +1,7 @@
 services:
   db:
     container_name: go_local_postgres
+    #container_name: ${CONTAINER_NAME}
     image: postgis/postgis
     restart: unless-stopped
     environment:
@@ -33,6 +34,19 @@ services:
   #     - db
   #   networks:
   #     - go_local_network
+
+  # temp
+  pgadmin:
+    container_name: go_local_pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
+    networks:
+      - go_local_network
 
 networks:
   go_local_network:
