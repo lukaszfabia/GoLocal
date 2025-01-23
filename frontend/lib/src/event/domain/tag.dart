@@ -9,7 +9,7 @@ class Tag extends Model {
   });
 
   Tag.fromJson(super.json)
-      : name = json['name'],
+      : name = json['Name'],
         super.fromJson();
 
   @override

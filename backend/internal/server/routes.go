@@ -83,7 +83,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// events
 	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
 
-	event := api.PathPrefix("/event").Subrouter()
+	event := auth.PathPrefix("/event").Subrouter()
 	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 

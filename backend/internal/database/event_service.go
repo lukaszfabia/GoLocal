@@ -95,13 +95,16 @@ func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*model
 		Preload("Location").
 		Preload("Location.Address").
 		Preload("Tags").
+		Preload("EventOrganizers").
 		Model(&models.Event{})
 
 	if limit > 0 {
 		q = q.Limit(limit)
 	}
 
-	if params["lon"] != "" && params["lat"] != "" && params["accuracy"] != "" {
+	if params["lon"] != nil && params["lat"] != nil && params["accuracy"] != nil && params["lon"] != "" && params["lat"] != "" && params["accuracy"] != "" {
+		log.Println(params["lon"], params["lat"], params["accuracy"])
+
 		tmpQ := q.Joins("JOIN locations ON locations.id = events.location_id").
 			Joins("JOIN coords ON coords.id = locations.coords_id").
 			Where("ST_DWithin(coords.geom::geography, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)",

@@ -4,7 +4,7 @@ class User extends Model {
   String firstName;
   String lastName;
   String email;
-  DateTime birthDate;
+  DateTime? birthDate;
 
   bool isVerified;
   bool isPremium;
@@ -17,7 +17,7 @@ class User extends Model {
     required this.firstName,
     required this.lastName,
     required this.email,
-    required this.birthDate,
+    this.birthDate,
     required this.isVerified,
     required this.isPremium,
     this.avatarUrl,
@@ -29,7 +29,9 @@ class User extends Model {
       firstName: json['firstName'] ?? '',
       lastName: json['lastName'] ?? '',
       email: json['email'] ?? '',
-      birthDate: DateTime.parse(json['birthDate'] ?? ''),
+      birthDate: json['birthDate'] != null && json['birthDate'].isNotEmpty
+          ? DateTime.parse(json['birthDate'])
+          : null,
       isVerified: json['isVerified'] ?? false,
       isPremium: json['isPremium'] ?? false,
       avatarUrl: json['avatarUrl'] ?? '',

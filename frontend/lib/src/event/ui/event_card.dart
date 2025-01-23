@@ -15,7 +15,9 @@ class EventCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: NetworkImage(event.imageUrl ?? ''),
+            image: event.hasImage
+                ? NetworkImage(event.imageUrl!)
+                : AssetImage("assets/images/image_not_found.png"),
             fit: BoxFit.cover,
           ),
         ),

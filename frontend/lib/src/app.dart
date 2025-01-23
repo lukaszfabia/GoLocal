@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/auth/data/auth_repository.dart';
 import 'package:golocal/src/auth/data/auth_repository_dummy.dart';
 import 'package:golocal/src/auth/data/iauth_repository.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
@@ -20,7 +21,7 @@ class GoLocalApp extends StatelessWidget {
 
   // change the eventsRepository to EventsRepository() to use the real repository
   IEventsRepository get eventsRepository => EventsRepositoryImpl();
-  IAuthRepository get authRepository => AuthRepositoryDummy();
+  IAuthRepository get authRepository => AuthRepository();
   IVotesRepository get votesRepository => VotesRepositoryDummy();
   IPreferenceSurveyRepository get preferenceSurveyRepository =>
       PreferenceSurveyRepository();

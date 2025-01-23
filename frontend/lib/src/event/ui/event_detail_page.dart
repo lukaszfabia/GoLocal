@@ -80,12 +80,17 @@ class EventDetailPage extends StatelessWidget {
   Widget _image() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8.0),
-      child: Image.network(
-        event.imageUrl ??
-            'https://via.placeholder.com/150', // Placeholder if no image
-        fit: BoxFit.fitWidth,
-        width: double.infinity,
-      ),
+      child: event.hasImage
+          ? Image.network(
+              event.imageUrl!,
+              fit: BoxFit.fitWidth,
+              width: double.infinity,
+            )
+          : Image.asset(
+              "assets/images/image_not_found.png", // Placeholder if no image
+              fit: BoxFit.fitWidth,
+              width: double.infinity,
+            ),
     );
   }
 
