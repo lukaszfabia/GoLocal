@@ -6,6 +6,7 @@ import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/location/location.dart';
 import 'package:golocal/src/user/domain/user.dart';
+import 'package:image_picker/image_picker.dart';
 
 part 'manage_event_event.dart';
 part 'manage_event_state.dart';

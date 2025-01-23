@@ -14,6 +14,7 @@ class ManageEventState extends Equatable {
       this.isAdultsOnly = false,
       required this.organizers,
       this.location,
+      this.image,
       this.message});
   final ManageEventStatus status;
   final String title;
@@ -25,6 +26,7 @@ class ManageEventState extends Equatable {
   final bool isAdultsOnly;
   final List<User> organizers;
   final Location? location;
+  final XFile? image;
 
   final String? message;
 
@@ -41,6 +43,7 @@ class ManageEventState extends Equatable {
         organizers,
         location,
         message,
+        image,
       ];
 
   ManageEventState copyWith({
@@ -55,6 +58,7 @@ class ManageEventState extends Equatable {
     List<User>? organizers,
     Location? location,
     String? message,
+    XFile? image,
   }) {
     return ManageEventState(
       status: status ?? this.status,
@@ -68,6 +72,7 @@ class ManageEventState extends Equatable {
       organizers: organizers ?? this.organizers,
       location: location ?? this.location,
       message: message ?? this.message,
+      image: image ?? this.image,
     );
   }
 

@@ -83,3 +83,11 @@ final class UpdateLocation extends ManageEventEvent {
   @override
   List<Object> get props => [location];
 }
+
+final class UpdateImage extends ManageEventEvent {
+  const UpdateImage(this.image);
+  final XFile image;
+
+  @override
+  List<Object> get props => [image];
+}

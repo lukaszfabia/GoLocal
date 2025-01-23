@@ -38,7 +38,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Placeholder(),
+                      imageSection(state, context),
                       SizedBox(height: 8),
                       titleSection(state, context),
                       SizedBox(height: 8),
@@ -68,6 +68,10 @@ class _EventCreatePageState extends State<EventCreatePage> {
         ),
       ),
     );
+  }
+
+  Widget imageSection(ManageEventState state, BuildContext context) {
+    return Placeholder();
   }
 
   Column tagsSection(ManageEventState state, BuildContext context) {
@@ -118,7 +122,6 @@ class _EventCreatePageState extends State<EventCreatePage> {
               Chip(
                 label: Text(tag.name),
                 onDeleted: () {
-                  print('deleting');
                   context
                       .read<ManageEventBloc>()
                       .add(UpdateTags(tag.name, remove: true));
