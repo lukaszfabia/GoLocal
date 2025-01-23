@@ -18,6 +18,8 @@ class Event extends Model {
 
   Location? location;
 
+  bool get hasImage => imageUrl != null && imageUrl!.isNotEmpty;
+
   Event({
     required super.id,
     required this.title,
