@@ -18,13 +18,16 @@ class Location extends Model {
     this.address,
   });
 
-  Location.fromJson(super.json)
+  // super.json doesn't work for some reason
+  Location.fromJson(Map<String, dynamic> json)
       : city = json['city'],
         country = json['country'],
         zip = json['zip'],
-        coords = Coords.fromJson(json['coords']),
-        address = Address.fromJson(json['address']),
-        super.fromJson();
+        coords =
+            json['coords'] != null ? Coords.fromJson(json['coords']) : null,
+        address =
+            json['address'] != null ? Address.fromJson(json['address']) : null,
+        super.fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {

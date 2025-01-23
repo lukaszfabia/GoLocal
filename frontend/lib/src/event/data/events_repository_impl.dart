@@ -15,41 +15,93 @@ class EventsRepositoryImpl implements IEventsRepository {
 
   @override
   Future<List<Event>> getEvents() async {
-    final response = await _dioClient.dio.get('/auth/event?=all');
-    return (response.data as List).map((json) => Event.fromJson(json)).toList();
+    await Future.delayed(Duration(seconds: 10));
+    final response = await _dioClient.dio.get('/event/10');
+
+    print(response.data);
+
+    final data = response.data['data'] as List<dynamic>;
+
+    return data.map((json) => Event.fromJson(json)).toList();
   }
 
   @override
   Future<Event> getEvent(String id) async {
-    final response = await _dioClient.dio.get('/auth/event?id=$id');
-    return Event.fromJson(response.data);
+    // Return null for now
+    return Event(
+        id: 1,
+        title: "1",
+        description: "",
+        tags: [],
+        startDate: DateTime(2024),
+        eventOrganizers: []);
   }
 
   @override
   Future<Event> createEvent(Event event) async {
-    final response =
-        await _dioClient.dio.post('/auth/event', data: event.toJson());
-    return Event.fromJson(response.data);
+    // Return null for now
+    return Event(
+        id: 1,
+        title: "1",
+        description: "",
+        tags: [],
+        startDate: DateTime(2024),
+        eventOrganizers: []);
   }
 
   @override
   Future<Event> updateEvent(Event event) async {
-    var id = event.id;
-    final response =
-        await _dioClient.dio.put('/events/$id', data: event.toJson());
-    return Event.fromJson(response.data);
+    // Return null for now
+    return Event(
+        id: 1,
+        title: "1",
+        description: "",
+        tags: [],
+        startDate: DateTime(2024),
+        eventOrganizers: []);
   }
 
   @override
   Future<void> deleteEvent(String id) async {
-    await _dioClient.dio.delete('/events/$id');
+    // Do nothing for now
   }
 
   @override
   Future<void> reportEvent(int id, String category, String description) async {
-    await _dioClient.dio.post('/events/$id/report', data: {
-      'category': category,
-      'description': description,
-    });
+    // Do nothing for now
   }
+
+  // @override
+  // Future<Event> getEvent(String id) async {
+  //   final response = await _dioClient.dio.get('/auth/event?id=$id');
+  //   return Event.fromJson(response.data);
+  // }
+
+  // @override
+  // Future<Event> createEvent(Event event) async {
+  //   final response =
+  //       await _dioClient.dio.post('/auth/event', data: event.toJson());
+  //   return Event.fromJson(response.data);
+  // }
+
+  // @override
+  // Future<Event> updateEvent(Event event) async {
+  //   var id = event.id;
+  //   final response =
+  //       await _dioClient.dio.put('/events/$id', data: event.toJson());
+  //   return Event.fromJson(response.data);
+  // }
+
+  // @override
+  // Future<void> deleteEvent(String id) async {
+  //   await _dioClient.dio.delete('/events/$id');
+  // }
+
+  // @override
+  // Future<void> reportEvent(int id, String category, String description) async {
+  //   await _dioClient.dio.post('/events/$id/report', data: {
+  //     'category': category,
+  //     'description': description,
+  //   });
+  // }
 }

@@ -13,7 +13,7 @@ class Address extends Model {
 
   Address.fromJson(super.json)
       : street = json['street'],
-        streetNumber = json['streetNumber'],
+        streetNumber = int.tryParse(json['streetNumber']) ?? 0,
         additionalInfo = json['additionalInfo'],
         super.fromJson();
 

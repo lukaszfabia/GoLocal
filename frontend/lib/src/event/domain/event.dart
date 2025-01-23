@@ -40,15 +40,18 @@ class Event extends Model {
         description = json['description'],
         imageUrl = json['imageUrl'] ?? '',
         isAdultOnly = json['isAdultOnly'],
-        eventType = json['eventType'],
-        tags = json['tags'],
+        eventType = EventType.fromString(json['event_type']),
+        tags =
+            (json['event_tags'] as List).map((e) => Tag.fromJson(e)).toList(),
         startDate = DateTime.parse(json['startDate']),
         endDate =
             json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
         location = Location.fromJson(json['location']),
-        eventOrganizers = (json['eventOrganizers'] as List)
-            .map((e) => User.fromJson(e))
-            .toList(),
+        eventOrganizers = json['eventOrganizers'] != null
+            ? (json['eventOrganizers'] as List)
+                .map((e) => User.fromJson(e))
+                .toList()
+            : [],
         super.fromJson();
 
   @override
