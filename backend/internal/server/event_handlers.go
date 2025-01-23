@@ -15,7 +15,7 @@ import (
 // @Tags event
 // @Accept json
 // @Produce json
-// @Router /api/event [get]
+// @Router /api/auth/event [get]
 func (s *Server) EventHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:

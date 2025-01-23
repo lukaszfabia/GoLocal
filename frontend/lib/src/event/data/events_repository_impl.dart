@@ -15,19 +15,20 @@ class EventsRepositoryImpl implements IEventsRepository {
 
   @override
   Future<List<Event>> getEvents() async {
-    final response = await _dioClient.dio.get('api/events');
+    final response = await _dioClient.dio.get('/auth/event?=all');
     return (response.data as List).map((json) => Event.fromJson(json)).toList();
   }
 
   @override
   Future<Event> getEvent(String id) async {
-    final response = await _dioClient.dio.get('/events/$id');
+    final response = await _dioClient.dio.get('/auth/event?id=$id');
     return Event.fromJson(response.data);
   }
 
   @override
   Future<Event> createEvent(Event event) async {
-    final response = await _dioClient.dio.post('/events', data: event.toJson());
+    final response =
+        await _dioClient.dio.post('/auth/event', data: event.toJson());
     return Event.fromJson(response.data);
   }
 
