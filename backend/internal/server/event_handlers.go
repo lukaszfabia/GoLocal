@@ -51,6 +51,9 @@ func (s *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 
 	form.ImageURL = url
 
+	// normalize tags
+	form.Tags = pkg.Normalizer(form.Tags)
+
 	if event, err := s.db.EventService().CreateEvent(*form); err != nil {
 		s.InvalidFormResponse(w)
 		return

@@ -28,7 +28,6 @@ import (
 
 // @host localhost:8080
 // @BasePath /api
-
 func (s *Server) RegisterRoutes() http.Handler {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
@@ -82,6 +81,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// events
 	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
+
+	// votes
+	api.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).Methods(http.MethodGet)
 
 	event := auth.PathPrefix("/event").Subrouter()
 	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).

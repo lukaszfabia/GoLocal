@@ -31,6 +31,8 @@ const (
 	CannotChangeVote VoteType = "CANNOT_CHANGE_VOTE"
 )
 
+var VoteTypes = []VoteType{CanChangeVote, CannotChangeVote}
+
 type QuestionType string
 
 const (

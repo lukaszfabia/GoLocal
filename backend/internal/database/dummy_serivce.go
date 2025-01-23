@@ -32,20 +32,20 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	//d.coords()
-	//d.address()
-	//d.location()
-	//d.user1()
-	//d.tags()
-	//d.voteComment()
-	//d.event1()
-	//d.event2()
-	//d.opinion()
-	//d.followers()
-	//d.user2()
-	//d.generateMockSurvey()
-	//d.easyLoginUser()
-	//d.generateRecommendations()
+	d.coords()
+	d.address()
+	d.location()
+	d.user1()
+	d.tags()
+	d.voteComment()
+	d.event1()
+	d.event2()
+	d.opinion()
+	d.followers()
+	d.user2()
+	d.generateMockSurvey()
+	d.easyLoginUser()
+	d.generateRecommendations()
 }
 
 // &models.Opinion{},
