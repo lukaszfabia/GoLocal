@@ -123,6 +123,20 @@ func ParseHTMLToString(templateName string, data any) (string, error) {
 	return body, nil
 }
 
+/*
+Transform query string to dict
+
+Params:
+
+  - r: Request
+  - model: any - Validate json keys and insert them to dict
+  - args: ...string - wanted fields
+
+Returns:
+
+  - list of events
+  - error occured during transaction
+*/
 func ParseURLQuery(r *http.Request, model any, args ...string) map[string]any {
 	v := reflect.ValueOf(model)
 	t := reflect.TypeOf(model)
