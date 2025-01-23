@@ -16,7 +16,7 @@ class EventsRepositoryImpl implements IEventsRepository {
   @override
   Future<List<Event>> getEvents() async {
     await Future.delayed(Duration(seconds: 10));
-    final response = await _dioClient.dio.get('/event/10');
+    final response = await _dioClient.dio.get('/auth/event/10');
 
     print(response.data);
 
@@ -27,14 +27,12 @@ class EventsRepositoryImpl implements IEventsRepository {
 
   @override
   Future<Event> getEvent(String id) async {
-    // Return null for now
-    return Event(
-        id: 1,
-        title: "1",
-        description: "",
-        tags: [],
-        startDate: DateTime(2024),
-        eventOrganizers: []);
+    await Future.delayed(Duration(seconds: 10));
+    final response = await _dioClient.dio.get('/auth/event/id=$id');
+
+    final data = response.data['data'] as dynamic;
+
+    return Event.fromJson(data);
   }
 
   @override

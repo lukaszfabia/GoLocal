@@ -76,11 +76,13 @@ func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	user, e := s.db.UserService().SaveUser(user)
 
 	if e != nil {
+		log.Println("Error saving user:", e)
 		s.NewResponse(w, http.StatusBadRequest, "Could not create user account")
 		return
 	}
 
 	if tokens, err := auth.GenerateJWT(user.ID, nil); err != nil {
+		log.Println("Error generating JWT token:", err)
 		s.NewResponse(w, http.StatusUnauthorized, err.Error())
 	} else {
 
