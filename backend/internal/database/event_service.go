@@ -95,6 +95,7 @@ func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*model
 		Preload("Location").
 		Preload("Location.Address").
 		Preload("Tags").
+		Preload("EventOrganizers").
 		Model(&models.Event{})
 
 	if limit > 0 {
