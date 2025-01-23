@@ -2,6 +2,7 @@ package database
 
 import (
 	"backend/internal/models"
+	"backend/internal/recommendation"
 	"context"
 	"database/sql"
 	"fmt"
@@ -40,6 +41,7 @@ var allModels []any = []any{
 
 	&models.Recommendation{},
 	&models.BlacklistedTokens{},
+	&models.DeviceToken{},
 }
 
 var (
@@ -70,7 +72,10 @@ type Service interface {
 
 	UserService() UserService
 	PreferenceSurveyService() PreferenceSurveyService
+	RecommendationService() recommendation.RecommendationService
+	EventService() EventService
 	TokenService() TokenService
+	NotificationService() NotificationService
 }
 
 type service struct {
@@ -78,8 +83,10 @@ type service struct {
 
 	userService             UserService
 	preferenceSurveyService PreferenceSurveyService
+	recommendationService   recommendation.RecommendationService
 	tokenService            TokenService
 	dummyService            DummyService
+	notificationService     NotificationService
 
 	eventService EventService
 }
@@ -92,7 +99,8 @@ func New() Service {
 	if db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	}); err != nil {
-		panic("Can't connect to db!")
+		log.Printf("Provided dsn %s\n", dsn)
+		panic("Can't connect to db!\n" + err.Error())
 	} else {
 		log.Println("Successfully connected to db!")
 
@@ -102,7 +110,9 @@ func New() Service {
 		tokenService := NewTokenService(db)
 		dummyService := NewDummyService(db)
 		prefenceSurveyService := NewPreferenceSurveyService(db)
+		recommendationService := recommendation.NewRecommendationService(db)
 		eventService := NewEventService(db)
+		notificationService := NewNotificationService(db)
 
 		return &service{
 			db:                      db,
@@ -110,7 +120,9 @@ func New() Service {
 			tokenService:            tokenService,
 			dummyService:            dummyService,
 			preferenceSurveyService: prefenceSurveyService,
+			recommendationService:   recommendationService,
 			eventService:            eventService,
+			notificationService:     notificationService,
 		}
 	}
 }
@@ -202,4 +214,8 @@ func (s *service) Sync() {
 	log.Println("Migrating models has been done.")
 
 	s.dummyService.Cook()
+}
+
+func (s *service) RecommendationService() recommendation.RecommendationService {
+	return s.recommendationService
 }

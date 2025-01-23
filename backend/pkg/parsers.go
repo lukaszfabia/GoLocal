@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"time"
 
 	"github.com/gorilla/schema"
@@ -22,7 +23,7 @@ var decoder = schema.NewDecoder()
 type Formable interface {
 	forms.Login | forms.Register |
 		forms.RefreshTokenRequest | forms.EditAccount |
-		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest
+		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest | forms.Device
 }
 
 type FileInfo struct {
@@ -120,4 +121,43 @@ func ParseHTMLToString(templateName string, data any) (string, error) {
 	}
 
 	return body, nil
+}
+
+func ParseURLQuery(r *http.Request, model any, args ...string) map[string]any {
+	v := reflect.ValueOf(model)
+	t := reflect.TypeOf(model)
+
+	// map with tags and values for q
+	params := map[string]any{}
+
+	if v.Kind() == reflect.Struct {
+		// iter through all event fields
+		for i := 0; i < v.NumField(); i++ {
+			// for struct
+			property := t.Field(i)
+			tag := property.Tag.Get("json") // get json tag
+			// skip field without json tag
+			if tag == "" {
+				continue
+			}
+
+			// skip field without param
+			param := r.URL.Query().Get(tag)
+			if param == "" {
+				continue
+			}
+
+			params[tag] = param
+		}
+	}
+
+	// interate through customtags
+	// add additional params
+	for _, cTag := range args {
+		if v := r.URL.Query().Get(cTag); v != "" {
+			params[cTag] = v
+		}
+	}
+
+	return params
 }

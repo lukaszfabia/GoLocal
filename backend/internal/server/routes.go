@@ -7,9 +7,27 @@ import (
 	"net/http"
 	"time"
 
+	_ "gorm.io/gorm"
+
 	"github.com/coder/websocket"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+// @title Your API Title
+// @version 1.0
+// @description This is a sample server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := mux.NewRouter()
@@ -18,6 +36,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.HandleFunc("/", s.HelloWorldHandler)
 
 	r.HandleFunc("/ws", s.websocketHandler)
+
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	api := r.PathPrefix("/api").Subrouter()
 
@@ -34,25 +54,38 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api.HandleFunc("/password-reset/", s.PasswordResetHandler).Methods(http.MethodPost)
 	api.HandleFunc("/verify/callback/", s.VerifyCallbackHandler).Methods(http.MethodPost)
 	api.HandleFunc("/password-reset/callback", s.PasswordResetCallbackHandler).Methods(http.MethodPost)
+	api.HandleFunc("/device-token-registration/", s.DeviceTokenRegistrationHandler).Methods(http.MethodPost)
 
 	provider := api.PathPrefix("/{provider}").Subrouter()
 	provider.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodGet) // handles signing up
 	provider.HandleFunc("/callback/", s.Callback).Methods(http.MethodGet)
 
 	auth := api.PathPrefix("/auth").Subrouter()
+	// setting middleware
+	// authenthicated endpoints
+	auth.Use(s.isAuth)
+
+	preference := api.PathPrefix("/preference").Subrouter()
+
+	// preference survey routes
+	preference.HandleFunc("/change-preference-survey", s.handleSurvey)
+	preference.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
+	preference.HandleFunc("/preference-survey", s.getSurvey)
 
 	// recommendation routes
-	api.HandleFunc("/change-preference-survey", s.handleSurvey)
-	api.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
-	api.HandleFunc("/preference-survey", s.getSurvey)
+	api.HandleFunc("/recommendation/{userID:[0-9]+}", s.getRecommendations)
 
-	// setting middleware
-	auth.Use(s.isAuth)
-	// authenthicated endpoints
 	auth.HandleFunc("/account/", s.AccountHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
+
+	// events
+	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
+
+	event := auth.PathPrefix("/event").Subrouter()
+	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
+		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	return r
 }

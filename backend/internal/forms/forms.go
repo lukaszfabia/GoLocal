@@ -1,7 +1,8 @@
-package forms
+package forms // aka dto
 
 import (
 	"mime/multipart"
+	"time"
 )
 
 type Register struct {
@@ -40,4 +41,27 @@ type CodeRequest struct {
 
 type NewPasswordRequest struct {
 	Password string `json:"newPassword"`
+}
+
+type Device struct {
+	UserID    int     `json:"userID"`
+	Token     string  `json:"token"`
+	OSVersion *string `json:"os"`
+	Platform  *string `json:"platform"`
+}
+
+type Event struct {
+	// list with users ids
+	Organizers  []uint                `json:"organizers" form:"organizers"`
+	Title       string                `json:"title" form:"title"`
+	Description string                `json:"description" form:"description"`
+	Image       *multipart.FileHeader `json:"-" form:"image"`
+	StartDate   *time.Time            `json:"startDate" form:"startDate"`
+	FinishDate  *time.Time            `json:"finishDate" form:"finishDate"`
+	IsAdultOnly bool                  `form:"isAdultOnly" json:"isAdultOnly"`
+	EventType   string                `json:"eventType" form:"eventType"`
+	// list with tags as ids
+	Tags       []uint `json:"tags" form:"tags"`
+	LocationID uint   `json:"locationID" form:"locationID"`
+	ImageURL   string `json:"-" form:"-"`
 }

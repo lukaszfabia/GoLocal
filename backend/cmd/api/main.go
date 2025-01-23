@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "backend/docs"
 	"backend/internal/auth"
 	"backend/internal/server"
 	"context"

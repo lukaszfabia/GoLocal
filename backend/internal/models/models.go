@@ -33,8 +33,9 @@ type User struct {
 	Comments []*Comment    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"comments"`
 	Votes    []*VoteAnswer `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"votes"`
 
-	Location   *Location `gorm:"constraint:OnDelete:CASCADE" json:"location"`
-	LocationID *uint     `json:"locationID"`
+	Location   *Location      `gorm:"constraint:OnDelete:CASCADE" json:"location"`
+	LocationID *uint          `json:"locationID"`
+	Devices    []*DeviceToken `gorm:"many2many:devices;constraint:OnDelete:CASCADE" json:"devices"`
 
 	SkipValidation bool `gorm:"-" json:"-"`
 }
@@ -56,6 +57,7 @@ type Coords struct {
 	Model
 	Latitude  float64 `gorm:"not null" json:"latitude"`
 	Longitude float64 `gorm:"not null" json:"longitude"`
+	Geom      string  `gorm:"column:geom;type:geometry(Point,4326)" json:"-"`
 }
 
 type Address struct {
@@ -106,6 +108,7 @@ type Vote struct {
 	Text     string       `gorm:"not null;size:255" json:"text"`
 	VoteType VoteType     `gorm:"not null" json:"voteType"`
 	Options  []VoteOption `gorm:"foreignKey:VoteID" json:"options"`
+	EndDate  *time.Time   `gorm:"type:date" json:"endDate"`
 }
 
 type VoteAnswer struct {
@@ -151,25 +154,23 @@ type PreferenceSurveyQuestion struct {
 	Text     string                   `gorm:"not null;size:1024" json:"text"`
 	Type     QuestionType             `gorm:"not null" json:"type"`
 	Options  []PreferenceSurveyOption `gorm:"foreignKey:QuestionID" json:"options"`
-	Toggle   *bool                    `json:"toggle"` // Only used if Type == Toggle
 }
 
-// PreferenceSurveyOption represents an option for SingleChoice or MultipleChoice
 type PreferenceSurveyOption struct {
 	Model
-	QuestionID uint   `json:"questionID"`
-	Text       string `gorm:"not null;size:1024" json:"text"`
-	IsSelected bool   `json:"isSelected"` // Used for MultipleChoice answers
+	QuestionID  uint   `json:"questionID"`
+	Text        string `gorm:"not null;size:1024" json:"text"`
+	TagID       uint   `json:"tagID"`
+	Tag         Tag    `gorm:"foreignKey:TagID" json:"tag"`
+	TagPositive bool   `json:"tagPositive"`
 }
 
 type PreferenceSurveyAnswer struct {
 	Model
-	SurveyID   uint                           `json:"surveyID"`
-	QuestionID uint                           `json:"questionID"`
-	UserID     uint                           `json:"userID"`
-	Toggle     *bool                          `json:"toggle"`                             // For Toggle type
-	OptionID   *uint                          `json:"optionID"`                           // For SingleChoice
-	Options    []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"` // For MultipleChoice, store option IDs
+	SurveyID        uint                           `json:"surveyID"`
+	QuestionID      uint                           `json:"questionID"`
+	UserID          uint                           `json:"userID"`
+	SelectedOptions []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"`
 }
 
 type PreferenceSurveyAnswerOption struct {
@@ -180,6 +181,20 @@ type PreferenceSurveyAnswerOption struct {
 
 type Recommendation struct {
 	Model
-	UserID uint   `json:"userID"`
-	Text   string `gorm:"not null;size:1024" json:"text"`
+	UserID uint  `json:"userID"`
+	Tags   []Tag `gorm:"many2many:recommendation_tags" json:"tags"`
+}
+
+type DeviceToken struct {
+	Model
+	// FMC token
+	Token     string  `gorm:"not null;size:1024" json:"token"`
+	OSVersion *string `gorm:"size:32" json:"os"`
+	Platform  *string `gorm:"size:32" json:"platform"`
+	Users     []*User `gorm:"many2many:user_devices;" json:"users"`
+}
+
+type ErrorResponse struct {
+	Type    int    `json:"type"`
+	Message string `json:"message"`
 }
