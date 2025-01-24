@@ -23,8 +23,8 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
             preferenceSurveyId, questionId, userId, value);
       }).toList();
 
-      final response =
-          await _dioClient.dio.post('/preference-survey/answer', data: {
+      final response = await _dioClient.dio
+          .post('/preference/preference-survey/answer', data: {
         'answers': answerList.map((answer) => answer.toJson()).toList(),
       });
       print('Survey submitted: ${response.data}');
@@ -36,7 +36,8 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
   @override
   Future<PreferenceSurvey> fetchSurvey() async {
     try {
-      final response = await _dioClient.dio.get('/preference-survey');
+      final response =
+          await _dioClient.dio.get('/preference/preference-survey');
       final Map<String, dynamic> data = response.data['data'];
       return PreferenceSurvey.fromJson(data);
     } catch (e) {
