@@ -2,7 +2,7 @@ package database
 
 import (
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/parsers"
 	"fmt"
 	"log"
 	"time"
@@ -92,7 +92,7 @@ func (d *dummyServiceImpl) user1() {
 		p := d.f.Person()
 
 		password := d.f.Password(true, true, true, false, false, 40)
-		date := pkg.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
+		date := parsers.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
 		rURL := "https://i.pravatar.cc/300"
 		bio := d.f.HipsterSentence(10)
 
@@ -129,7 +129,7 @@ func (d *dummyServiceImpl) easyLoginUser() {
 	p := d.f.Person()
 	email := "a@a.a"
 	password := "Passw0rd!"
-	date := pkg.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
+	date := parsers.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
 	rURL := "https://i.pravatar.cc/300"
 	bio := d.f.HipsterSentence(10)
 

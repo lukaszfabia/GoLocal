@@ -1,4 +1,4 @@
-package pkg
+package normalizer
 
 import (
 	"regexp"
@@ -20,6 +20,20 @@ func clean(e string) string {
 	return strings.ReplaceAll(cleaned, " ", "_")
 }
 
+/*
+Normalizes list of strings
+
+Example:
+  - ['  tt#sa12', 'tag%^test'] -> ['tt_sa12', 'tag_test']
+
+Params:
+
+  - strings to normalize
+
+Returns:
+
+  - normalized list
+*/
 func Normalizer(lst []string) []string {
 	res := []string{}
 

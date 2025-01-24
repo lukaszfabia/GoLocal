@@ -1,7 +1,7 @@
-package pkg_test
+package normalizer_test
 
 import (
-	"backend/pkg"
+	"backend/pkg/normalizer"
 	"testing"
 )
 
@@ -29,7 +29,7 @@ func TestNormalizer(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			res := pkg.Normalizer([]string{test.input})[0]
+			res := normalizer.Normalizer([]string{test.input})[0]
 			if res != test.expected {
 				t.Errorf("For input %q, expected %q, but got %q", test.input, test.expected, res)
 			}

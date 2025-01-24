@@ -2,7 +2,7 @@ package email
 
 import (
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/parsers"
 	"errors"
 	"fmt"
 	"log"
@@ -62,7 +62,7 @@ func SendCode[T ContentProvider](email T, user models.User, code string) error {
 	m.SetAddressHeader("Cc", user.Email, username)
 	m.SetHeader("Subject", email.GetSubject())
 
-	body, err := pkg.ParseHTMLToString("base.html", Components{
+	body, err := parsers.ParseHTMLToString("base.html", Components{
 		Username: username,
 		Info:     email.GetInfo(),
 		Sub:      email.GetSubject(),

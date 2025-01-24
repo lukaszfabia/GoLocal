@@ -93,27 +93,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	type testRequest struct {
-		Message string `json:"message"`
-		Year    int    `json:"year"`
-	}
-
-	req := testRequest{
-		Message: "test",
-		Year:    time.Now().Year(),
-	}
-
-	s.NewResponse(w, http.StatusOK, req)
-}
-
-func (s *Server) healthHandler(w http.ResponseWriter, _ *http.Request) {
 	jsonResp, err := json.Marshal(s.db.Health())
 
 	if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
+		s.NewResponse(w, http.StatusInternalServerError, nil)
 	}
 
-	_, _ = w.Write(jsonResp)
+	s.NewResponse(w, http.StatusOK, jsonResp)
 }
 
 func (s *Server) websocketHandler(w http.ResponseWriter, r *http.Request) {

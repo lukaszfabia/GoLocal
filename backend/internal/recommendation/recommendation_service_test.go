@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// SUGGESTION(lukasz): lepiej zrobic test handlera od razu
 func TestRecommendationService_Predict(t *testing.T) {
 	dsn := "host=localhost user=test password=test dbname=go_local_db_test port=5000 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
