@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+type UserKey string
+
+const userKey UserKey = "user"
+
 func (s *Server) isAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")
@@ -52,7 +56,7 @@ func (s *Server) isAuth(next http.Handler) http.Handler {
 		}
 
 		// set user in ctx
-		ctx := context.WithValue(r.Context(), "user", user)
+		ctx := context.WithValue(r.Context(), userKey, user)
 		r = r.WithContext(ctx)
 
 		// go to next handler

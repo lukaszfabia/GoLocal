@@ -12,14 +12,11 @@ class VoteOption extends Model {
     required this.isSelected,
   });
 
-  factory VoteOption.fromJson(Map<String, dynamic> json) {
-    return VoteOption(
-      id: json['ID'],
-      text: json['text'],
-      votesCount: json['votesCount'],
-      isSelected: json['isSelected'] ?? false,
-    );
-  }
+  VoteOption.fromJson(super.json)
+      : text = json['text'],
+        votesCount = json['votesCount'] ?? 0,
+        isSelected = json['isSelected'] ?? false,
+        super.fromJson();
 
   @override
   Map<String, dynamic> toJson() {

@@ -2,7 +2,7 @@ package database
 
 import (
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/parsers"
 	"fmt"
 	"log"
 	"time"
@@ -32,20 +32,21 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	//d.coords()
-	//d.address()
-	//d.location()
-	//d.user1()
-	//d.tags()
-	//d.voteComment()
-	//d.event1()
-	//d.event2()
-	//d.opinion()
-	//d.followers()
-	//d.user2()
-	//d.generateMockSurvey()
-	//d.easyLoginUser()
-	//d.generateRecommendations()
+	// d.coords()
+	// d.address()
+	// d.location()
+	// d.user1()
+	// d.tags()
+	d.comments()
+	d.votes()
+	// d.event1()
+	// d.event2()
+	// d.opinion()
+	// d.followers()
+	// d.user2()
+	// d.generateMockSurvey()
+	// d.easyLoginUser()
+	// d.generateRecommendations()
 }
 
 // &models.Opinion{},
@@ -92,7 +93,7 @@ func (d *dummyServiceImpl) user1() {
 		p := d.f.Person()
 
 		password := d.f.Password(true, true, true, false, false, 40)
-		date := pkg.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
+		date := parsers.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
 		rURL := "https://i.pravatar.cc/300"
 		bio := d.f.HipsterSentence(10)
 
@@ -129,7 +130,7 @@ func (d *dummyServiceImpl) easyLoginUser() {
 	p := d.f.Person()
 	email := "a@a.a"
 	password := "Passw0rd!"
-	date := pkg.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
+	date := parsers.ParseDate(d.f.Date().AddDate(-100, 0, 0).Format(time.DateOnly))
 	rURL := "https://i.pravatar.cc/300"
 	bio := d.f.HipsterSentence(10)
 
@@ -227,7 +228,7 @@ func (d *dummyServiceImpl) coords() {
 	}
 }
 
-func (d *dummyServiceImpl) voteComment() {
+func (d *dummyServiceImpl) comments() {
 	// take events and users
 	var users []*models.User
 	var events []*models.Event
@@ -254,18 +255,59 @@ func (d *dummyServiceImpl) voteComment() {
 			if err := d.db.Save(comment).Error; err != nil {
 				log.Println(err)
 			}
+		}
+	}
+}
 
-			// why was vote here
-			// vote := &models.Vote{
-			// 	State:   models.ParticipationStatuses[d.f.Number(0, 2)],
-			// 	EventID: events[i].ID,
-			// 	UserID:  users[d.f.Number(0, len(users)-1)].ID,
-			// }
+func (d *dummyServiceImpl) votes() {
+	var users []*models.User
+	var events []*models.Event
 
-			// if err := d.db.Save(vote).Error; err != nil {
-			// 	log.Println(err)
-			// }
+	if err := d.db.Find(&events).Error; err != nil {
+		log.Println(err)
+		return
+	}
 
+	if err := d.db.Find(&users).Error; err != nil {
+		log.Println(err)
+		return
+	}
+
+	for i := 0; i < len(events); i++ {
+		// assign about 2 votes per event
+		for j := 0; j < d.f.Number(1, 2); j++ {
+			// Create a new vote
+			vote := &models.Vote{
+				EventID: events[i].ID,
+				Text:    d.f.Question(),
+				VoteType: func() models.VoteType {
+					if d.f.Bool() {
+						return models.CanChangeVote
+					}
+					return models.CannotChangeVote
+				}(),
+				Options: []models.VoteOption{
+					{Text: d.f.Noun()},
+					{Text: d.f.Noun()},
+				},
+			}
+
+			if err := d.db.Create(vote).Error; err != nil {
+				log.Println(err)
+				continue
+			}
+
+			// Assign the vote to a random user
+			user := users[d.f.Number(0, len(users)-1)]
+			voteAnswer := &models.VoteAnswer{
+				VoteID:       vote.ID,
+				UserID:       user.ID,
+				VoteOptionID: vote.Options[d.f.Number(0, len(vote.Options)-1)].ID,
+			}
+
+			if err := d.db.Create(voteAnswer).Error; err != nil {
+				log.Println(err)
+			}
 		}
 	}
 }

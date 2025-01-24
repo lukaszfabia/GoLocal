@@ -28,7 +28,6 @@ import (
 
 // @host localhost:8080
 // @BasePath /api
-
 func (s *Server) RegisterRoutes() http.Handler {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
@@ -83,35 +82,29 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// events
 	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
 
+	// votes
+	api.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).Methods(http.MethodGet)
+
 	event := auth.PathPrefix("/event").Subrouter()
 	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
+		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
+
+	vote := auth.PathPrefix("/vote").Subrouter()
+	vote.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	return r
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	type testRequest struct {
-		Message string `json:"message"`
-		Year    int    `json:"year"`
-	}
-
-	req := testRequest{
-		Message: "test",
-		Year:    time.Now().Year(),
-	}
-
-	s.NewResponse(w, http.StatusOK, req)
-}
-
-func (s *Server) healthHandler(w http.ResponseWriter, _ *http.Request) {
 	jsonResp, err := json.Marshal(s.db.Health())
 
 	if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
+		s.NewResponse(w, http.StatusInternalServerError, nil)
 	}
 
-	_, _ = w.Write(jsonResp)
+	s.NewResponse(w, http.StatusOK, jsonResp)
 }
 
 func (s *Server) websocketHandler(w http.ResponseWriter, r *http.Request) {

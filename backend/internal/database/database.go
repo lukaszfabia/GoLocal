@@ -75,6 +75,7 @@ type Service interface {
 	RecommendationService() recommendation.RecommendationService
 	EventService() EventService
 	TokenService() TokenService
+	VoteService() VoteService
 	NotificationService() NotificationService
 }
 
@@ -89,6 +90,7 @@ type service struct {
 	notificationService     NotificationService
 
 	eventService EventService
+	voteService  VoteService
 }
 
 // Initializes new database connection and services
@@ -112,6 +114,7 @@ func New() Service {
 		prefenceSurveyService := NewPreferenceSurveyService(db)
 		recommendationService := recommendation.NewRecommendationService(db)
 		eventService := NewEventService(db)
+		voteService := NewVoteService(db)
 		notificationService := NewNotificationService(db)
 
 		return &service{
@@ -122,6 +125,7 @@ func New() Service {
 			preferenceSurveyService: prefenceSurveyService,
 			recommendationService:   recommendationService,
 			eventService:            eventService,
+			voteService:             voteService,
 			notificationService:     notificationService,
 		}
 	}

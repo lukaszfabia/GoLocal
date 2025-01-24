@@ -2,7 +2,7 @@ import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
 import 'package:golocal/src/event/domain/event.dart';
 
-enum VoteType { single, multiple }
+enum VoteType { CAN_CHANGE_VOTE, CANNOT_CHANGE_VOTE }
 
 class Vote extends Model {
   final Event event;
@@ -20,19 +20,16 @@ class Vote extends Model {
     required this.endsAt,
   });
 
-  factory Vote.fromJson(Map<String, dynamic> json) {
-    return Vote(
-      id: json['ID'],
-      options: (json['options'] as List)
-          .map((option) => VoteOption.fromJson(option))
-          .toList(),
-      text: json['text'],
-      event: Event.fromJson(json['event']),
-      type: VoteType.values
-          .firstWhere((e) => e.toString() == 'VoteType.${json['type']}'),
-      endsAt: DateTime.parse(json['endsAt']),
-    );
-  }
+  Vote.fromJson(super.json)
+      : options = (json['options'] as List)
+            .map((option) => VoteOption.fromJson(option))
+            .toList(),
+        text = json['text'],
+        event = Event.fromJson(json['event']),
+        type = VoteType.values
+            .firstWhere((e) => e.toString() == 'VoteType.${json['voteType']}'),
+        endsAt = DateTime.parse(json['endsAt']),
+        super.fromJson();
 
   @override
   Map<String, dynamic> toJson() {

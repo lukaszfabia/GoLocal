@@ -60,8 +60,7 @@ type Event struct {
 	FinishDate  *time.Time            `json:"finishDate" form:"finishDate"`
 	IsAdultOnly bool                  `form:"isAdultOnly" json:"isAdultOnly"`
 	EventType   string                `json:"eventType" form:"eventType"`
-	// list with tags as ids
-	Tags       []uint `json:"tags" form:"tags"`
-	LocationID uint   `json:"locationID" form:"locationID"`
-	ImageURL   string `json:"-" form:"-"`
+	LocationID  uint                  `json:"locationID" form:"locationID"`
+	ImageURL    string                `json:"-" form:"-"`
+	Tags        []string              `json:"tags" form:"tags"` // list with user input tags
 }

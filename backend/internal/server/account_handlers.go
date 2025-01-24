@@ -3,7 +3,8 @@ package server
 import (
 	"backend/internal/forms"
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/image"
+	"backend/pkg/parsers"
 	"log"
 	"net/http"
 )
@@ -37,19 +38,19 @@ func (s *Server) AccountHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request, user *models.User) {
-	form, err := pkg.DecodeMultipartForm[forms.EditAccount](r)
+	form, err := parsers.DecodeMultipartForm[forms.EditAccount](r)
 	if err != nil {
 		s.InvalidFormResponse(w)
 		return
 	}
 
-	info, err := pkg.GetFileFromForm(r.MultipartForm, "avatar")
+	info, err := parsers.GetFileFromForm(r.MultipartForm, "avatar")
 	if err != nil {
 		log.Println("Avatar upload error:", err)
 	} else {
 		// Handle image
 		info.OldPath = user.AvatarURL
-		if path, err := pkg.SaveImage[*pkg.Avatar](info); err == nil {
+		if path, err := image.SaveImage[*image.Avatar](info); err == nil {
 			user.AvatarURL = &path
 		} else {
 			log.Println("Failed to save avatar:", err)
@@ -63,7 +64,7 @@ func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request, user *
 	user.Password = &form.Password
 	user.Bio = &form.Bio
 
-	parsedDate := pkg.ParseDate(form.Birthday)
+	parsedDate := parsers.ParseDate(form.Birthday)
 	user.Birthday = &parsedDate
 
 	updatedUser, err := s.db.UserService().SaveUser(user)

@@ -1,9 +1,14 @@
 package server
 
 import (
+	"backend/internal/database"
 	"backend/internal/forms"
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/functools"
+	"backend/pkg/image"
+	"backend/pkg/normalizer"
+	"backend/pkg/parsers"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -33,32 +38,52 @@ func (s *Server) EventHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createEvent(w http.ResponseWriter, r *http.Request) {
-	form, err := pkg.DecodeMultipartForm[forms.Event](r)
+	form, err := parsers.DecodeMultipartForm[forms.Event](r)
+	// Get user from ctx
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
+	}
 
 	if err != nil {
 		s.InvalidFormResponse(w)
 		return
 	}
 
-	if !pkg.In(form.EventType, models.EventTypes) {
+	if !functools.In(form.EventType, models.EventTypes) {
 		s.InvalidFormResponse(w)
 		return
 	}
 
-	info, _ := pkg.GetFileFromForm(r.MultipartForm, "image")
+	info, _ := parsers.GetFileFromForm(r.MultipartForm, "image")
 
-	url, _ := pkg.SaveImage[*pkg.EventImage](info)
+	url, _ := image.SaveImage[*image.EventImage](info)
 
 	form.ImageURL = url
 
-	if event, err := s.db.EventService().CreateEvent(*form); err != nil {
+	// normalize tags
+	form.Tags = normalizer.Normalizer(form.Tags)
+
+	event, err := s.db.EventService().CreateEvent(*form)
+	if err != nil {
 		s.InvalidFormResponse(w)
-		return
-	} else {
-		s.NewResponse(w, http.StatusCreated, event)
 		return
 	}
 
+	title := fmt.Sprintf("You've been organizer of %s", form.Title)
+	body := "Check events info!"
+	// dont send to requester
+	ids := functools.Filter(func(e uint) bool {
+		return e != user.ID
+	}, form.Organizers)
+
+	n := database.NewNotification(title, body, nil, ids)
+
+	// already logged err
+	s.db.NotificationService().SendPush(&n)
+
+	s.NewResponse(w, http.StatusCreated, event)
 }
 
 func (s *Server) getEvent(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +95,7 @@ func (s *Server) getEvent(w http.ResponseWriter, r *http.Request) {
 	var event models.Event
 
 	// map with tags and values for q
-	params := pkg.ParseURLQuery(r, event, "lon", "lat", "accuracy", "street", "street_number", "country", "city")
+	params := parsers.ParseURLQuery(r, event, "lon", "lat", "accuracy", "street", "street_number", "country", "city")
 
 	limitStr := mux.Vars(r)["limit"]
 	limit, err := strconv.Atoi(limitStr)
@@ -90,7 +115,7 @@ func (s *Server) getEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
-	params := pkg.ParseURLQuery(r, models.Event{}, "id")
+	params := parsers.ParseURLQuery(r, models.Event{}, "id")
 
 	if _, ok := params["id"]; !ok && len(params) < 1 {
 		s.InvalidFormResponse(w)

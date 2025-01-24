@@ -12,7 +12,6 @@ import (
 	"time"
 
 	firebase "firebase.google.com/go"
-	"firebase.google.com/go/messaging"
 	_ "github.com/joho/godotenv/autoload"
 	"google.golang.org/api/option"
 
@@ -26,7 +25,7 @@ type Server struct {
 	db    database.Service
 	store store.Store
 	// Firebase messaging provider
-	notificationProvider *messaging.Client
+	// notificationProvider *messaging.Client
 }
 
 type response struct {
@@ -72,10 +71,11 @@ func NewServer() *http.Server {
 	NewServer := &Server{
 		port: port,
 
-		db:                   database.New(),
-		store:                store.New(),
-		notificationProvider: client,
+		db:    database.New(),
+		store: store.New(),
 	}
+
+	NewServer.db.NotificationService().SetClient(client)
 
 	NewServer.db.Sync()
 

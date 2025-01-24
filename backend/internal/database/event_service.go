@@ -55,10 +55,7 @@ func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) 
 			return err
 		}
 
-		tags := []*models.Tag{}
-		if err := e.db.Preload("Tags").Find(&tags, "id IN ?", event.Tags).Error; err != nil {
-			return err
-		}
+		tags, _ := getOrCreateTags(tx, event.Tags)
 
 		newEvent.Tags = tags
 		newEvent.LocationID = event.LocationID
@@ -72,6 +69,58 @@ func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) 
 		return models.Event{}, err
 	}
 	return newEvent, nil
+}
+
+func getOrCreateTags(tx *gorm.DB, tags []string) ([]*models.Tag, error) {
+	var existingTags []*models.Tag
+	tagNames := make(map[string]*models.Tag)
+
+	if err := tx.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&models.Tag{}).
+			Where("name IN ?", tags).
+			Find(&existingTags).Error; err != nil {
+			return err
+		}
+
+		for _, tag := range existingTags {
+			tagNames[tag.Name] = tag
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	var toCreate []*models.Tag
+	for _, tag := range tags {
+		if _, exists := tagNames[tag]; !exists {
+			toCreate = append(toCreate, &models.Tag{
+				Name: tag,
+			})
+		}
+	}
+
+	if len(toCreate) > 0 {
+		if err := tx.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Create(&toCreate).Error; err != nil {
+				return err
+			}
+			for _, createdTag := range toCreate {
+				tagNames[createdTag.Name] = createdTag
+			}
+			return nil
+		}); err != nil {
+			log.Printf("Failed to create tags: %v", err)
+			return nil, err
+		}
+	}
+
+	var result []*models.Tag
+	for _, tag := range tagNames {
+		result = append(result, tag)
+	}
+
+	return result, nil
 }
 
 func (e *eventServiceImpl) DeleteEvent(id int) (models.Event, error) { return models.Event{}, nil }
@@ -96,6 +145,7 @@ func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*model
 		Preload("Location.Address").
 		Preload("Tags").
 		Preload("EventOrganizers").
+		Preload("Votes").
 		Model(&models.Event{})
 
 	if limit > 0 {
