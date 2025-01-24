@@ -29,7 +29,7 @@ Returns:
 
   - generated token as a string
 */
-func generate(duration time.Duration, id uint) string {
+func Generate(duration time.Duration, id uint) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": id,
 		"exp": time.Now().Add(duration).Unix(),
@@ -65,10 +65,10 @@ func GenerateJWT(id uint, additionalFunc *func() error) (*Token, error) {
 	}
 
 	// duration 24h
-	access := generate(time.Hour*24, id)
+	access := Generate(time.Hour*24, id)
 
 	// duration 30 days
-	refresh := generate(time.Hour*30*24, id)
+	refresh := Generate(time.Hour*30*24, id)
 
 	if access != "" && refresh != "" {
 		return &Token{
