@@ -24,7 +24,7 @@ type preferenceSurveyServiceImpl struct {
 
 func (s *preferenceSurveyServiceImpl) GetSurvey(id uint) (*models.PreferenceSurvey, error) {
 	var survey models.PreferenceSurvey
-	if err := s.db.Preload("Questions.Options").First(&survey, id).Error; err != nil {
+	if err := s.db.Preload("Questions.Options").First(&survey).Error; err != nil {
 		log.Printf("Couldn't find survey with id %d: %v", id, err)
 		return nil, err
 	}

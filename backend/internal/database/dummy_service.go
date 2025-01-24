@@ -36,15 +36,15 @@ func (d *dummyServiceImpl) Cook() {
 	// d.address()
 	// d.location()
 	// d.user1()
-	// d.tags()
+	d.tags()
 	// d.comments()
-	d.votes()
+	// d.votes()
 	// d.event1()
 	// d.event2()
 	// d.opinion()
 	// d.followers()
 	// d.user2()
-	// d.generateMockSurvey()
+	d.generateMockSurvey()
 	// d.easyLoginUser()
 	// d.generateRecommendations()
 }
@@ -369,6 +369,15 @@ func (d *dummyServiceImpl) tags() {
 		return
 	}
 
+	// hard coded tags for preference survey
+	preferenceSurveyTags := []string{"Adult only", "High-energy", "Relaxation", "Family-friendly", "Couple-friendly", "Indoors", "Outdoors", "Learning", "Music", "Sports"}
+
+	for _, tag := range preferenceSurveyTags {
+		if err := d.db.Save(&models.Tag{Name: tag}).Error; err != nil {
+			log.Println("Error saving tag:", err)
+		}
+	}
+
 	if len(tags) >= 300 {
 		log.Println("Tags already exist")
 		return
@@ -503,16 +512,30 @@ func generateEventTitle(eventType models.EventType) string {
 }
 
 func (d *dummyServiceImpl) generateMockSurvey() {
-	// don't generate if survey already exists
+	// delete if survey already exists
 
-	var count int64
-	if err := d.db.Model(&models.PreferenceSurvey{}).Count(&count).Error; err != nil {
-		log.Println("Error counting surveys:", err)
+	if err := d.db.Exec("DELETE FROM preference_survey_answer_options").Error; err != nil {
+		log.Println("Error deleting all survey answer options:", err)
 		return
 	}
 
-	if count > 0 {
-		log.Println("Mock survey already exists")
+	if err := d.db.Exec("DELETE FROM preference_survey_answers").Error; err != nil {
+		log.Println("Error deleting all survey answers:", err)
+		return
+	}
+
+	if err := d.db.Exec("DELETE FROM preference_survey_options").Error; err != nil {
+		log.Println("Error deleting all survey options:", err)
+		return
+	}
+
+	if err := d.db.Exec("DELETE FROM preference_survey_questions").Error; err != nil {
+		log.Println("Error deleting all survey questions:", err)
+		return
+	}
+
+	if err := d.db.Exec("DELETE FROM preference_surveys").Error; err != nil {
+		log.Println("Error deleting all surveys:", err)
 		return
 	}
 
@@ -527,11 +550,6 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 	}
 
 	questions := []models.PreferenceSurveyQuestion{
-		{
-			Text:     "Are you interested in adult-only activities?",
-			Type:     models.Toggle,
-			SurveyID: mockSurvey.ID,
-		},
 		{
 			Text:     "Do you prefer to relax, or spend time actively?",
 			Type:     models.SingleChoice,
@@ -560,34 +578,86 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 			return
 		}
 
+		log.Println("Question saved:", question.Text)
+
 		var options []models.PreferenceSurveyOption
 		switch question.Text {
-		case "Are you interested in adult-only activities?":
-			options = []models.PreferenceSurveyOption{
-				{Text: "Yes", QuestionID: question.ID},
-				{Text: "No", QuestionID: question.ID},
-			}
 		case "Do you prefer to relax, or spend time actively?":
+			var tag1, tag2 models.Tag
+			if err := d.db.Where("name = ?", "High-energy").First(&tag1).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
+			if err := d.db.Where("name = ?", "Relaxation").First(&tag2).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
 			options = []models.PreferenceSurveyOption{
-				{Text: "High-energy", QuestionID: question.ID},
-				{Text: "Relaxation", QuestionID: question.ID},
+				{Text: "High-energy", QuestionID: question.ID, Tag: tag1},
+				{Text: "Relaxation", QuestionID: question.ID, Tag: tag2},
 			}
 		case "What are your age/family constraints for events and activities?":
+			var tag1, tag2, tag3 models.Tag
+			if err := d.db.Where("name = ?", "Family-friendly").First(&tag1).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
+			if err := d.db.Where("name = ?", "Couple-friendly").First(&tag2).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
+			if err := d.db.Where("name = ?", "Adult only").First(&tag3).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
 			options = []models.PreferenceSurveyOption{
-				{Text: "Family-friendly", QuestionID: question.ID},
-				{Text: "Couple-friendly", QuestionID: question.ID},
-				{Text: "Adult-only", QuestionID: question.ID},
+				{Text: "Family-friendly", QuestionID: question.ID, Tag: tag1},
+				{Text: "Couple-friendly", QuestionID: question.ID, Tag: tag2},
+				{Text: "Adult-only", QuestionID: question.ID, Tag: tag3},
 			}
 		case "Do you prefer indoors or outdoors events and activities?":
+			var tag1, tag2 models.Tag
+			if err := d.db.Where("name = ?", "Indoors").First(&tag1).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
+			if err := d.db.Where("name = ?", "Outdoors").First(&tag2).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
 			options = []models.PreferenceSurveyOption{
-				{Text: "Indoors", QuestionID: question.ID},
-				{Text: "Outdoors", QuestionID: question.ID},
+				{Text: "Indoors", QuestionID: question.ID, Tag: tag1},
+				{Text: "Outdoors", QuestionID: question.ID, Tag: tag2},
 			}
 		case "What more are you interested in?":
+			var tag1, tag2, tag3 models.Tag
+
+			if err := d.db.Where("name = ?", "Learning").First(&tag1).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
+			if err := d.db.Where("name = ?", "Music").First(&tag2).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
+			if err := d.db.Where("name = ?", "Sports").First(&tag3).Error; err != nil {
+				log.Println("Error fetching tag:", err)
+				return
+			}
+
 			options = []models.PreferenceSurveyOption{
-				{Text: "Learning", QuestionID: question.ID},
-				{Text: "Music", QuestionID: question.ID},
-				{Text: "Sports", QuestionID: question.ID},
+				{Text: "Learning", QuestionID: question.ID, Tag: tag1},
+				{Text: "Music", QuestionID: question.ID, Tag: tag2},
+				{Text: "Sports", QuestionID: question.ID, Tag: tag3},
 			}
 		}
 

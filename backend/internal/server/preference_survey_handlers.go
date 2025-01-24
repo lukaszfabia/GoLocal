@@ -85,6 +85,8 @@ func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 			s.db.PreferenceSurveyService().SaveAnswers(&answer)
 		}
 
+		log.Println("Received answers:", answers)
+
 		s.NewResponse(w, http.StatusCreated, answers)
 	default:
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")

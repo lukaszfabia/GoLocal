@@ -5,14 +5,12 @@ class PreferenceSurveyQuestion extends Model {
   final String text;
   final QuestionType type;
   final List<Option>? options;
-  final bool? toggle;
 
   PreferenceSurveyQuestion({
     required super.id,
     required this.text,
     required this.type,
     this.options,
-    this.toggle,
   });
 
   factory PreferenceSurveyQuestion.fromJson(Map<String, dynamic> json) {
@@ -25,7 +23,6 @@ class PreferenceSurveyQuestion extends Model {
               .map((option) => Option.fromJson(option))
               .toList()
           : null,
-      toggle: json['toggle'],
     );
   }
 

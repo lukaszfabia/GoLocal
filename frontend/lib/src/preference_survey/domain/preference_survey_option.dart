@@ -14,7 +14,7 @@ class Option extends Model {
     return Option(
       id: json['id'],
       text: json['text'],
-      isSelected: json['isSelected'],
+      isSelected: json['isSelected'] ?? false,
     );
   }
 }
