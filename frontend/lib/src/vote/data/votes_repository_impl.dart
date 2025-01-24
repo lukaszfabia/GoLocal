@@ -5,12 +5,9 @@ import 'package:golocal/src/dio_client.dart';
 class VotesRepositoryImpl implements IVotesRepository {
   final DioClient _dioClient = DioClient();
 
-  // lol I forgot I need this on backend too
   @override
   Future<Vote> getVote(String id) async {
     final response = await _dioClient.dio.get('/auth/vote/?=all');
-
-    print(response.data);
 
     final data = response.data['data'] as List<dynamic>;
 
@@ -23,8 +20,6 @@ class VotesRepositoryImpl implements IVotesRepository {
   @override
   Future<List<Vote>> getVotes() async {
     final response = await _dioClient.dio.get('/auth/vote/10');
-
-    print(response.data);
 
     final data = response.data['data'] as List<dynamic>;
 
@@ -47,8 +42,6 @@ class VotesRepositoryImpl implements IVotesRepository {
   Future<List<Vote>> getVotesForEvent(String eventId) async {
     final response = await _dioClient.dio.get('/auth/vote/?eventID=$eventId');
 
-    print(response.data);
-
     final data = response.data['data'] as List<dynamic>;
 
     return data.map((json) => Vote.fromJson(json)).toList();
@@ -62,7 +55,13 @@ class VotesRepositoryImpl implements IVotesRepository {
 
   @override
   Future<void> voteOnOption(int voteId, int optionId) async {
-    // TODO: implement voteOnOption
-    throw UnimplementedError();
+    final response = await _dioClient.dio.post('/auth/vote/', data: {
+      'voteID': voteId,
+      'voteOptionID': optionId,
+    });
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to vote on option');
+    }
   }
 }
