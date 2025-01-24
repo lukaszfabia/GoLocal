@@ -31,6 +31,7 @@ func (s *service) VoteService() VoteService {
 func (v *voteServiceImpl) GetVotes(params map[string]any, limit int) ([]*models.Vote, error) {
 	q := v.db.
 		Preload("Options").
+		Preload("Options.VoteAnswers").
 		Preload("Event").
 		Model(&models.Vote{})
 
