@@ -89,6 +89,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
+	vote := auth.PathPrefix("/vote").Subrouter()
+	vote.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).
+		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
+
 	return r
 }
 
