@@ -29,7 +29,10 @@ func (s *service) VoteService() VoteService {
 }
 
 func (v *voteServiceImpl) GetVotes(params map[string]any, limit int) ([]*models.Vote, error) {
-	q := v.db.Preload("Options").Preload("Event").Model(&models.Vote{})
+	q := v.db.
+		Preload("Options").
+		Preload("Event").
+		Model(&models.Vote{})
 
 	if limit > 0 && limit < 20 {
 		q = q.Limit(limit)
