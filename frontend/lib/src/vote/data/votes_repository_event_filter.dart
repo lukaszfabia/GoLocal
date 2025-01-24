@@ -25,8 +25,12 @@ class VotesRepositoryEventFilter implements IVotesRepository {
 
   @override
   Future<List<Vote>> getVotes() async {
-    return _votesRepository.getVotes().then(
-        (votes) => votes.where((vote) => vote.event.id == event.id).toList());
+    return _votesRepository.getVotesForEvent(event.id.toString());
+  }
+
+  @override
+  Future<List<Vote>> getVotesForEvent(String eventId) async {
+    return _votesRepository.getVotesForEvent(eventId);
   }
 
   @override
