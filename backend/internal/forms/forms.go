@@ -64,3 +64,8 @@ type Event struct {
 	ImageURL    string                `json:"-" form:"-"`
 	Tags        []string              `json:"tags" form:"tags"` // list with user input tags
 }
+
+type VoteForm struct {
+	VoteID       int `json:"voteID"`
+	VoteOptionID int `json:"voteOptionID"`
+}
