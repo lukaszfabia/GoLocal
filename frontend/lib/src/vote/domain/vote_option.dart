@@ -14,9 +14,17 @@ class VoteOption extends Model {
 
   VoteOption.fromJson(super.json)
       : text = json['text'],
-        votesCount = json['votesCount'] ?? 0,
+        votesCount = json['voteAnswers'].length ?? 0,
         isSelected = json['isSelected'] ?? false,
         super.fromJson();
+
+  // bool checkIfSelected(voteAnswers) {
+  //   for (var i = 0; i < voteAnswers.length; i++) {
+  //     if (voteAnswers['userId'] == ) {
+  //       return true;
+  //     }
+  //   }
+  // }
 
   @override
   Map<String, dynamic> toJson() {

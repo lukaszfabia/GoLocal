@@ -67,6 +67,7 @@ class VoteCard extends StatelessWidget {
 
   Widget _buildOptionCard(
       BuildContext context, VoteOption option, int totalVotes, Vote vote) {
+    totalVotes = totalVotes == 0 ? 1 : totalVotes;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -45,8 +45,7 @@ class VotesRepositoryImpl implements IVotesRepository {
 
   @override
   Future<List<Vote>> getVotesForEvent(String eventId) async {
-    await Future.delayed(Duration(seconds: 10));
-    final response = await _dioClient.dio.get('/auth/vote/eventID=$eventId');
+    final response = await _dioClient.dio.get('/auth/vote/?eventID=$eventId');
 
     print(response.data);
 

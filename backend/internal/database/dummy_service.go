@@ -37,7 +37,7 @@ func (d *dummyServiceImpl) Cook() {
 	// d.location()
 	// d.user1()
 	// d.tags()
-	d.comments()
+	// d.comments()
 	d.votes()
 	// d.event1()
 	// d.event2()
@@ -268,15 +268,20 @@ func (d *dummyServiceImpl) votes() {
 		return
 	}
 
-	if err := d.db.Find(&users).Error; err != nil {
+	if err := d.db.Find(&users).Order("RANDOM()").Error; err != nil {
 		log.Println(err)
 		return
 	}
 
 	for i := 0; i < len(events); i++ {
-		// assign about 2 votes per event
-		for j := 0; j < d.f.Number(1, 2); j++ {
-			// Create a new vote
+		for j := 0; j < d.f.Number(0, 4); j++ {
+			Options :=
+				[]models.VoteOption{}
+
+			for k := 0; k < d.f.Number(2, 5); k++ {
+				Options = append(Options, models.VoteOption{Text: d.f.Noun()})
+			}
+
 			vote := &models.Vote{
 				EventID: events[i].ID,
 				Text:    d.f.Question(),
@@ -286,10 +291,7 @@ func (d *dummyServiceImpl) votes() {
 					}
 					return models.CannotChangeVote
 				}(),
-				Options: []models.VoteOption{
-					{Text: d.f.Noun()},
-					{Text: d.f.Noun()},
-				},
+				Options: Options,
 			}
 
 			if err := d.db.Create(vote).Error; err != nil {
@@ -297,16 +299,24 @@ func (d *dummyServiceImpl) votes() {
 				continue
 			}
 
-			// Assign the vote to a random user
-			user := users[d.f.Number(0, len(users)-1)]
-			voteAnswer := &models.VoteAnswer{
-				VoteID:       vote.ID,
-				UserID:       user.ID,
-				VoteOptionID: vote.Options[d.f.Number(0, len(vote.Options)-1)].ID,
-			}
+			answersCount := d.f.Number(0, 10)
+			usersStartingIndex := min(0, d.f.Number(0, len(users)-1-answersCount))
 
-			if err := d.db.Create(voteAnswer).Error; err != nil {
-				log.Println(err)
+			for k := 0; k < answersCount; k++ {
+				user := users[usersStartingIndex+k]
+				voteOption := vote.Options[d.f.Number(0, len(vote.Options)-1)]
+				voteAnswer := &models.VoteAnswer{
+					VoteID:       vote.ID,
+					UserID:       user.ID,
+					VoteOptionID: voteOption.ID,
+					VoteOption:   voteOption,
+				}
+
+				voteOption.VoteAnswers = append(voteOption.VoteAnswers, *voteAnswer)
+
+				if err := d.db.Create(voteAnswer).Error; err != nil {
+					log.Println(err)
+				}
 			}
 		}
 	}
