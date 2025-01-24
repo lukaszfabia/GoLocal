@@ -24,7 +24,7 @@ var decoder = schema.NewDecoder()
 type Formable interface {
 	forms.Login | forms.Register |
 		forms.RefreshTokenRequest | forms.EditAccount |
-		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest | forms.Device
+		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest | forms.Device | forms.VoteForm
 }
 
 type FileInfo struct {

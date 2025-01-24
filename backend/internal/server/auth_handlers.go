@@ -72,11 +72,6 @@ func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Email:     form.Email,
 	}
 
-	println(user.FirstName)
-	println(user.LastName)
-	println(user.Password)
-	println(user.Email)
-
 	user, e := s.db.UserService().SaveUser(user)
 
 	if e != nil {
