@@ -18,7 +18,7 @@ class VotesRepositoryDummy implements IVotesRepository {
           VoteOption(id: 2, text: 'Option 2', votesCount: 2, isSelected: false),
         ],
         event: mockEvents[0],
-        type: VoteType.single,
+        type: VoteType.CAN_CHANGE_VOTE,
         endsAt: DateTime.now().add(Duration(days: 1)),
       ),
       Vote(
@@ -30,11 +30,16 @@ class VotesRepositoryDummy implements IVotesRepository {
           VoteOption(
               id: 4, text: 'Option 2.2', votesCount: 123, isSelected: true),
         ],
-        type: VoteType.multiple,
+        type: VoteType.CAN_CHANGE_VOTE,
         event: mockEvents[1],
         endsAt: DateTime.now().add(Duration(days: 2)),
       )
     ];
+  }
+
+  @override
+  Future<List<Vote>> getVotesForEvent(String eventId) async {
+    return _votes.where((vote) => vote.event.id.toString() == eventId).toList();
   }
 
   @override

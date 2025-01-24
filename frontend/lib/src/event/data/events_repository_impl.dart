@@ -1,21 +1,12 @@
-import 'package:faker/faker.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/domain/eventtype_enum.dart';
-import 'package:golocal/src/event/domain/tag.dart';
-import 'package:golocal/src/event/location/location.dart';
-import 'package:golocal/src/user/domain/user.dart';
 import 'package:golocal/src/dio_client.dart';
-import 'package:golocal/src/jwt_token_storage.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:dio/dio.dart';
 
 class EventsRepositoryImpl implements IEventsRepository {
   final DioClient _dioClient = DioClient();
 
   @override
   Future<List<Event>> getEvents() async {
-    await Future.delayed(Duration(seconds: 10));
     final response = await _dioClient.dio.get('/auth/event/10');
 
     print(response.data);
@@ -27,7 +18,6 @@ class EventsRepositoryImpl implements IEventsRepository {
 
   @override
   Future<Event> getEvent(String id) async {
-    await Future.delayed(Duration(seconds: 10));
     final response = await _dioClient.dio.get('/auth/event/id=$id');
 
     final data = response.data['data'] as dynamic;

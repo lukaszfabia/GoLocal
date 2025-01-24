@@ -43,11 +43,13 @@ class Event extends Model {
         imageUrl = json['imageUrl'] ?? '',
         isAdultOnly = json['isAdultOnly'],
         eventType = EventType.fromString(json['event_type']),
-        tags =
-            (json['event_tags'] as List).map((e) => Tag.fromJson(e)).toList(),
+        tags = json["event_tags"] != null
+            ? (json['event_tags'] as List).map((e) => Tag.fromJson(e)).toList()
+            : [],
         startDate = DateTime.parse(json['startDate']),
-        endDate =
-            json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+        endDate = json['finishDate'] != null
+            ? DateTime.parse(json['finishDate'])
+            : null,
         location = Location.fromJson(json['location']),
         eventOrganizers = json['eventOrganizers'] != null
             ? (json['eventOrganizers'] as List)

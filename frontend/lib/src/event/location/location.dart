@@ -19,7 +19,7 @@ class Location extends Model {
   });
 
   // super.json doesn't work for some reason
-  Location.fromJson(Map<String, dynamic> json)
+  Location.fromJson(super.json)
       : city = json['city'],
         country = json['country'],
         zip = json['zip'],
@@ -27,7 +27,7 @@ class Location extends Model {
             json['coords'] != null ? Coords.fromJson(json['coords']) : null,
         address =
             json['address'] != null ? Address.fromJson(json['address']) : null,
-        super.fromJson(json);
+        super.fromJson();
 
   @override
   Map<String, dynamic> toJson() {
