@@ -373,6 +373,9 @@ func (d *dummyServiceImpl) tags() {
 	preferenceSurveyTags := []string{"Adult only", "High-energy", "Relaxation", "Family-friendly", "Couple-friendly", "Indoors", "Outdoors", "Learning", "Music", "Sports"}
 
 	for _, tag := range preferenceSurveyTags {
+		if err := d.db.First(&models.Tag{}, "name = ?", tag).Error; err == nil {
+			continue
+		}
 		if err := d.db.Save(&models.Tag{Name: tag}).Error; err != nil {
 			log.Println("Error saving tag:", err)
 		}
@@ -577,8 +580,6 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 			log.Println("Error saving question:", err)
 			return
 		}
-
-		log.Println("Question saved:", question.Text)
 
 		var options []models.PreferenceSurveyOption
 		switch question.Text {

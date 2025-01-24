@@ -42,7 +42,7 @@ func (v *voteServiceImpl) Vote(params forms.VoteForm, user models.User) error {
 		}
 
 		// validate time
-		if time.Now().After(*destVote.EndDate) {
+		if destVote.EndDate != nil && time.Now().After(*destVote.EndDate) {
 			return fmt.Errorf("vote expired")
 		}
 
