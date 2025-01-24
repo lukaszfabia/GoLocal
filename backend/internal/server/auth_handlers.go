@@ -5,7 +5,7 @@ import (
 	"backend/internal/email"
 	"backend/internal/forms"
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/parsers"
 	"context"
 	"errors"
 	"fmt"
@@ -18,8 +18,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type providerKey string
+
+const providerK providerKey = "provider"
+
 func (s *Server) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
-	form, err := pkg.DecodeJSON[forms.RefreshTokenRequest](r)
+	form, err := parsers.DecodeJSON[forms.RefreshTokenRequest](r)
 
 	if err != nil {
 		s.NewResponse(w, http.StatusBadRequest, "Failed to decode form")
@@ -54,7 +58,7 @@ func (s *Server) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {
-	form, err := pkg.DecodeJSON[forms.Register](r)
+	form, err := parsers.DecodeJSON[forms.Register](r)
 
 	if err != nil {
 		s.InvalidFormResponse(w)
@@ -115,8 +119,8 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.WithValue(r.Context(), "user", nil)
-	r = r.WithContext(ctx)
+	// ctx := context.WithValue(r.Context(), userK, nil)
+	// r = r.WithContext(ctx)
 
 	s.NewResponse(w, http.StatusOK, "Successfully logged out!")
 }
@@ -125,7 +129,7 @@ func (s *Server) Callback(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	provider := vars["provider"]
 
-	req := r.WithContext(context.WithValue(r.Context(), "provider", provider))
+	req := r.WithContext(context.WithValue(r.Context(), providerK, provider))
 
 	user, err := gothic.CompleteUserAuth(w, req)
 	if err != nil {
@@ -168,7 +172,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if provider != "" {
 		// callback returns tokens in the future
-		req := r.WithContext(context.WithValue(context.Background(), "provider", provider))
+		req := r.WithContext(context.WithValue(context.Background(), providerK, provider))
 
 		_, err := gothic.CompleteUserAuth(w, req)
 		if err != nil {
@@ -177,7 +181,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		form, err := pkg.DecodeJSON[forms.Login](r)
+		form, err := parsers.DecodeJSON[forms.Login](r)
 
 		if err != nil {
 			s.InvalidFormResponse(w)
@@ -231,7 +235,7 @@ func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	form, err := pkg.DecodeJSON[forms.CodeRequest](r)
+	form, err := parsers.DecodeJSON[forms.CodeRequest](r)
 	user, ok := r.Context().Value("user").(*models.User)
 
 	if !ok {
@@ -260,7 +264,7 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	form, err := pkg.DecodeJSON[forms.NewPasswordRequest](r)
+	form, err := parsers.DecodeJSON[forms.NewPasswordRequest](r)
 	user, ok := r.Context().Value("user").(*models.User)
 
 	if !ok {
@@ -286,7 +290,7 @@ func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (s *Server) PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
-	form, err := pkg.DecodeJSON[forms.RestoreAccount](r)
+	form, err := parsers.DecodeJSON[forms.RestoreAccount](r)
 
 	if err != nil {
 		s.InvalidFormResponse(w)
@@ -317,7 +321,7 @@ func (s *Server) PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) DeviceTokenRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: assign new device token to user
-	form, err := pkg.DecodeJSON[forms.Device](r)
+	form, err := parsers.DecodeJSON[forms.Device](r)
 
 	if err != nil {
 		s.NewResponse(w, http.StatusBadRequest, "Failed to decode form")

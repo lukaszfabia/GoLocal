@@ -2,7 +2,7 @@ package server
 
 import (
 	"backend/internal/models"
-	"backend/pkg"
+	"backend/pkg/parsers"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,7 +28,7 @@ func (s *Server) getVote(w http.ResponseWriter, r *http.Request) {
 
 	var vote models.Vote
 
-	params := pkg.ParseURLQuery(r, vote, "eventID", "voteType")
+	params := parsers.ParseURLQuery(r, vote, "eventID", "voteType")
 
 	limitStr := mux.Vars(r)["limit"]
 	limit, err := strconv.Atoi(limitStr)

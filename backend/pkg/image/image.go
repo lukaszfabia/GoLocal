@@ -1,6 +1,7 @@
-package pkg
+package image
 
 import (
+	"backend/pkg/parsers"
 	"fmt"
 	"io"
 	"log"
@@ -31,7 +32,7 @@ func (a *Avatar) GetPath(base string, fileName string, ext string) string {
 }
 
 // Saves image and returns new URL
-func SaveImage[T Saveable](file FileInfo) (string, error) {
+func SaveImage[T Saveable](file parsers.FileInfo) (string, error) {
 	var item T
 
 	uuid := uuid.New()
