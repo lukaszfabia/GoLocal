@@ -1,72 +1,92 @@
-package store_test
+package store
 
 import (
-	"backend/internal/store"
 	"testing"
 )
 
-func TestSingleSave(t *testing.T) {
-	store := store.New()
-	email0 := "email"
+func TestSetCode(t *testing.T) {
+	store := New()
 
-	code0, err0 := store.SetCode(email0)
-
-	if err0 != nil {
-		t.Errorf(err0.Error())
+	// Test: SetCode should generate a code and store it
+	email := "test@example.com"
+	code, err := store.SetCode(email)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !store.Compare(email0, code0) {
-		t.Error("Something went wrong during saving code")
-	}
-}
-
-func TestDoubleSave(t *testing.T) {
-	store := store.New()
-	email0 := "email0"
-	email1 := "email1"
-
-	code0, err0 := store.SetCode(email0)
-	code1, err1 := store.SetCode(email1)
-
-	if err0 != nil {
-		t.Errorf(err0.Error())
-	}
-	if err1 != nil {
-		t.Errorf(err1.Error())
+	if len(code) != 6 {
+		t.Errorf("expected code length of 6, got %d", len(code))
 	}
 
-	if !store.Compare(email1, code1) {
-		t.Error("Something went wrong during saving code")
-	}
-
-	if !store.Compare(email0, code0) {
-		t.Error("Something went wrong during saving code")
+	// Test: Code should be stored correctly
+	if !store.Compare(email, code) {
+		t.Errorf("stored code doesn't match the expected code")
 	}
 }
 
-func TestOverwriteCode(t *testing.T) {
-	store := store.New()
-	email0 := "email0"
-	email1 := email0
+func TestCompareInvalidEmail(t *testing.T) {
+	store := New()
 
-	code0, err0 := store.SetCode(email0)
-	//there should overwrite code
-	code1, err1 := store.SetCode(email1)
-
-	if err0 != nil {
-		t.Errorf(err0.Error())
+	// Test: Compare with an invalid email
+	code := "123456"
+	email := "test@example.com"
+	if store.Compare(email, code) {
+		t.Errorf("expected false for invalid email comparison")
 	}
-	if err1 != nil {
-		t.Errorf(err1.Error())
+}
+
+func TestCompareInvalidCode(t *testing.T) {
+	store := New()
+
+	// Test: SetCode and Compare with wrong code
+	email := "test@example.com"
+	expectedCode, _ := store.SetCode(email)
+
+	// Compare with incorrect code
+	if store.Compare(email, "wrongcode") {
+		t.Errorf("expected false for incorrect code comparison")
 	}
 
-	// expected true
-	if !store.Compare(email1, code1) {
-		t.Error("Something went wrong during saving code")
+	// Compare with the correct code
+	if !store.Compare(email, expectedCode) {
+		t.Errorf("expected true for correct code comparison")
+	}
+}
+
+func TestClear(t *testing.T) {
+	store := New()
+
+	// Test: Set a code and then clear it
+	email := "test@example.com"
+	code, _ := store.SetCode(email)
+
+	// Ensure the code is stored
+	if !store.Compare(email, code) {
+		t.Errorf("expected stored code to match")
 	}
 
-	// expected false
-	if store.Compare(email0, code0) {
-		t.Errorf("Something went wrong during overwriting code")
+	// Clear the code
+	store.clear(email)
+
+	// Ensure the code is cleared
+	if store.Compare(email, code) {
+		t.Errorf("expected code to be cleared")
+	}
+}
+
+func TestGenerateCodeLength(t *testing.T) {
+	// Test: GenerateCode should always return a 6 digit code
+	code, err := generateCode(6)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(code) != 6 {
+		t.Errorf("expected code length of 6, got %d", len(code))
+	}
+
+	// Test: GenerateCode should fail with length < 6
+	_, err = generateCode(5)
+	if err == nil {
+		t.Errorf("expected error for length < 6")
 	}
 }

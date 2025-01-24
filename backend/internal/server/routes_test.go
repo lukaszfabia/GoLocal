@@ -1,9 +1,3 @@
 package server_test
 
-import (
-	"testing"
-)
-
-func TestEventHandler(t *testing.T) {
-
-}
+// tu beda kiedys testy XD
