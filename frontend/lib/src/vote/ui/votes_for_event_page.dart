@@ -6,6 +6,7 @@ import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/data/votes_repository_event_filter.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/vote/ui/vote_card.dart';
+import 'package:golocal/src/vote/ui/vote_list.dart';
 
 class VotesForEventPage extends StatelessWidget {
   final Event event;
@@ -19,7 +20,7 @@ class VotesForEventPage extends StatelessWidget {
         ..add(LoadVotes()),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Votes'),
+          title: const Text('Votes for event'),
           actions: [
             IconButton(
               icon: const Icon(Icons.filter_list),
@@ -34,22 +35,12 @@ class VotesForEventPage extends StatelessWidget {
             } else if (state.status == VoteStatus.error) {
               return Center(child: Text('Error: ${state.errorMessage}'));
             } else if (state.status == VoteStatus.loaded) {
-              return _buildVoteList(state.votes);
+              return VoteList(votes: state.votes);
             }
             return const SizedBox.shrink();
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildVoteList(List<Vote> votes) {
-    return ListView.builder(
-      itemCount: votes.length,
-      itemBuilder: (context, index) {
-        final vote = votes[index];
-        return VoteCard(vote: vote);
-      },
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/dio_client.dart';
@@ -42,7 +43,9 @@ class VotesRepositoryImpl implements IVotesRepository {
   Future<List<Vote>> getVotesForEvent(String eventId) async {
     final response = await _dioClient.dio.get('/auth/vote/?eventID=$eventId');
 
-    final data = response.data['data'] as List<dynamic>;
+    final data = response.data['data'] != null
+        ? response.data['data'] as List<dynamic>
+        : [];
 
     return data.map((json) => Vote.fromJson(json)).toList();
   }
@@ -55,13 +58,19 @@ class VotesRepositoryImpl implements IVotesRepository {
 
   @override
   Future<void> voteOnOption(int voteId, int optionId) async {
-    final response = await _dioClient.dio.post('/auth/vote/', data: {
-      'voteID': voteId,
-      'voteOptionID': optionId,
-    });
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to vote on option');
+    try {
+      await _dioClient.dio.post('/auth/vote/', data: {
+        'voteID': voteId,
+        'voteOptionID': optionId,
+      });
+    } on DioException catch (e) {
+      print(e.response);
+      if (e.response?.statusCode == 400 &&
+          e.response?.data['message'] ==
+              'You tried to change vote on a vote that doesn\'t allow changing votes') {
+        throw Exception('you can\'t change vote');
+      }
+      rethrow;
     }
   }
 }
