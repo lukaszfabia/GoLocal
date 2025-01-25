@@ -7,7 +7,6 @@ import 'package:golocal/src/event/data/events_repository_impl.dart';
 import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
-import 'package:golocal/src/vote/data/votes_repository_dummy.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/preference_survey/data/ipreference_survey_repository.dart';
 import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';

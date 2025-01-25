@@ -43,7 +43,7 @@ class Event extends Model {
   Event.fromJson(super.json)
       : title = json['title'],
         description = json['description'],
-        imageUrl = json['imageUrl'] ?? '',
+        imageUrl = json['image'] ?? '',
         isAdultOnly = json['isAdultOnly'],
         eventType = EventType.fromString(json['event_type']),
         tags = json["event_tags"] != null
@@ -53,7 +53,9 @@ class Event extends Model {
         endDate = json['finishDate'] != null
             ? DateTime.parse(json['finishDate'])
             : null,
-        location = Location.fromJson(json['location']),
+        location = json['location'] != null
+            ? Location.fromJson(json['location'])
+            : null,
         eventOrganizers = json['eventOrganizers'] != null
             ? (json['eventOrganizers'] as List)
                 .map((e) => User.fromJson(e))

@@ -1,6 +1,7 @@
 package forms // aka dto
 
 import (
+	"backend/internal/models"
 	"mime/multipart"
 	"time"
 )
@@ -63,4 +64,27 @@ type Event struct {
 	LocationID  uint                  `json:"locationID" form:"locationID"`
 	ImageURL    string                `json:"-" form:"-"`
 	Tags        []string              `json:"tags" form:"tags"` // list with user input tags
+}
+
+type VoteInVotingForm struct {
+	VoteID       int `json:"voteID"`
+	VoteOptionID int `json:"voteOptionID"`
+}
+
+type VoteForm struct {
+	ID       int              `json:"id"`
+	EventID  int              `json:"eventID"`
+	Text     string           `json:"text"`
+	VoteType string           `json:"voteType"`
+	EndDate  time.Time        `json:"endDate"`
+	Options  []VoteOptionForm `json:"options"`
+	Event    models.Event     `json:"event"`
+}
+
+type VoteOptionForm struct {
+	ID         int    `json:"id"`
+	VoteID     int    `json:"voteID"`
+	Text       string `json:"text"`
+	IsSelected bool   `json:"isSelected"`
+	VotesCount int    `json:"votesCount"`
 }

@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/schema"
@@ -23,7 +24,7 @@ var decoder = schema.NewDecoder()
 type Formable interface {
 	forms.Login | forms.Register |
 		forms.RefreshTokenRequest | forms.EditAccount |
-		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest | forms.Device
+		forms.RestoreAccount | forms.CodeRequest | forms.NewPasswordRequest | forms.Device | forms.VoteInVotingForm
 }
 
 type FileInfo struct {
@@ -36,7 +37,7 @@ func DecodeJSON[T Formable](r *http.Request) (*T, error) {
 	form := new(T) // new instance of T
 	if err := json.NewDecoder(r.Body).Decode(form); err != nil {
 		log.Println("Error decoding JSON:", err)
-		return nil, errors.New("Invalid JSON format")
+		return nil, errors.New("invalid JSON format")
 	}
 
 	return form, nil
@@ -141,35 +142,45 @@ func ParseURLQuery(r *http.Request, model any, args ...string) map[string]any {
 	v := reflect.ValueOf(model)
 	t := reflect.TypeOf(model)
 
-	// map with tags and values for q
 	params := map[string]any{}
 
 	if v.Kind() == reflect.Struct {
-		// iter through all event fields
 		for i := 0; i < v.NumField(); i++ {
-			// for struct
+
 			property := t.Field(i)
-			tag := property.Tag.Get("json") // get json tag
-			// skip field without json tag
+
+			tag := property.Tag.Get("json")
 			if tag == "" {
 				continue
 			}
 
-			// skip field without param
 			param := r.URL.Query().Get(tag)
 			if param == "" {
 				continue
 			}
 
-			params[tag] = param
+			switch property.Type.Kind() {
+			case reflect.Bool:
+				if param == "true" {
+					params[tag] = true
+				} else if param == "false" {
+					params[tag] = false
+				}
+			case reflect.Int:
+				if val, err := strconv.Atoi(param); err == nil {
+					params[tag] = val
+				}
+			case reflect.String:
+				params[tag] = param
+			default:
+				params[tag] = param
+			}
 		}
-	}
-
-	// interate through customtags
-	// add additional params
-	for _, cTag := range args {
-		if v := r.URL.Query().Get(cTag); v != "" {
-			params[cTag] = v
+	} else {
+		for _, cTag := range args {
+			if v := r.URL.Query().Get(cTag); v != "" {
+				params[cTag] = v
+			}
 		}
 	}
 

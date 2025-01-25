@@ -62,25 +62,11 @@ class VoteBloc extends Bloc<VoteEvent, VoteState> {
   Future<void> _onVoteOnOption(
       VoteOnOption event, Emitter<VoteState> emit) async {
     try {
-      final vote = await votesRepository.getVote(event.voteId.toString());
+      await votesRepository.voteOnOption(event.voteId, event.optionId);
 
-      final updatedOptions = vote.options.map((option) {
-        if (option.id == event.optionId) {
-          return option.copyWith(
-              votesCount: option.votesCount + (event.newValue ? 1 : -1),
-              isSelected: event.newValue);
-        } else if (option.isSelected) {
-          return option.copyWith(
-              votesCount: option.votesCount - 1, isSelected: false);
-        }
-        return option;
-      }).toList();
-
-      final updatedVote = vote.copyWith(options: updatedOptions);
-
-      await votesRepository.updateVote(updatedVote);
-
-      add(LoadVotes());
+      Future.delayed(Duration(seconds: 1), () {
+        add(LoadVotes());
+      });
     } catch (e) {
       emit(
           state.copyWith(status: VoteStatus.error, errorMessage: e.toString()));

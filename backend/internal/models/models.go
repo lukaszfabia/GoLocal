@@ -121,8 +121,10 @@ type VoteAnswer struct {
 
 type VoteOption struct {
 	Model
-	VoteID uint   `json:"voteId"`
-	Text   string `gorm:"not null;size:255" json:"text"`
+	Vote        Vote         `gorm:"foreignKey:VoteID;references:ID;constraint:OnDelete:RESTRICT" json:"vote"`
+	VoteID      uint         `json:"voteId"`
+	Text        string       `gorm:"not null;size:255" json:"text"`
+	VoteAnswers []VoteAnswer `gorm:"foreignKey:VoteOptionID" json:"voteAnswers"`
 }
 
 type Opinion struct {

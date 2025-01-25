@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func JWTest(t *testing.T) {
+func TestJWT(t *testing.T) {
 	var userID uint = 1
 
 	tokens, err := auth.GenerateJWT(userID, nil)

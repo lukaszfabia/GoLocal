@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -97,14 +96,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, err := json.Marshal(s.db.Health())
+	health := s.db.Health()
+	log.Println(s.db.Health())
 
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
+	if health["status"] == "down" {
 		s.NewResponse(w, http.StatusInternalServerError, nil)
+		return
 	}
 
-	s.NewResponse(w, http.StatusOK, jsonResp)
+	s.NewResponse(w, http.StatusOK, health["message"])
 }
 
 func (s *Server) websocketHandler(w http.ResponseWriter, r *http.Request) {

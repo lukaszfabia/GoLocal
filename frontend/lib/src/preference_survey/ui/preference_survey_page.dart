@@ -110,7 +110,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
     switch (question.type) {
       case QuestionType.toggle:
         return _buildToggleQuestion(
-            index, question.text, question.toggle ?? false);
+            index, question.text, question.options![0].isSelected);
       case QuestionType.singleChoice:
         return _buildSingleSelectQuestion(index, question.text,
             question.options?.map((option) => option.text).toList() ?? [], 0);

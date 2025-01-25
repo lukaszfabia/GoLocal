@@ -9,7 +9,7 @@ class Vote extends Model {
   final String text;
   final List<VoteOption> options;
   final VoteType type;
-  final DateTime endsAt;
+  final DateTime? endsAt;
 
   Vote({
     required super.id,
@@ -21,14 +21,18 @@ class Vote extends Model {
   });
 
   Vote.fromJson(super.json)
-      : options = (json['options'] as List)
-            .map((option) => VoteOption.fromJson(option))
-            .toList(),
+      : options = json["options"] != null
+            ? (json['options'] as List)
+                .map((option) => VoteOption.fromJson(option))
+                .toList()
+            : []
+          ..sort((a, b) => a.text.compareTo(b.text)),
         text = json['text'],
         event = Event.fromJson(json['event']),
         type = VoteType.values
             .firstWhere((e) => e.toString() == 'VoteType.${json['voteType']}'),
-        endsAt = DateTime.parse(json['endsAt']),
+        endsAt =
+            json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
         super.fromJson();
 
   @override

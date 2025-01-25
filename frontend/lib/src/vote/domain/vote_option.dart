@@ -14,7 +14,7 @@ class VoteOption extends Model {
 
   VoteOption.fromJson(super.json)
       : text = json['text'],
-        votesCount = json['votesCount'] ?? 0,
+        votesCount = json["votesCount"] != null ? json['votesCount'] : 0,
         isSelected = json['isSelected'] ?? false,
         super.fromJson();
 
