@@ -36,7 +36,7 @@ func (d *dummyServiceImpl) Cook() {
 	// d.address()
 	// d.location()
 	// d.user1()
-	d.tags()
+	// d.tags()
 	// d.comments()
 	// d.votes()
 	// d.event1()

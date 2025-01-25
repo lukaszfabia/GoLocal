@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -14,7 +15,7 @@ import (
 func (s *Server) VoteHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		s.getVote(w, r)
+		s.getVotes(w, r)
 	case http.MethodPost:
 		s.vote(w, r)
 	default:
@@ -25,7 +26,10 @@ func (s *Server) VoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) vote(w http.ResponseWriter, r *http.Request) {
-	form, err := parsers.DecodeJSON[forms.VoteForm](r)
+	form, err := parsers.DecodeJSON[forms.VoteInVotingForm](r)
+
+	log.Println(form)
+
 	if err != nil {
 		log.Println(err)
 		s.InvalidFormResponse(w)
@@ -54,7 +58,8 @@ func (s *Server) vote(w http.ResponseWriter, r *http.Request) {
 
 	s.NewResponse(w, http.StatusOK, "Successfully changed")
 }
-func (s *Server) getVote(w http.ResponseWriter, r *http.Request) {
+
+func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
 	// GET api/auth/votes/?=all
 	// GET api/auth/votes/?eventID=2
 	// GET api/auth/votes/5?eventID=2&voteType=jakistamtyp
@@ -70,10 +75,64 @@ func (s *Server) getVote(w http.ResponseWriter, r *http.Request) {
 		limit = 5
 	}
 
-	if res, err := s.db.VoteService().GetVotes(params, limit); err != nil {
+	userId := r.Header.Get("User-Id")
+	if userId == "" {
+		log.Println("Unauthorized access")
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
+	}
+
+	user, err := s.db.UserService().GetUser(userId)
+	if err != nil {
+		log.Println(err)
+		s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	votes, err := s.db.VoteService().GetVotes(params, limit)
+	if err != nil {
 		log.Println(err)
 		s.NewResponse(w, http.StatusBadRequest, nil)
-	} else {
-		s.NewResponse(w, http.StatusOK, res)
+		return
 	}
+
+	var transformedVotes []forms.VoteForm
+	for _, vote := range votes {
+		var options []forms.VoteOptionForm
+		for _, option := range vote.Options {
+			isSelected := false
+			for _, answer := range option.VoteAnswers {
+				if answer.UserID == user.ID {
+					isSelected = true
+					println("Selected")
+					break
+				}
+			}
+			log.Println(userId)
+			log.Println(user.ID)
+			options = append(options, forms.VoteOptionForm{
+				ID:         int(option.ID),
+				VoteID:     int(option.VoteID),
+				Text:       option.Text,
+				IsSelected: isSelected,
+				VotesCount: len(option.VoteAnswers),
+			})
+		}
+		var endDate time.Time
+		if vote.EndDate != nil {
+			endDate = *vote.EndDate
+		}
+
+		transformedVotes = append(transformedVotes, forms.VoteForm{
+			ID:       int(vote.ID),
+			EventID:  int(vote.EventID),
+			Text:     vote.Text,
+			VoteType: string(vote.VoteType),
+			EndDate:  endDate,
+			Options:  options,
+			Event:    vote.Event,
+		})
+	}
+
+	s.NewResponse(w, http.StatusOK, transformedVotes)
 }

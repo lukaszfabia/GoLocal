@@ -64,7 +64,9 @@ class VoteBloc extends Bloc<VoteEvent, VoteState> {
     try {
       await votesRepository.voteOnOption(event.voteId, event.optionId);
 
-      add(LoadVotes());
+      Future.delayed(Duration(seconds: 1), () {
+        add(LoadVotes());
+      });
     } catch (e) {
       emit(
           state.copyWith(status: VoteStatus.error, errorMessage: e.toString()));
