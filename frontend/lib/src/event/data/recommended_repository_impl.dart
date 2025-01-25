@@ -7,10 +7,6 @@ class RecommendedRepositoryImpl implements IEventsRepository {
 
   @override
   Future<List<Event>> getEvents() async {
-    // wait 10 seconds
-
-    await Future.delayed(Duration(seconds: 10));
-
     final response = await _dioClient.dio.get('/auth/recommendations');
 
     final data = response.data['data'] as List<dynamic>;

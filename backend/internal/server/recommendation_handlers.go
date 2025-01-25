@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"backend/internal/models"
 	"log"
 	"net/http"
 	"strconv"
@@ -29,14 +29,16 @@ func (s *Server) getRecommendations(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		events, err := s.db.EventService().GetEvents(map[string]any{}, 0)
-		for _, event := range events {
-			fmt.Println(event)
+		preloads := []string{
+			"Tags",
 		}
+		events, err := s.db.EventService().GetEvents(nil, 1000, preloads)
 		if err != nil {
 			s.NewResponse(w, http.StatusInternalServerError, "Error fetching events")
 			return
 		}
+
+		log.Println("Events fetched")
 
 		userIdUint, err := strconv.ParseUint(userId, 10, 32)
 		if err != nil {
@@ -44,12 +46,23 @@ func (s *Server) getRecommendations(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		survey, err := s.db.RecommendationService().Predict(events, uint(userIdUint))
+		recommendedEventIds, err := s.db.RecommendationService().Predict(events, uint(userIdUint), 10)
 		if err != nil {
 			s.NewResponse(w, http.StatusInternalServerError, "Error fetching survey")
 			return
 		}
-		s.NewResponse(w, http.StatusOK, survey)
+
+		recommendedEvents := []*models.Event{}
+		for _, id := range recommendedEventIds {
+			event, err := s.db.EventService().GetEvent(id)
+			if err != nil {
+				log.Printf("Error fetching event with ID: %d", id)
+				continue
+			}
+			recommendedEvents = append(recommendedEvents, event)
+		}
+
+		s.NewResponse(w, http.StatusOK, recommendedEvents)
 	default:
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}

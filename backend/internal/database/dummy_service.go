@@ -12,6 +12,7 @@ import (
 )
 
 const MAX_CAPACITY = 1000
+const CAN_CLEAR_DATABASE = false
 
 type DummyService interface {
 	Cook()
@@ -32,21 +33,68 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	d.coords()
-	d.address()
-	d.location()
-	d.user1()
-	d.tags()
-	d.comments()
-	d.votes()
-	d.event1()
-	d.event2()
-	d.opinion()
-	d.followers()
-	d.user2()
-	d.generateMockSurvey()
-	d.easyLoginUser()
-	d.generateRecommendations()
+	// d.clearDatabase()
+
+	// d.coords()
+	// d.address()
+	// d.location()
+	// d.user1()
+	// d.tags()
+	// d.event1()
+	// d.event2()
+	// d.opinion()
+	// d.followers()
+	// d.comments()
+	// d.votes()
+	// d.user2()
+	// d.generateMockSurvey()
+	// d.easyLoginUser()
+	// d.generateRecommendations()
+}
+
+func (d *dummyServiceImpl) clearDatabase() {
+	log.Println("Clearing WHOLE database...")
+
+	if !CAN_CLEAR_DATABASE {
+		log.Println("Cannot clear database")
+		return
+	}
+
+	time.Sleep(10 * time.Second)
+
+	sql := `
+        DELETE FROM user_followers;
+        DELETE FROM user_following;
+        DELETE FROM event_organizers;
+        DELETE FROM event_tags;
+        DELETE FROM devices;
+        DELETE FROM recommendation_tags;
+        DELETE FROM vote_answers;
+        DELETE FROM vote_options;
+        DELETE FROM votes;
+        DELETE FROM comments;
+        DELETE FROM opinions;
+        DELETE FROM preference_survey_answer_options;
+        DELETE FROM preference_survey_answers;
+        DELETE FROM preference_survey_options;
+        DELETE FROM preference_survey_questions;
+        DELETE FROM preference_surveys;
+        DELETE FROM recommendations;
+        DELETE FROM device_tokens;
+        DELETE FROM users;
+        DELETE FROM locations;
+        DELETE FROM coords;
+        DELETE FROM addresses;
+        DELETE FROM events;
+        DELETE FROM tags;
+        DELETE FROM blacklisted_tokens;
+    `
+
+	if err := d.db.Exec(sql).Error; err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Database cleared")
 }
 
 // &models.Opinion{},
@@ -226,6 +274,8 @@ func (d *dummyServiceImpl) coords() {
 			log.Println(err)
 		}
 	}
+
+	log.Println("Coords generated")
 }
 
 func (d *dummyServiceImpl) comments() {
@@ -257,6 +307,8 @@ func (d *dummyServiceImpl) comments() {
 			}
 		}
 	}
+
+	log.Println("Comments generated")
 }
 
 func (d *dummyServiceImpl) votes() {
@@ -320,6 +372,8 @@ func (d *dummyServiceImpl) votes() {
 			}
 		}
 	}
+
+	log.Println("Votes generated")
 }
 
 func (d *dummyServiceImpl) followers() {
@@ -355,6 +409,8 @@ func (d *dummyServiceImpl) followers() {
 			d.db.Model(&user).Association("Following").Append(following)
 		}
 	}
+
+	log.Println("Followers generated")
 }
 
 func (d *dummyServiceImpl) opinion() {
@@ -398,6 +454,8 @@ func (d *dummyServiceImpl) tags() {
 			i++
 		}
 	}
+
+	log.Println("Tags generated")
 }
 
 func (d *dummyServiceImpl) event1() {
@@ -456,6 +514,8 @@ func (d *dummyServiceImpl) event1() {
 			log.Println(err)
 		}
 	}
+
+	log.Println("Events generated")
 }
 
 func (d *dummyServiceImpl) event2() {
@@ -486,6 +546,8 @@ func (d *dummyServiceImpl) event2() {
 			log.Println("Error saving event", event.ID, err)
 		}
 	}
+
+	log.Println("Event details generated")
 }
 
 func generateEventTitle(eventType models.EventType) string {
@@ -673,15 +735,17 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 	log.Println("Mock survey saved successfully")
 }
 
-func (d *dummyServiceImpl) generateRecommendations() error {
+func (d *dummyServiceImpl) generateRecommendations() {
 	var users []*models.User
 	if err := d.db.Find(&users).Error; err != nil {
-		return fmt.Errorf("error fetching users: %w", err)
+		log.Println("error fetching users:", err)
+		return
 	}
 
 	var tags []*models.Tag
 	if err := d.db.Find(&tags).Error; err != nil {
-		return fmt.Errorf("error fetching tags: %w", err)
+		log.Println("error fetching tags:", err)
+		return
 	}
 
 	for _, user := range users {
@@ -701,5 +765,5 @@ func (d *dummyServiceImpl) generateRecommendations() error {
 		}
 	}
 
-	return nil
+	log.Println("Recommendations generated")
 }

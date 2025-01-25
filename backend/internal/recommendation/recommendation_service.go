@@ -10,7 +10,7 @@ import (
 )
 
 type RecommendationService interface {
-	Predict([]*models.Event, uint) ([]uint, error)
+	Predict([]*models.Event, uint, int) ([]uint, error)
 }
 
 type recommendationServiceImpl struct {
@@ -21,14 +21,7 @@ func NewRecommendationService(db *gorm.DB) RecommendationService {
 	return &recommendationServiceImpl{db: db}
 }
 
-func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId uint) ([]uint, error) {
-	// TODO: temp hack while getting events doesnt work
-	var events []*models.Event
-	if err := s.db.Preload("Tags").Find(&events).Error; err != nil {
-		return nil, err
-	}
-	allEvents = events
-
+func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId uint, count int) ([]uint, error) {
 	userPreferences, err := s.getUserPreferences(userId)
 	if err != nil {
 		log.Printf("Error getting userPreferences: %v", err)
@@ -70,7 +63,7 @@ func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId ui
 
 	recommendedEvents := []uint{}
 	for _, idx := range sortedIndices {
-		if len(recommendedEvents) >= 3 {
+		if len(recommendedEvents) >= count {
 			break
 		}
 
@@ -86,7 +79,7 @@ func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId ui
 
 func (s *recommendationServiceImpl) getUserPreferences(userId uint) (*models.Recommendation, error) {
 	var userPreferences models.Recommendation
-	if err := s.db.Preload("Tags").First(&userPreferences, "id = ?", userId).Error; err != nil {
+	if err := s.db.Preload("Tags").First(&userPreferences, "user_id = ?", userId).Error; err != nil {
 		return nil, err
 	}
 	return &userPreferences, nil

@@ -11,10 +11,11 @@ import (
 )
 
 type EventService interface {
-	GetEvents(params map[string]any, limit int) ([]*models.Event, error)
+	GetEvents(params map[string]any, limit int, preloadOptions []string) ([]*models.Event, error)
 	CreateEvent(event forms.Event) (models.Event, error)
 	DeleteEvent(id int) (models.Event, error)
 	UpdateEvent() (models.Event, error)
+	GetEvent(eventId uint) (*models.Event, error)
 }
 
 type eventServiceImpl struct {
@@ -126,6 +127,10 @@ func getOrCreateTags(tx *gorm.DB, tags []string) ([]*models.Tag, error) {
 func (e *eventServiceImpl) DeleteEvent(id int) (models.Event, error) { return models.Event{}, nil }
 func (e *eventServiceImpl) UpdateEvent() (models.Event, error)       { return models.Event{}, nil }
 
+type PreloadOption struct {
+	Association string
+}
+
 /*
 Filter Events by given params. Result length <= limit.
 
@@ -139,14 +144,12 @@ Returns:
   - list of events
   - error occured during transaction
 */
-func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*models.Event, error) {
-	q := e.db.
-		Preload("Location").
-		Preload("Location.Address").
-		Preload("Tags").
-		Preload("EventOrganizers").
-		Preload("Votes").
-		Model(&models.Event{})
+func (e *eventServiceImpl) GetEvents(params map[string]any, limit int, preloadOptions []string) ([]*models.Event, error) {
+	q := e.db.Model(&models.Event{})
+
+	for _, option := range preloadOptions {
+		q = q.Preload(option)
+	}
 
 	if limit > 0 {
 		q = q.Limit(limit)
@@ -215,4 +218,18 @@ func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*model
 	}
 
 	return res, nil
+}
+
+func (e *eventServiceImpl) GetEvent(eventId uint) (*models.Event, error) {
+	var event models.Event
+	if err := e.db.Preload("Location").
+		Preload("Location.Address").
+		Preload("Tags").
+		Preload("EventOrganizers").
+		Preload("Votes").
+		First(&event, "id = ?", eventId).Error; err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }

@@ -16,35 +16,36 @@ services:
     networks:
       - go_local_network
 
-  api:
-    container_name: go_local_api
-    restart: always
-    build:
-      context: .
-    ports:
-      - ${PORT}:${PORT}
-    environment:
-      PORT: ${PORT}
-      DB_HOST: go_local_postgres
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on:
-      - db
-    networks:
-      - go_local_network
-  # pgadmin:
-  #   container_name: go_local_pgadmin
-  #   image: dpage/pgadmin4
+  # api:
+  #   container_name: go_local_api
   #   restart: always
-  #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
-  #     - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+  #   build:
+  #     context: .
   #   ports:
-  #     - "${PGADMIN_PORT}:80"
+  #     - ${PORT}:${PORT}
+  #   environment:
+  #     PORT: ${PORT}
+  #     DB_HOST: go_local_postgres
+  #     DB_PORT: ${DB_PORT}
+  #     DB_DATABASE: ${DB_DATABASE}
+  #     DB_USERNAME: ${DB_USERNAME}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #   depends_on:
+  #     - db
   #   networks:
   #     - go_local_network
+
+  pgadmin:
+    container_name: go_local_pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
+    networks:
+      - go_local_network
 
 networks:
   go_local_network:
