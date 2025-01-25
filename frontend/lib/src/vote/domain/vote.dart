@@ -21,9 +21,12 @@ class Vote extends Model {
   });
 
   Vote.fromJson(super.json)
-      : options = (json['options'] as List)
-            .map((option) => VoteOption.fromJson(option))
-            .toList(),
+      : options = json["options"] != null
+            ? (json['options'] as List)
+                .map((option) => VoteOption.fromJson(option))
+                .toList()
+            : []
+          ..sort((a, b) => a.text.compareTo(b.text)),
         text = json['text'],
         event = Event.fromJson(json['event']),
         type = VoteType.values

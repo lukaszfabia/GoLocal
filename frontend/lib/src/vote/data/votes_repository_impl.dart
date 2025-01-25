@@ -42,7 +42,9 @@ class VotesRepositoryImpl implements IVotesRepository {
   Future<List<Vote>> getVotesForEvent(String eventId) async {
     final response = await _dioClient.dio.get('/auth/vote/?eventID=$eventId');
 
-    final data = response.data['data'] as List<dynamic>;
+    final data = response.data['data'] != null
+        ? response.data['data'] as List<dynamic>
+        : [];
 
     return data.map((json) => Vote.fromJson(json)).toList();
   }

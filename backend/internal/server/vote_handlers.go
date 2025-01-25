@@ -28,8 +28,6 @@ func (s *Server) VoteHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) vote(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.VoteInVotingForm](r)
 
-	log.Println(form)
-
 	if err != nil {
 		log.Println(err)
 		s.InvalidFormResponse(w)

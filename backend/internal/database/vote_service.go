@@ -34,25 +34,18 @@ func (s *service) VoteService() VoteService {
 
 func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) error {
 	return v.db.Transaction(func(tx *gorm.DB) error {
-		log.Println("Starting transaction for voting")
-
-		log.Println(params.VoteID)
-		log.Println(params.VoteOptionID)
-
 		// get vote
 		destVote := &models.Vote{}
 		if err := v.db.First(destVote, "id = ?", params.VoteID).Error; err != nil {
 			log.Println("Error fetching vote:", err)
 			return err
 		}
-		log.Println("Fetched vote:", destVote)
 
 		// validate time
 		if destVote.EndDate != nil && time.Now().After(*destVote.EndDate) {
 			log.Println("Vote expired")
 			return fmt.Errorf("vote expired")
 		}
-		log.Println("Vote is still valid")
 
 		// check if user already voted
 		var existingAnswer models.VoteAnswer
@@ -65,7 +58,6 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 			log.Println("User cannot change vote")
 			return fmt.Errorf("you can't change vote")
 		}
-		log.Println("User can change vote")
 
 		if existingAnswer.ID != 0 {
 			existingAnswer.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
@@ -76,7 +68,6 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 		}
 
 		// get vote answer
-		// get vote answer
 		newAnswer := &models.VoteAnswer{
 			VoteOptionID: uint(params.VoteOptionID),
 			VoteID:       uint(params.VoteID),
@@ -86,7 +77,6 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 			log.Println("Failed to create vote answer:", err)
 			return fmt.Errorf("failed to create vote answer")
 		}
-		log.Println("Created vote answer:", newAnswer)
 
 		// get vote option
 		voteOption := &models.VoteOption{}
@@ -94,7 +84,6 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 			log.Println("Failed to get vote options:", err)
 			return fmt.Errorf("failed to get vote options")
 		}
-		log.Println("Fetched vote option:", voteOption)
 
 		// update vote option
 		voteOption.VoteAnswers = append(voteOption.VoteAnswers, *newAnswer)
@@ -102,7 +91,6 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 			log.Println("Failed to update vote option:", err)
 			return fmt.Errorf("failed to update vote option")
 		}
-		log.Println("Updated vote option:", voteOption)
 
 		// update vote
 		destVote.Options = append(destVote.Options, *voteOption)
@@ -110,9 +98,6 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 			log.Println("Failed to update vote:", err)
 			return fmt.Errorf("failed to update vote")
 		}
-		log.Println("Updated vote:", destVote)
-
-		log.Println("Transaction completed successfully")
 		return nil
 	})
 }
