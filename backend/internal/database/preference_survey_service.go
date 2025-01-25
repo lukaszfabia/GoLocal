@@ -11,7 +11,7 @@ type PreferenceSurveyService interface {
 	GetSurvey(id uint) (*models.PreferenceSurvey, error)
 	SaveSurvey(survey *models.PreferenceSurvey) (*models.PreferenceSurvey, error)
 	DeleteSurvey(survey *models.PreferenceSurvey) error
-	SaveAnswers(answer *models.PreferenceSurveyAnswer) error
+	SaveAnswers(answer []models.PreferenceSurveyAnswer) error
 }
 
 func NewPreferenceSurveyService(db *gorm.DB) PreferenceSurveyService {
@@ -47,45 +47,60 @@ func (s *preferenceSurveyServiceImpl) DeleteSurvey(survey *models.PreferenceSurv
 	return nil
 }
 
-func (s *preferenceSurveyServiceImpl) SaveAnswers(answer *models.PreferenceSurveyAnswer) error {
-	if err := s.db.Save(&answer).Error; err != nil {
-		log.Printf("Couldn't save answer with id %d: %v", answer.ID, err)
-		return err
-	}
-
-	log.Println("answer")
-	log.Println(answer)
-	log.Println("options")
-	log.Println(answer.SelectedOptions)
-
-	tags := []models.Tag{}
-	for _, option := range answer.SelectedOptions {
-		option.AnswerID = answer.ID
-		if err := s.db.Save(&option).Error; err != nil {
-			log.Printf("Couldn't save option with id %d: %v", option.ID, err)
+func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSurveyAnswer) error {
+	for _, answer := range answers {
+		if err := s.db.Create(&answer).Error; err != nil {
 			return err
 		}
 
-		tags = append(tags, option.Option.Tag)
+		log.Println(answer.SurveyID)
+		log.Println(answer.QuestionID)
+		log.Println(answer.UserID)
 
-		log.Println(option.Option.Tag)
+		tags := []models.Tag{}
+		for _, option := range answer.SelectedOptions {
+			log.Println(option.OptionID)
+			log.Println(option.AnswerID)
+
+			option.Answer = answer
+			if err := s.db.First(&option.Option, option.OptionID).Error; err != nil {
+				log.Printf("Couldn't find option with id %d: %v", option.OptionID, err)
+				return err
+			}
+
+			if err := s.db.Save(&option).Error; err != nil {
+				log.Printf("Couldn't save option with id %d: %v", option.ID, err)
+				return err
+			}
+
+			tag := models.Tag{}
+			if err := s.db.First(&tag, option.Option.TagID).Error; err != nil {
+				log.Printf("Couldn't find tag with id %d: %v", option.Option.TagID, err)
+				return err
+			}
+
+			log.Println(option.Option.Tag.Name)
+
+			tags = append(tags, tag)
+		}
+
+		recommendation := models.Recommendation{
+			UserID: answer.UserID,
+			Tags:   tags,
+		}
+
+		log.Println(recommendation)
+
+		if err := s.db.Save(&recommendation).Error; err != nil {
+			log.Printf("Couldn't save recommendation with id %d: %v", recommendation.ID, err)
+			return err
+		}
+
+		if err := s.db.Model(&recommendation).Association("Tags").Replace(tags); err != nil {
+			log.Printf("Couldn't save recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
+			return err
+		}
 	}
-
-	recommendation := models.Recommendation{
-		UserID: answer.UserID,
-		Tags:   tags,
-	}
-
-	if err := s.db.Save(&recommendation).Error; err != nil {
-		log.Printf("Couldn't save recommendation with id %d: %v", recommendation.ID, err)
-		return err
-	}
-
-	if err := s.db.Model(&recommendation).Association("Tags").Replace(tags); err != nil {
-		log.Printf("Couldn't save recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
-		return err
-	}
-
 	return nil
 }
 

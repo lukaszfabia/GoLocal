@@ -88,3 +88,10 @@ type VoteOptionForm struct {
 	IsSelected bool   `json:"isSelected"`
 	VotesCount int    `json:"votesCount"`
 }
+
+type PreferenceSurveyAnswer struct {
+	PreferenceSurveyID int   `json:"SurveyID"`
+	QuestionID         int   `json:"QuestionID"`
+	UserID             int   `json:"UserID"`
+	Options            []int `json:"Options"`
+}

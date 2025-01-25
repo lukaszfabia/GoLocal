@@ -47,7 +47,7 @@ func (d *dummyServiceImpl) Cook() {
 	// d.comments()
 	// d.votes()
 	// d.user2()
-	// d.generateMockSurvey()
+	d.generateMockSurvey()
 	// d.easyLoginUser()
 	// d.generateRecommendations()
 }
