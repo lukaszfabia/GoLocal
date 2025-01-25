@@ -2,12 +2,12 @@ import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
 
-class EventsRepositoryImpl implements IEventsRepository {
+class RecommendedRepositoryImpl implements IEventsRepository {
   final DioClient _dioClient = DioClient();
 
   @override
   Future<List<Event>> getEvents() async {
-    final response = await _dioClient.dio.get('/auth/event/10');
+    final response = await _dioClient.dio.get('/auth/recommendations');
 
     final data = response.data['data'] as List<dynamic>;
 

@@ -4,6 +4,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/bloc/events_bloc.dart';
+import 'package:golocal/src/event/data/events_repository_impl.dart';
+import 'package:golocal/src/event/data/recommended_repository_impl.dart';
 import 'package:golocal/src/event/ui/event_card.dart';
 import 'package:golocal/src/routing/router.dart';
 
@@ -17,6 +19,7 @@ class EventsViewPage extends StatefulWidget {
 class _EventsViewPageState extends State<EventsViewPage> {
   final ScrollController _scrollController = ScrollController();
   bool _showSearchBar = false;
+  bool _showFilterBar = false;
   bool _isScrollingDown = false;
 
   @override
@@ -36,7 +39,7 @@ class _EventsViewPageState extends State<EventsViewPage> {
         ScrollDirection.reverse) {
       if (!_isScrollingDown) {
         _isScrollingDown = true;
-        _toggleSearchBar(false);
+        _toggleBarsOff();
       }
     } else if (_scrollController.position.userScrollDirection ==
         ScrollDirection.forward) {
@@ -48,8 +51,25 @@ class _EventsViewPageState extends State<EventsViewPage> {
   }
 
   void _toggleSearchBar(bool show) {
+    _toggleBarsOff();
+
     setState(() {
       _showSearchBar = show;
+    });
+  }
+
+  void _toggleFilterBar(bool show) {
+    _toggleBarsOff();
+
+    setState(() {
+      _showFilterBar = show;
+    });
+  }
+
+  void _toggleBarsOff() {
+    setState(() {
+      _showSearchBar = false;
+      _showFilterBar = false;
     });
   }
 
@@ -65,6 +85,10 @@ class _EventsViewPageState extends State<EventsViewPage> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _toggleFilterBar(true),
+          ),
+          IconButton(
             icon: const Icon(Icons.search),
             onPressed: () => _toggleSearchBar(true),
           ),
@@ -73,6 +97,7 @@ class _EventsViewPageState extends State<EventsViewPage> {
       body: Column(
         children: [
           SearchBar(showSearchBar: _showSearchBar),
+          FilterBar(showFilterBar: _showFilterBar),
           Expanded(
             child: BlocConsumer<EventsBloc, EventsState>(
               listener: (context, state) {
@@ -146,6 +171,52 @@ class SearchBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
+              ),
+            )
+          : const SizedBox.shrink(),
+    );
+  }
+}
+
+class FilterBar extends StatelessWidget {
+  const FilterBar({
+    super.key,
+    required bool showFilterBar,
+  }) : _showFilterBar = showFilterBar;
+
+  final bool _showFilterBar;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: _showFilterBar
+          ? Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      final eventsRepository = EventsRepositoryImpl();
+                      context
+                          .read<EventsBloc>()
+                          .add(SwitchRepository(eventsRepository));
+                    },
+                    child: const Text('Recent'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final recommendedRepository = RecommendedRepositoryImpl();
+                      context
+                          .read<EventsBloc>()
+                          .add(SwitchRepository(recommendedRepository));
+                    },
+                    child: const Text('Recommended'),
+                  ),
+                ],
               ),
             )
           : const SizedBox.shrink(),

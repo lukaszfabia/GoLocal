@@ -10,7 +10,7 @@ class User extends Model {
   bool isPremium;
   String? avatarUrl;
 
-  // TODO: comments, votes???
+  // TODO: comments, votes??? wg. mnie nie
 
   User({
     required super.id,

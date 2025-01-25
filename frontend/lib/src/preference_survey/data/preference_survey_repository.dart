@@ -10,7 +10,7 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
 
   @override
   Future<void> submitSurvey(
-      int preferenceSurveyId, Map<int, String> answers) async {
+      int preferenceSurveyId, Map<int, List<int>> answers) async {
     try {
       final accessToken = await TokenStorage().getAccessToken();
       final decodedToken = JwtDecoder.decode(accessToken!);
@@ -18,15 +18,17 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
       final List<PreferenceSurveyAnswer> answerList =
           answers.entries.map((entry) {
         final questionId = entry.key;
-        final value = entry.value;
+        final values = entry.value;
         return PreferenceSurveyAnswer.factory(
-            preferenceSurveyId, questionId, userId, value);
+            preferenceSurveyId, questionId, userId, values);
       }).toList();
 
-      final response = await _dioClient.dio
-          .post('/preference/preference-survey/answer', data: {
+      final data = {
         'answers': answerList.map((answer) => answer.toJson()).toList(),
-      });
+      };
+
+      final response = await _dioClient.dio
+          .post('/preference/preference-survey/answer', data: data);
       print('Survey submitted: ${response.data}');
     } catch (e) {
       print('Error submitting survey: $e');

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"backend/internal/forms"
 	"backend/internal/models"
 	"encoding/json"
 	"log"
@@ -68,7 +69,7 @@ func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		var payload struct {
-			Answers []models.PreferenceSurveyAnswer `json:"answers"`
+			Answers []forms.PreferenceSurveyAnswer `json:"answers"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -79,10 +80,28 @@ func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 
 		answers := payload.Answers
 
-		// TODO: Check if user has already answered the survey and other logic
-
+		// Map DTO to Model
+		var modelAnswers []models.PreferenceSurveyAnswer
 		for _, answer := range answers {
-			s.db.PreferenceSurveyService().SaveAnswers(&answer)
+			modelAnswer := models.PreferenceSurveyAnswer{
+				SurveyID:   uint(answer.PreferenceSurveyID),
+				QuestionID: uint(answer.QuestionID),
+				UserID:     uint(answer.UserID),
+			}
+			for _, optionID := range answer.Options {
+				modelAnswer.SelectedOptions = append(modelAnswer.SelectedOptions, models.PreferenceSurveyAnswerOption{
+					OptionID: uint(optionID),
+					Answer:   modelAnswer,
+				})
+			}
+			modelAnswers = append(modelAnswers, modelAnswer)
+		}
+
+		// Save answers to database
+		if err := s.db.PreferenceSurveyService().SaveAnswers(modelAnswers); err != nil {
+			log.Println("Error saving answers:", err)
+			s.NewResponse(w, http.StatusInternalServerError, "Error saving answers")
+			return
 		}
 
 		log.Println("Received answers:", answers)

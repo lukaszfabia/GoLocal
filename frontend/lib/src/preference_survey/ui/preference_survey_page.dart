@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_option.dart';
 import '../bloc/preference_survey_bloc.dart';
 import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
@@ -34,7 +35,7 @@ class PreferenceSurveyForm extends StatefulWidget {
 }
 
 class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
-  final Map<int, dynamic> _answers = {};
+  final Map<int, List<int>> _answers = {};
 
   @override
   void initState() {
@@ -42,15 +43,9 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
   }
 
   void _submitSurvey(int surveyId) {
-    final answers = _answers.map((key, value) {
-      if (value is List) {
-        return MapEntry(key, value.join(', '));
-      }
-      return MapEntry(key, value.toString());
-    });
     context
         .read<PreferenceSurveyBloc>()
-        .add(SubmitPreferenceSurvey(surveyId: surveyId, answers: answers));
+        .add(SubmitPreferenceSurvey(surveyId: surveyId, answers: _answers));
   }
 
   @override
@@ -60,27 +55,29 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         if (state is PreferenceSurveyLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is PreferenceSurveyLoaded) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  state.survey.description,
-                  style: const TextStyle(fontSize: 18),
+          return SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      state.survey.description,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    ...state.survey.questions.asMap().entries.map((entry) {
+                      int index = entry.value.id;
+                      PreferenceSurveyQuestion question = entry.value;
+                      return _buildQuestion(index, question);
+                    }),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => _submitSurvey(state.survey.id),
+                      child: const Text('Submit Survey'),
+                    ),
+                  ],
                 ),
-                ...state.survey.questions.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  PreferenceSurveyQuestion question = entry.value;
-                  return _buildQuestion(index, question);
-                }),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => _submitSurvey(state.survey.id),
-                  child: const Text('Submit Survey'),
-                ),
-              ],
-            ),
-          );
+              ));
         } else if (state is PreferenceSurveySubmitted) {
           return const Center(child: Text('Survey submitted successfully!'));
         } else if (state is PreferenceSurveyError) {
@@ -112,36 +109,37 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         return _buildToggleQuestion(
             index, question.text, question.options![0].isSelected);
       case QuestionType.singleChoice:
-        return _buildSingleSelectQuestion(index, question.text,
-            question.options?.map((option) => option.text).toList() ?? [], 0);
+        return _buildSingleSelectQuestion(
+            index, question.text, question.options ?? [], 0);
       case QuestionType.multiSelect:
-        return _buildMultiSelectQuestion(index, question.text,
-            question.options?.map((option) => option.text).toList() ?? []);
+        return _buildMultiSelectQuestion(
+            index, question.text, question.options ?? []);
     }
   }
 
   Widget _buildToggleQuestion(int index, String question, bool initialValue) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(question, style: const TextStyle(fontSize: 16)),
-        const SizedBox(height: 8),
-        Switch(
-          value: _answers[index] ?? initialValue,
-          onChanged: (bool value) {
-            setState(() {
-              _answers[index] = value;
-            });
-          },
-        ),
-      ],
-    );
+    return const SizedBox.shrink();
+    // return Column(
+    //   crossAxisAlignment: CrossAxisAlignment.center,
+    //   children: [
+    //     Text(question, style: const TextStyle(fontSize: 16)),
+    //     const SizedBox(height: 8),
+    //     Switch(
+    //       value: _answers[index] ?? initialValue,
+    //       onChanged: (bool value) {
+    //         setState(() {
+    //           _answers[index] = value;
+    //         });
+    //       },
+    //     ),
+    //   ],
+    // );
   }
 
   Widget _buildSingleSelectQuestion(
-      int index, String question, List<String> options, int selectedIndex) {
+      int index, String question, List<Option> options, int selectedIndex) {
     if (_answers[index] == null) {
-      _answers[index] = selectedIndex;
+      _answers[index] = [selectedIndex];
     }
 
     return Column(
@@ -152,19 +150,21 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         Wrap(
           spacing: 8.0,
           children: options.asMap().entries.map((entry) {
-            int idx = entry.key;
-            String text = entry.value;
+            int idx = entry.value.id;
+            String text = entry.value.text;
             return ChoiceChip(
               label: Text(text),
-              selected: _answers[index] == idx,
+              selected: _answers[index]?[0] == idx,
               onSelected: (bool selected) {
                 setState(() {
-                  _answers[index] = idx;
+                  _answers[index] = [idx];
                 });
               },
               selectedColor: Colors.blue,
               labelStyle: TextStyle(
-                color: _answers[index] == idx ? Colors.white : Colors.black,
+                color: (_answers.isNotEmpty && _answers[index]![0] == idx)
+                    ? Colors.white
+                    : Colors.black,
               ),
             );
           }).toList(),
@@ -174,7 +174,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
   }
 
   Widget _buildMultiSelectQuestion(
-      int index, String question, List<String> options) {
+      int index, String question, List<Option> options) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -183,8 +183,8 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         Wrap(
           spacing: 8.0,
           children: options.asMap().entries.map((entry) {
-            int idx = entry.key;
-            String text = entry.value;
+            int idx = entry.value.id;
+            String text = entry.value.text;
             return FilterChip(
               label: Text(text),
               selected: _answers[index]?.contains(idx) ?? false,
@@ -194,7 +194,7 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
                     if (_answers[index] == null) {
                       _answers[index] = [];
                     }
-                    _answers[index].add(idx);
+                    _answers[index]!.add(idx);
                   } else {
                     _answers[index]?.remove(idx);
                   }

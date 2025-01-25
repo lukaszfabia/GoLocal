@@ -104,7 +104,14 @@ func (s *Server) getEvent(w http.ResponseWriter, r *http.Request) {
 		limit = -1 // take all records
 	}
 
-	res, err := s.db.EventService().GetEvents(params, limit)
+	preloads := []string{
+		"Location",
+		"Location.Address",
+		"Tags",
+		"EventOrganizers",
+		"Votes",
+	}
+	res, err := s.db.EventService().GetEvents(params, limit, preloads)
 
 	if err != nil {
 		s.NewResponse(w, http.StatusNotFound, "No such a events")
