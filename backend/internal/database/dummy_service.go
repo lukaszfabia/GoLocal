@@ -34,7 +34,7 @@ func (s *service) DummyService() DummyService {
 
 func (d *dummyServiceImpl) Cook() {
 	// d.clearDatabase()
-
+	//
 	// d.coords()
 	// d.address()
 	// d.location()

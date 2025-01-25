@@ -53,12 +53,37 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answer *models.PreferenceSurve
 		return err
 	}
 
+	log.Println("answer")
+	log.Println(answer)
+	log.Println("options")
+	log.Println(answer.SelectedOptions)
+
+	tags := []models.Tag{}
 	for _, option := range answer.SelectedOptions {
 		option.AnswerID = answer.ID
 		if err := s.db.Save(&option).Error; err != nil {
 			log.Printf("Couldn't save option with id %d: %v", option.ID, err)
 			return err
 		}
+
+		tags = append(tags, option.Option.Tag)
+
+		log.Println(option.Option.Tag)
+	}
+
+	recommendation := models.Recommendation{
+		UserID: answer.UserID,
+		Tags:   tags,
+	}
+
+	if err := s.db.Save(&recommendation).Error; err != nil {
+		log.Printf("Couldn't save recommendation with id %d: %v", recommendation.ID, err)
+		return err
+	}
+
+	if err := s.db.Model(&recommendation).Association("Tags").Replace(tags); err != nil {
+		log.Printf("Couldn't save recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
+		return err
 	}
 
 	return nil

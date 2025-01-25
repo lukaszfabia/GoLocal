@@ -152,6 +152,7 @@ type PreferenceSurvey struct {
 
 type PreferenceSurveyQuestion struct {
 	Model
+	Survey   PreferenceSurvey         `gorm:"foreignKey:SurveyID" json:"survey"`
 	SurveyID uint                     `json:"surveyID"`
 	Text     string                   `gorm:"not null;size:1024" json:"text"`
 	Type     QuestionType             `gorm:"not null" json:"type"`
@@ -160,29 +161,36 @@ type PreferenceSurveyQuestion struct {
 
 type PreferenceSurveyOption struct {
 	Model
-	QuestionID  uint   `json:"questionID"`
-	Text        string `gorm:"not null;size:1024" json:"text"`
-	TagID       uint   `json:"tagID"`
-	Tag         Tag    `gorm:"foreignKey:TagID" json:"tag"`
-	TagPositive bool   `json:"tagPositive"`
+	Question    PreferenceSurveyQuestion `gorm:"foreignKey:QuestionID" json:"question"`
+	QuestionID  uint                     `json:"questionID"`
+	Text        string                   `gorm:"not null;size:1024" json:"text"`
+	Tag         Tag                      `gorm:"foreignKey:TagID" json:"tag"`
+	TagID       uint                     `json:"tagID"`
+	TagPositive bool                     `json:"tagPositive"`
 }
 
 type PreferenceSurveyAnswer struct {
 	Model
+	Survey          PreferenceSurvey               `gorm:"foreignKey:SurveyID" json:"survey"`
 	SurveyID        uint                           `json:"surveyID"`
+	Question        PreferenceSurveyQuestion       `gorm:"foreignKey:QuestionID" json:"question"`
 	QuestionID      uint                           `json:"questionID"`
+	User            User                           `gorm:"foreignKey:UserID" json:"user"`
 	UserID          uint                           `json:"userID"`
 	SelectedOptions []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"`
 }
 
 type PreferenceSurveyAnswerOption struct {
 	Model
-	AnswerID uint `json:"answerID"`
-	OptionID uint `json:"optionID"`
+	Answer   PreferenceSurveyAnswer `gorm:"foreignKey:AnswerID" json:"answer"`
+	AnswerID uint                   `json:"answerID"`
+	Option   PreferenceSurveyOption `gorm:"foreignKey:OptionID" json:"option"`
+	OptionID uint                   `json:"optionID"`
 }
 
 type Recommendation struct {
 	Model
+	User   User  `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE" json:"user"`
 	UserID uint  `json:"userID"`
 	Tags   []Tag `gorm:"many2many:recommendation_tags" json:"tags"`
 }
