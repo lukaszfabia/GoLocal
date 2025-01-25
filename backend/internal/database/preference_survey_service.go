@@ -53,15 +53,8 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			return err
 		}
 
-		log.Println(answer.SurveyID)
-		log.Println(answer.QuestionID)
-		log.Println(answer.UserID)
-
 		tags := []models.Tag{}
 		for _, option := range answer.SelectedOptions {
-			log.Println(option.OptionID)
-			log.Println(option.AnswerID)
-
 			option.Answer = answer
 			if err := s.db.First(&option.Option, option.OptionID).Error; err != nil {
 				log.Printf("Couldn't find option with id %d: %v", option.OptionID, err)
@@ -79,8 +72,6 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 				return err
 			}
 
-			log.Println(option.Option.Tag.Name)
-
 			tags = append(tags, tag)
 		}
 
@@ -88,8 +79,6 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			UserID: answer.UserID,
 			Tags:   tags,
 		}
-
-		log.Println(recommendation)
 
 		if err := s.db.Save(&recommendation).Error; err != nil {
 			log.Printf("Couldn't save recommendation with id %d: %v", recommendation.ID, err)
