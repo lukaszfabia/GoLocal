@@ -26,6 +26,9 @@ class VoteCard extends StatelessWidget {
     var optionCounts = vote.options.map((option) => option.votesCount).toList();
     var totalVotes = optionCounts.reduce((a, b) => a + b);
 
+    bool canVote = !(vote.type == VoteType.CANNOT_CHANGE_VOTE &&
+        vote.options.any((option) => option.isSelected));
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -54,8 +57,8 @@ class VoteCard extends StatelessWidget {
               children: [
                 Text(vote.text, style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                ...vote.options.map((option) =>
-                    _buildOptionCard(context, option, totalVotes, vote)),
+                ...vote.options.map((option) => _buildOptionCard(
+                    context, option, totalVotes, vote, canVote)),
               ],
             ),
           ),
@@ -65,9 +68,10 @@ class VoteCard extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionCard(
-      BuildContext context, VoteOption option, int totalVotes, Vote vote) {
+  Widget _buildOptionCard(BuildContext context, VoteOption option,
+      int totalVotes, Vote vote, bool canVote) {
     totalVotes = totalVotes == 0 ? 1 : totalVotes;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -77,11 +81,12 @@ class VoteCard extends StatelessWidget {
             icon: option.isSelected
                 ? Icon(Icons.circle)
                 : Icon(Icons.circle_outlined),
-            onPressed: () {
-              context
-                  .read<VoteBloc>()
-                  .add(VoteOnOption(vote.id, option.id, !option.isSelected));
-            },
+            onPressed: canVote
+                ? () {
+                    context.read<VoteBloc>().add(
+                        VoteOnOption(vote.id, option.id, !option.isSelected));
+                  }
+                : null,
           ),
         ),
         title: Text(option.text),
@@ -93,6 +98,7 @@ class VoteCard extends StatelessWidget {
         ),
         trailing: Text(
             '${(option.votesCount / totalVotes * 100).toStringAsFixed(2)}%'),
+        tileColor: canVote ? null : Colors.grey[300], // Grey out if cannot vote
       ),
     );
   }
