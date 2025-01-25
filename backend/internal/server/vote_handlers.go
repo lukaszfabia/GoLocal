@@ -83,7 +83,11 @@ func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
 	user, err := s.db.UserService().GetUser(userId)
 	if err != nil {
 		log.Println(err)
-		s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
+		message := "Internal server error"
+		if err.Error() == "you can't change vote" {
+			message = "You tried to change vote on a vote that doesn't allow changing votes"
+		}
+		s.NewResponse(w, http.StatusInternalServerError, message)
 		return
 	}
 
@@ -102,12 +106,9 @@ func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
 			for _, answer := range option.VoteAnswers {
 				if answer.UserID == user.ID {
 					isSelected = true
-					println("Selected")
 					break
 				}
 			}
-			log.Println(userId)
-			log.Println(user.ID)
 			options = append(options, forms.VoteOptionForm{
 				ID:         int(option.ID),
 				VoteID:     int(option.VoteID),
