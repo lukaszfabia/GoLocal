@@ -3,30 +3,33 @@ part of 'manage_event_bloc.dart';
 enum ManageEventStatus { initial, success, error, loading }
 
 class ManageEventState extends Equatable {
-  const ManageEventState(
-      {this.status = ManageEventStatus.initial,
-      this.title = '',
-      this.description = '',
-      this.type,
-      required this.tags,
-      this.startDate,
-      this.endDate,
-      this.isAdultsOnly = false,
-      required this.organizers,
-      this.location,
-      this.image,
-      this.message});
+  const ManageEventState({
+    this.status = ManageEventStatus.initial,
+    this.title = '',
+    this.description = '',
+    this.type,
+    required this.tags,
+    this.startDate,
+    this.endDate,
+    this.isAdultsOnly = false,
+    required this.organizers,
+    this.location,
+    this.image,
+    this.message,
+    this.id,
+  });
   final ManageEventStatus status;
+  final int? id;
   final String title;
   final String description;
   final EventType? type;
-  final List<Tag> tags;
+  final List<String> tags;
   final DateTime? startDate;
   final DateTime? endDate;
   final bool isAdultsOnly;
   final List<User> organizers;
   final Location? location;
-  final XFile? image;
+  final File? image;
 
   final String? message;
 
@@ -51,14 +54,14 @@ class ManageEventState extends Equatable {
     String? title,
     String? description,
     EventType? type,
-    List<Tag>? tags,
+    List<String>? tags,
     DateTime? startDate,
     DateTime? endDate,
     bool? isAdultsOnly,
     List<User>? organizers,
     Location? location,
     String? message,
-    XFile? image,
+    File? image,
   }) {
     return ManageEventState(
       status: status ?? this.status,
@@ -82,7 +85,7 @@ class ManageEventState extends Equatable {
           title: event.title,
           description: event.description,
           type: event.eventType,
-          tags: event.tags,
+          tags: event.tags.map((e) => e.name).toList(),
           startDate: event.startDate,
           endDate: event.endDate,
           isAdultsOnly: event.isAdultOnly,

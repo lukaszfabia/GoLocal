@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
@@ -26,15 +27,15 @@ class EventsRepositoryImpl implements IEventsRepository {
   }
 
   @override
-  Future<Event> createEvent(Event event) async {
-    // Return null for now
-    return Event(
-        id: 1,
-        title: "1",
-        description: "",
-        tags: [],
-        startDate: DateTime(2024),
-        eventOrganizers: []);
+  Future<Event> createEvent(EventDTO event) async {
+    final FormData formData = await event.toFormData();
+    final response = await _dioClient.dio.post('/auth/event',
+        data: formData, options: Options(contentType: 'multipart/form-data'));
+    if (response.statusCode == 201) {
+      return Event.fromJson(response.data['data']);
+    } else {
+      throw Exception('Failed to create event');
+    }
   }
 
   @override

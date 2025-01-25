@@ -39,7 +39,7 @@ class DioClient {
             final refreshToken = await _tokenStorage.getRefreshToken();
             if (refreshToken != null) {
               try {
-                final response = await dio.post('refresh-token/', data: {
+                final response = await dio.post('/api/refresh-token/', data: {
                   'refresh': refreshToken,
                 });
                 final newAccessToken = response.data['data']['access'];

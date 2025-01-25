@@ -22,6 +22,7 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           events: state.events + events,
           status: EventsStatus.loaded,
           nextPage: state.nextPage + 1,
+          hasNext: events.isNotEmpty,
         ));
       } catch (e) {
         emit(state.copyWith(

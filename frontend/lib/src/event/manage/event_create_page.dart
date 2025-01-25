@@ -120,11 +120,71 @@ class _EventCreatePageState extends State<EventCreatePage> {
           children: [
             for (var tag in state.tags)
               Chip(
-                label: Text(tag.name),
+                label: Text(tag),
                 onDeleted: () {
                   context
                       .read<ManageEventBloc>()
-                      .add(UpdateTags(tag.name, remove: true));
+                      .add(UpdateTags(tag, remove: true));
+                },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Column organizersSection(ManageEventState state, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Tell us more about the organizers",
+          style: TextStyle(fontSize: 16),
+        ),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                  controller: _tagsFieldController,
+                  decoration: InputDecoration(
+                    labelText: 'Organizer',
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    context
+                        .read<ManageEventBloc>()
+                        .add(UpdateOrganizers(value));
+                    _tagsFieldController.clear();
+                  }),
+            ),
+            SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                context
+                    .read<ManageEventBloc>()
+                    .add(UpdateTags(_tagsFieldController.text));
+                _tagsFieldController.clear();
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(16),
+                shape: CircleBorder(),
+              ),
+              child: Icon(Icons.add),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (var organizer in state.organizers)
+              Chip(
+                label: Text(organizer.firstName),
+                onDeleted: () {
+                  context
+                      .read<ManageEventBloc>()
+                      .add(UpdateTags(tag, remove: true));
                 },
               ),
           ],

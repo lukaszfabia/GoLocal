@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
@@ -30,11 +33,11 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
     on<UpdateTags>((event, emit) {
       var tags = List.of(state.tags);
       if (event.remove) {
-        tags.removeWhere((element) => element.name == event.tag);
+        tags.removeWhere((element) => element == event.tag);
       } else {
         if (event.tag.isEmpty) return;
-        if (tags.map((t) => t.name).toList().contains(event.tag)) return;
-        tags.add(Tag(id: 1, name: event.tag));
+        if (tags.contains(event.tag)) return;
+        tags.add(event.tag);
       }
       emit(state.copyWith(tags: tags));
     });
@@ -62,21 +65,20 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
     });
     on<SaveEvent>((event, emit) async {
       emit(state.copyWith(status: ManageEventStatus.loading));
+      final dto = EventDTO(
+        title: state.title,
+        description: state.description,
+        startDate: state.startDate!,
+        endDate: state.endDate!,
+        isAdultOnly: state.isAdultsOnly,
+        location: state.location,
+        organizers: state.organizers.map((e) => e.id).toList(),
+        tags: state.tags,
+        image: state.image!,
+        eventType: state.type!.name,
+      );
       try {
-        _repository.createEvent(
-          Event(
-            id: 1,
-            title: state.title,
-            description: state.description,
-            startDate: state.startDate!,
-            endDate: state.endDate,
-            tags: state.tags,
-            eventOrganizers: state.organizers,
-            eventType: state.type ?? EventType.other,
-            isAdultOnly: state.isAdultsOnly,
-            location: state.location,
-          ),
-        );
+        final created = await _repository.createEvent(dto);
         emit(state.copyWith(
           status: ManageEventStatus.success,
           message: 'Event saved successfully',

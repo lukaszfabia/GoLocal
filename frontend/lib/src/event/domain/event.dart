@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/location/location.dart';
 import 'package:golocal/src/shared/model_base.dart';
@@ -71,6 +74,48 @@ class Event extends Model {
     data['endDate'] = endDate?.toString();
     data['location'] = location?.toJson() ?? {};
     data['eventOrganizers'] = eventOrganizers.map((e) => e.toJson()).toList();
+    return data;
+  }
+}
+
+class EventDTO {
+  List<int> organizers;
+  String title;
+  String description;
+  File image;
+  DateTime startDate;
+  DateTime endDate;
+  bool isAdultOnly;
+  String eventType;
+  List<String> tags;
+  var location;
+
+  EventDTO({
+    required this.organizers,
+    required this.title,
+    required this.description,
+    required this.image,
+    required this.startDate,
+    required this.endDate,
+    required this.isAdultOnly,
+    required this.eventType,
+    required this.tags,
+    required this.location,
+  });
+
+  Future<FormData> toFormData() async {
+    final data = FormData.fromMap({
+      'organizers': organizers,
+      'title': title,
+      'description': description,
+      'image': await MultipartFile.fromFile(image.path),
+      'startDate': startDate,
+      'endDate': endDate,
+      'isAdultOnly': isAdultOnly,
+      'eventType': eventType,
+      'tags': tags,
+      'location': location,
+    });
     return data;
   }
 }

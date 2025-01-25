@@ -46,7 +46,7 @@ class EventsRepositoryDummy implements IEventsRepository {
   }
 
   @override
-  Future<Event> createEvent(Event event) {
+  Future<Event> createEvent(EventDTO event) {
     // TODO: implement createEvent
     throw UnimplementedError();
   }
