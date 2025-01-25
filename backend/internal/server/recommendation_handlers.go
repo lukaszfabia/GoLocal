@@ -2,9 +2,9 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 // @Summary Get Recommendations
@@ -16,17 +16,18 @@ import (
 func (s *Server) getRecommendations(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/recommendation/"), "/")
-		if len(pathParts) < 1 {
-			s.NewResponse(w, http.StatusBadRequest, "Missing user ID")
+		userId := r.Header.Get("User-Id")
+		if userId == "" {
+			log.Println("Unauthorized access")
+			s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 			return
 		}
-		userID64, err := strconv.ParseUint(pathParts[0], 10, 32)
+
+		_, err := s.db.UserService().GetUser(userId)
 		if err != nil {
-			s.NewResponse(w, http.StatusBadRequest, "Invalid user ID")
+			s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
 			return
 		}
-		userID := uint(userID64)
 
 		events, err := s.db.EventService().GetEvents(map[string]any{}, 0)
 		for _, event := range events {
@@ -36,7 +37,14 @@ func (s *Server) getRecommendations(w http.ResponseWriter, r *http.Request) {
 			s.NewResponse(w, http.StatusInternalServerError, "Error fetching events")
 			return
 		}
-		survey, err := s.db.RecommendationService().Predict(events, userID)
+
+		userIdUint, err := strconv.ParseUint(userId, 10, 32)
+		if err != nil {
+			s.NewResponse(w, http.StatusBadRequest, "Invalid User-Id")
+			return
+		}
+
+		survey, err := s.db.RecommendationService().Predict(events, uint(userIdUint))
 		if err != nil {
 			s.NewResponse(w, http.StatusInternalServerError, "Error fetching survey")
 			return

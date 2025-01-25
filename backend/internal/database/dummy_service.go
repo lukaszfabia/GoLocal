@@ -32,21 +32,21 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	// d.coords()
-	// d.address()
-	// d.location()
-	// d.user1()
-	// d.tags()
-	// d.comments()
-	// d.votes()
-	// d.event1()
-	// d.event2()
-	// d.opinion()
-	// d.followers()
-	// d.user2()
+	d.coords()
+	d.address()
+	d.location()
+	d.user1()
+	d.tags()
+	d.comments()
+	d.votes()
+	d.event1()
+	d.event2()
+	d.opinion()
+	d.followers()
+	d.user2()
 	d.generateMockSurvey()
-	// d.easyLoginUser()
-	// d.generateRecommendations()
+	d.easyLoginUser()
+	d.generateRecommendations()
 }
 
 // &models.Opinion{},
@@ -60,7 +60,7 @@ func (d *dummyServiceImpl) user2() {
 		var votes []*models.VoteAnswer
 		var comments []*models.Comment
 
-		if err := d.db.Model(&models.Vote{}).Where("user_id = ?", user.ID).Find(&votes).Error; err != nil {
+		if err := d.db.Model(&models.VoteAnswer{}).Where("user_id = ?", user.ID).Find(&votes).Error; err != nil {
 			log.Println("user2: Error fetching votes for user", user.ID, err)
 		} else {
 			user.Votes = votes
@@ -362,7 +362,7 @@ func (d *dummyServiceImpl) opinion() {
 }
 
 func (d *dummyServiceImpl) tags() {
-	// check if there are already 300 tags
+	// check if there are already 30 tags
 	tags := []*models.Tag{}
 	if err := d.db.Find(&tags).Error; err != nil {
 		log.Println(err)
@@ -381,13 +381,13 @@ func (d *dummyServiceImpl) tags() {
 		}
 	}
 
-	if len(tags) >= 300 {
+	if len(tags) >= 30 {
 		log.Println("Tags already exist")
 		return
 	}
 
 	var i = 0
-	for i < 300 {
+	for i < 30 {
 		t := &models.Tag{
 			Name: d.f.Hobby(),
 		}

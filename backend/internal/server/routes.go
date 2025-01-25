@@ -71,7 +71,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	preference.HandleFunc("/preference-survey", s.getSurvey)
 
 	// recommendation routes
-	api.HandleFunc("/recommendation/{userID:[0-9]+}", s.getRecommendations)
+	auth.HandleFunc("/recommendations", s.getRecommendations)
 
 	auth.HandleFunc("/account/", s.AccountHandler).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)

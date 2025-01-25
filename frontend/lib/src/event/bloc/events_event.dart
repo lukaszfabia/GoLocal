@@ -14,3 +14,11 @@ final class FetchEvents extends EventsEvent {
   @override
   List<Object> get props => [refresh];
 }
+
+final class SwitchRepository extends EventsEvent {
+  const SwitchRepository(this.newRepository);
+  final IEventsRepository newRepository;
+
+  @override
+  List<Object> get props => [newRepository];
+}

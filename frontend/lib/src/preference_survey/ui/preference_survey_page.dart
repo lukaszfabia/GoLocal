@@ -60,27 +60,29 @@ class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
         if (state is PreferenceSurveyLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is PreferenceSurveyLoaded) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  state.survey.description,
-                  style: const TextStyle(fontSize: 18),
+          return SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      state.survey.description,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    ...state.survey.questions.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      PreferenceSurveyQuestion question = entry.value;
+                      return _buildQuestion(index, question);
+                    }),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => _submitSurvey(state.survey.id),
+                      child: const Text('Submit Survey'),
+                    ),
+                  ],
                 ),
-                ...state.survey.questions.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  PreferenceSurveyQuestion question = entry.value;
-                  return _buildQuestion(index, question);
-                }),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => _submitSurvey(state.survey.id),
-                  child: const Text('Submit Survey'),
-                ),
-              ],
-            ),
-          );
+              ));
         } else if (state is PreferenceSurveySubmitted) {
           return const Center(child: Text('Survey submitted successfully!'));
         } else if (state is PreferenceSurveyError) {

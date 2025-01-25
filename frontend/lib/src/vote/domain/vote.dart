@@ -29,11 +29,22 @@ class Vote extends Model {
           ..sort((a, b) => a.text.compareTo(b.text)),
         text = json['text'],
         event = Event.fromJson(json['event']),
-        type = VoteType.values
-            .firstWhere((e) => e.toString() == 'VoteType.${json['voteType']}'),
+        type = parseVoteType(json['voteType']),
         endsAt =
             json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
         super.fromJson();
+
+  static VoteType parseVoteType(String type) {
+    switch (type) {
+      case 'CAN_CHANGE_VOTE':
+        return VoteType.CAN_CHANGE_VOTE;
+      case 'CANNOT_CHANGE_VOTE':
+        return VoteType.CANNOT_CHANGE_VOTE;
+      default:
+        print('Unknown vote type: $type');
+        return VoteType.CAN_CHANGE_VOTE;
+    }
+  }
 
   @override
   Map<String, dynamic> toJson() {
