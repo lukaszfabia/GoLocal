@@ -34,7 +34,7 @@ func (s *service) DummyService() DummyService {
 
 func (d *dummyServiceImpl) Cook() {
 	// d.clearDatabase()
-
+	//
 	// d.coords()
 	// d.address()
 	// d.location()
@@ -47,7 +47,7 @@ func (d *dummyServiceImpl) Cook() {
 	// d.comments()
 	// d.votes()
 	// d.user2()
-	d.generateMockSurvey()
+	// d.generateMockSurvey()
 	// d.easyLoginUser()
 	// d.generateRecommendations()
 }
@@ -335,26 +335,16 @@ func (d *dummyServiceImpl) votes() {
 
 	for i := 0; i < len(events); i++ {
 		for j := 0; j < d.f.Number(0, 4); j++ {
-			Options :=
-				[]models.VoteOption{}
+			vote := &models.Vote{}
+			err := error(nil)
 
-			for k := 0; k < d.f.Number(2, 5); k++ {
-				Options = append(Options, models.VoteOption{Text: d.f.Noun()})
+			if d.f.Bool() {
+				vote, err = d.generateRandomVote(events[i])
+			} else {
+				vote, err = d.generateAttendanceVote(events[i])
 			}
 
-			vote := &models.Vote{
-				EventID: events[i].ID,
-				Text:    d.f.Question(),
-				VoteType: func() models.VoteType {
-					if d.f.Bool() {
-						return models.CanChangeVote
-					}
-					return models.CannotChangeVote
-				}(),
-				Options: Options,
-			}
-
-			if err := d.db.Create(vote).Error; err != nil {
+			if err != nil {
 				log.Println(err)
 				continue
 			}
@@ -382,6 +372,66 @@ func (d *dummyServiceImpl) votes() {
 	}
 
 	log.Println("Votes generated")
+}
+
+func (d *dummyServiceImpl) generateRandomVote(event *models.Event) (*models.Vote, error) {
+	Options :=
+		[]models.VoteOption{}
+
+	for k := 0; k < d.f.Number(2, 5); k++ {
+		Options = append(Options, models.VoteOption{Text: d.f.Noun(), ParticipationStatus: models.NotApplicable})
+	}
+
+	vote := &models.Vote{
+		EventID: event.ID,
+		Text:    d.f.Question(),
+		VoteType: func() models.VoteType {
+			if d.f.Bool() {
+				return models.CanChangeVote
+			}
+			return models.CannotChangeVote
+		}(),
+		Options: Options,
+	}
+
+	if err := d.db.Create(vote).Error; err != nil {
+		return nil, err
+	}
+
+	return vote, nil
+}
+
+func (d *dummyServiceImpl) generateAttendanceVote(event *models.Event) (*models.Vote, error) {
+	Options :=
+		[]models.VoteOption{}
+
+	if d.f.Bool() {
+		Options = append(Options, models.VoteOption{Text: "Interested", ParticipationStatus: models.Interested})
+		Options = append(Options, models.VoteOption{Text: "Will participate", ParticipationStatus: models.WillParticipate})
+		Options = append(Options, models.VoteOption{Text: "Not interested", ParticipationStatus: models.NotInterested})
+	} else {
+		Options = append(Options, models.VoteOption{Text: "Will participate", ParticipationStatus: models.WillParticipate})
+		Options = append(Options, models.VoteOption{Text: "Not interested", ParticipationStatus: models.NotInterested})
+		Options = append(Options, models.VoteOption{Text: "I don't know yet", ParticipationStatus: models.NotApplicable})
+	}
+
+	vote := &models.Vote{
+		EventID: event.ID,
+		Text:    d.f.Question(),
+		VoteType: func() models.VoteType {
+			if d.f.Bool() {
+				return models.CanChangeVote
+			}
+			return models.CannotChangeVote
+		}(),
+		Options: Options,
+	}
+
+	if err := d.db.Create(vote).Error; err != nil {
+		return nil, err
+	}
+
+	return vote, nil
 }
 
 //lint:ignore U1000 Ignore unused function as dynamically used in seeder
