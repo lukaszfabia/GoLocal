@@ -26,7 +26,7 @@ class VoteCard extends StatelessWidget {
     var optionCounts = vote.options.map((option) => option.votesCount).toList();
     var totalVotes = optionCounts.reduce((a, b) => a + b);
 
-    bool canVote = !(vote.type == VoteType.CANNOT_CHANGE_VOTE &&
+    bool canVote = !(vote.type == VoteType.cannotChangeVote &&
         vote.options.any((option) => option.isSelected));
 
     return Card(

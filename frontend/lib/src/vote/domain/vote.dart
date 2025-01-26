@@ -2,7 +2,7 @@ import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
 import 'package:golocal/src/event/domain/event.dart';
 
-enum VoteType { CAN_CHANGE_VOTE, CANNOT_CHANGE_VOTE }
+enum VoteType { canChangeVote, cannotChangeVote }
 
 class Vote extends Model {
   final Event event;
@@ -37,12 +37,12 @@ class Vote extends Model {
   static VoteType parseVoteType(String type) {
     switch (type) {
       case 'CAN_CHANGE_VOTE':
-        return VoteType.CAN_CHANGE_VOTE;
+        return VoteType.canChangeVote;
       case 'CANNOT_CHANGE_VOTE':
-        return VoteType.CANNOT_CHANGE_VOTE;
+        return VoteType.cannotChangeVote;
       default:
         print('Unknown vote type: $type');
-        return VoteType.CAN_CHANGE_VOTE;
+        return VoteType.canChangeVote;
     }
   }
 

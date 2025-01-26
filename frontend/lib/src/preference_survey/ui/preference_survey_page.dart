@@ -21,20 +21,20 @@ class PreferenceSurveyPage extends StatelessWidget {
       body: BlocProvider(
         create: (context) => PreferenceSurveyBloc(PreferenceSurveyRepository())
           ..add(LoadPreferenceSurvey()),
-        child: const PreferenceSurveyForm(),
+        child: const _PreferenceSurveyForm(),
       ),
     );
   }
 }
 
-class PreferenceSurveyForm extends StatefulWidget {
-  const PreferenceSurveyForm({super.key});
+class _PreferenceSurveyForm extends StatefulWidget {
+  const _PreferenceSurveyForm();
 
   @override
   _PreferenceSurveyFormState createState() => _PreferenceSurveyFormState();
 }
 
-class _PreferenceSurveyFormState extends State<PreferenceSurveyForm> {
+class _PreferenceSurveyFormState extends State<_PreferenceSurveyForm> {
   final Map<int, List<int>> _answers = {};
 
   @override

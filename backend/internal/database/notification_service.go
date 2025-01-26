@@ -56,20 +56,29 @@ func (ns *notificationServiceImpl) SetClient(client *messaging.Client) {
 
 func (ns *notificationServiceImpl) SendPush(n *notification) error {
 	if ns.client == nil {
+		log.Println("No provided client")
 		return errors.New("no provided client")
 	}
+
+	log.Println("Fetching device tokens for users:", n.usersIds)
 
 	var devices []*models.DeviceToken
 
 	if err := ns.db.Preload("Users", "users.id IN ?", n.usersIds).Find(&devices).Error; err != nil {
+		log.Printf("Error fetching device tokens: %v", err)
 		return err
 	}
+
+	log.Printf("Fetched %d device tokens", len(devices))
+
 	// get only tokens
 	tokens := []string{}
 
 	for _, device := range devices {
 		tokens = append(tokens, device.Token)
 	}
+
+	log.Printf("Collected %d tokens", len(tokens))
 
 	notification := &messaging.Notification{
 		Title: n.title,
@@ -78,6 +87,7 @@ func (ns *notificationServiceImpl) SendPush(n *notification) error {
 
 	if n.image != nil {
 		notification.ImageURL = *n.image
+		log.Printf("Notification image URL set: %s", *n.image)
 	}
 
 	message := &messaging.MulticastMessage{
@@ -85,9 +95,11 @@ func (ns *notificationServiceImpl) SendPush(n *notification) error {
 		Notification: notification,
 	}
 
+	log.Println("Sending multicast message")
+
 	batchResponse, err := ns.client.SendMulticast(context.Background(), message)
 	if err != nil {
-		log.Fatalf("error sending multicast message: %v", err)
+		log.Fatalf("Error sending multicast message: %v", err)
 	}
 
 	log.Printf("Successfully sent %d messages", batchResponse.SuccessCount)

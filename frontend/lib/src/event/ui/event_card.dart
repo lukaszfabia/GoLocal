@@ -29,7 +29,7 @@ class EventCard extends StatelessWidget {
               right: 0,
               child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.8),
+                    color: Colors.grey.withValues(alpha: 0.8),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(6.0),

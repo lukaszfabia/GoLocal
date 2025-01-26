@@ -118,7 +118,6 @@ class _EventCreatePageState extends State<EventCreatePage> {
               Chip(
                 label: Text(tag.name),
                 onDeleted: () {
-                  print('deleting');
                   context
                       .read<ManageEventBloc>()
                       .add(UpdateTags(tag.name, remove: true));

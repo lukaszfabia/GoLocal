@@ -43,7 +43,6 @@ class ReportEventBloc extends Bloc<ReportEventEvent, ReportEventState> {
 
   @override
   void onTransition(Transition<ReportEventEvent, ReportEventState> transition) {
-    print(transition);
     super.onTransition(transition);
   }
 }

@@ -74,7 +74,6 @@ func (u *userServiceImpl) DeleteUser(user *models.User) error {
 }
 
 func (u *userServiceImpl) AddDevice(device *forms.Device) error {
-
 	token := models.DeviceToken{
 		Token:     device.Token,
 		OSVersion: device.OSVersion,
@@ -82,8 +81,9 @@ func (u *userServiceImpl) AddDevice(device *forms.Device) error {
 	}
 
 	return u.db.Transaction(func(tx *gorm.DB) error {
-		var user models.User = models.User{}
-		if err := u.db.Model(user).First(user, "id = ?", device.UserID).Error; err != nil {
+		var user models.User
+		if err := u.db.Model(&user).First(&user, "id = ?", device.UserID).Error; err != nil {
+			log.Println("Error fetching user:", err)
 			return err
 		}
 

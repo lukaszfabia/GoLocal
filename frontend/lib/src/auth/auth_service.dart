@@ -12,8 +12,6 @@ class AuthService {
     return _dio.post('/sign-up/', data: data);
   }
 
-  //TODO
-  // oj tam todo działa dobrze
   Future<Response> logout() {
     return Future<Response>.value(
         Response(requestOptions: RequestOptions(path: '')));

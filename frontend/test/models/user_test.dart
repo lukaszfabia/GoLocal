@@ -44,7 +44,6 @@ void main() {
       expect(userJson['isVerified'], user.isVerified);
       expect(userJson['isPremium'], user.isPremium);
       expect(userJson['avatarUrl'], user.avatarUrl);
-      print(userJson);
     });
   });
 }

@@ -91,7 +91,6 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
 
   @override
   void onTransition(Transition<ManageEventEvent, ManageEventState> transition) {
-    print(transition);
     super.onTransition(transition);
   }
 }

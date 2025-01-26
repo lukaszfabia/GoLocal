@@ -64,7 +64,6 @@ class VotesRepositoryImpl implements IVotesRepository {
         'voteOptionID': optionId,
       });
     } on DioException catch (e) {
-      print(e.response);
       if (e.response?.statusCode == 400 &&
           e.response?.data['message'] ==
               'You tried to change vote on a vote that doesn\'t allow changing votes') {

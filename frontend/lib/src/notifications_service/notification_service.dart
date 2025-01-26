@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:golocal/src/dio_client.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -8,6 +12,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class NotificationService {
+  final Dio _dio = DioClient().dio;
+
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
@@ -123,5 +129,49 @@ class NotificationService {
 
     final token = await _messaging.getToken();
     print('FirebaseMessaging token: $token');
+  }
+
+  Future<void> registerDevice() async {
+    print('Registering device with token');
+
+    final token = await _messaging.getToken();
+
+    print('Registering device with token: $token');
+
+    if (token == null) {
+      return;
+    }
+
+    final osVersion = Platform.operatingSystemVersion;
+
+    final platform = Platform.operatingSystem;
+
+    final deviceForm = DeviceForm(
+      token: token,
+      osVersion: osVersion,
+      platform: platform,
+    );
+
+    _dio.post("/device-token-registration/", data: deviceForm.toJson());
+  }
+}
+
+class DeviceForm {
+  String token;
+  String? osVersion;
+  String? platform;
+
+  DeviceForm({
+    required this.token,
+    this.osVersion,
+    this.platform,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'token': token,
+      'osVersion': osVersion,
+      'platform': platform,
+    };
   }
 }
