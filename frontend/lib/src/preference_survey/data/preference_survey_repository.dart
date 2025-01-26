@@ -27,9 +27,8 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
         'answers': answerList.map((answer) => answer.toJson()).toList(),
       };
 
-      final response = await _dioClient.dio
+      await _dioClient.dio
           .post('/preference/preference-survey/answer', data: data);
-      print('Survey submitted: ${response.data}');
     } catch (e) {
       print('Error submitting survey: $e');
     }

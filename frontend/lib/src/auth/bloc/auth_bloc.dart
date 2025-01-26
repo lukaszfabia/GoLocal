@@ -43,12 +43,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   @override
   void onEvent(AuthEvent event) {
     super.onEvent(event);
-    print(event);
   }
 
   @override
   void onTransition(Transition<AuthEvent, AuthState> transition) {
     super.onTransition(transition);
-    print(transition);
   }
 }
