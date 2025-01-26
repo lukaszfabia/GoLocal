@@ -1,6 +1,7 @@
 package server
 
 import (
+	"backend/internal/database"
 	"backend/internal/forms"
 	"backend/internal/models"
 	"encoding/json"
@@ -105,6 +106,19 @@ func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("Received answers:", answers)
+
+		title := "Hey, you just filled out the survey!"
+		body := "Check info!"
+
+		var userId = modelAnswers[0].UserID
+
+		ids := []uint{userId}
+
+		n := database.NewNotification(title, body, nil, ids)
+
+		s.db.NotificationService().SendPush(&n)
+
+		log.Println("Sent push notification")
 
 		s.NewResponse(w, http.StatusCreated, answers)
 	default:

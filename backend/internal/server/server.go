@@ -77,6 +77,8 @@ func NewServer() *http.Server {
 
 	NewServer.db.NotificationService().SetClient(client)
 
+	log.Printf("Client: %v", client)
+
 	NewServer.db.Sync()
 
 	// Declare Server config
