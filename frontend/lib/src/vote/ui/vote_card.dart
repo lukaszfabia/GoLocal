@@ -37,17 +37,19 @@ class VoteCard extends StatelessWidget {
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundImage: vote.event.imageUrl == null
+              backgroundImage: vote.event?.imageUrl == null
                   ? AssetImage('assets/image_not_found.png')
-                  : NetworkImage(vote.event.imageUrl!),
+                  : NetworkImage(vote.event!.imageUrl!),
             ),
-            title: Text(vote.event.title,
+            title: Text(vote.event?.title ?? "Title not available",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(__formatLocation(vote.event.location)),
+            subtitle: Text(__formatLocation(vote.event?.location)),
             trailing: Icon(Icons.star_border),
             onTap: () {
-              context.push('${AppRoute.events.path}/${vote.event.id}',
-                  extra: vote.event);
+              if (vote.event != null) {
+                context.push('${AppRoute.events.path}/${vote.event!.id}',
+                    extra: vote.event);
+              }
             },
           ),
           Padding(

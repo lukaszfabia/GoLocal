@@ -88,9 +88,8 @@ type service struct {
 	tokenService            TokenService
 	dummyService            DummyService
 	notificationService     NotificationService
-
-	eventService EventService
-	voteService  VoteService
+	eventService            EventService
+	voteService             VoteService
 }
 
 // Initializes new database connection and services
@@ -117,7 +116,7 @@ func New() Service {
 		voteService := NewVoteService(db)
 		notificationService := NewNotificationService(db)
 
-		return &service{
+		dbInstance = &service{
 			db:                      db,
 			userService:             userService,
 			tokenService:            tokenService,
@@ -128,6 +127,8 @@ func New() Service {
 			voteService:             voteService,
 			notificationService:     notificationService,
 		}
+
+		return dbInstance
 	}
 }
 

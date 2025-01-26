@@ -20,6 +20,7 @@ const (
 	Interested      ParticipationStatus = "INTERESTED"
 	WillParticipate ParticipationStatus = "WILL_PARTICIPATE"
 	NotInterested   ParticipationStatus = "NOT_INTERESTED"
+	NotApplicable   ParticipationStatus = "NOT_APPLICABLE"
 )
 
 var ParticipationStatuses = []ParticipationStatus{Interested, WillParticipate, NotInterested}
