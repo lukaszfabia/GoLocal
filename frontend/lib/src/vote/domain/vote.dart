@@ -5,7 +5,7 @@ import 'package:golocal/src/event/domain/event.dart';
 enum VoteType { canChangeVote, cannotChangeVote }
 
 class Vote extends Model {
-  final Event event;
+  final Event? event;
   final String text;
   final List<VoteOption> options;
   final VoteType type;
@@ -13,11 +13,11 @@ class Vote extends Model {
 
   Vote({
     required super.id,
-    this.text = '',
     required this.options,
-    required this.event,
     required this.type,
     required this.endsAt,
+    this.text = '',
+    this.event,
   });
 
   Vote.fromJson(super.json)
@@ -28,7 +28,7 @@ class Vote extends Model {
             : []
           ..sort((a, b) => a.text.compareTo(b.text)),
         text = json['text'],
-        event = Event.fromJson(json['event']),
+        event = json["event"] != null ? Event.fromJson(json['event']) : null,
         type = parseVoteType(json['voteType']),
         endsAt =
             json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
@@ -52,7 +52,7 @@ class Vote extends Model {
       'ID': id,
       'text': text,
       'options': options.map((option) => option.toJson()).toList(),
-      'event': event.toJson(),
+      'event': event?.toJson(),
     };
   }
 

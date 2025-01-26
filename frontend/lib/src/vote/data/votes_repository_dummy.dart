@@ -39,7 +39,9 @@ class VotesRepositoryDummy implements IVotesRepository {
 
   @override
   Future<List<Vote>> getVotesForEvent(String eventId) async {
-    return _votes.where((vote) => vote.event.id.toString() == eventId).toList();
+    return _votes
+        .where((vote) => vote.event?.id.toString() == eventId)
+        .toList();
   }
 
   @override
