@@ -18,6 +18,12 @@ type EventHandler struct {
 	NotificationService notifications.NotificationService
 }
 
+// @Summary Get Events
+// @Description Get events based on query parameters
+// @Tags event
+// @Accept json
+// @Produce json
+// @Router /api/auth/event [get]
 func (h *EventHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		h.post(w, r)
@@ -67,11 +73,8 @@ func (h *EventHandler) post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create notification
-
-	title := fmt.Sprintf("You've been organizer of %s", event.Title)
-
 	n := notifications.Notification{
-		Title:    title,
+		Title:    fmt.Sprintf("You've been organizer of %s", event.Title),
 		Body:     "Check new events info!",
 		UsersIds: form.Organizers,
 		Author:   user.ID,

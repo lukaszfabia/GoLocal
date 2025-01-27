@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Notification model which is sent to groups of users
 type Notification struct {
 	Title    string
 	Body     string
@@ -21,13 +20,12 @@ type Notification struct {
 }
 
 type NotificationService interface {
-	// Set client before you call send push notification
-	SetClient(client *messaging.Client)
+	SetClient(client messagingClient)
 	SendPush(n *Notification) error
 }
 
 type notificationServiceImpl struct {
-	client *messaging.Client
+	client messagingClient
 	db     *gorm.DB
 }
 
@@ -38,7 +36,7 @@ func NewNotificationService(db *gorm.DB) NotificationService {
 	}
 }
 
-func (ns *notificationServiceImpl) SetClient(client *messaging.Client) {
+func (ns *notificationServiceImpl) SetClient(client messagingClient) {
 	ns.client = client
 	log.Println("Client has been set")
 }
@@ -49,7 +47,11 @@ func (ns *notificationServiceImpl) SendPush(n *Notification) error {
 		return errors.New("no provided client")
 	}
 
-	// remove here author
+	if len(n.UsersIds) < 1 {
+		log.Println("No users specified")
+		return errors.New("no users specified")
+	}
+
 	ids := functools.Filter(func(e uint) bool {
 		return e != n.Author
 	}, n.UsersIds)
@@ -58,16 +60,18 @@ func (ns *notificationServiceImpl) SendPush(n *Notification) error {
 
 	var devices []*models.DeviceToken
 
-	if err := ns.db.Preload("Users", "users.id IN ?", ids).Find(&devices).Error; err != nil {
+	if err := ns.db.
+		Joins("JOIN user_devices ON user_devices.device_token_id = device_tokens.id").
+		Joins("JOIN users ON users.id = user_devices.user_id").
+		Where("users.id IN ? AND users.deleted_at IS NULL", ids).
+		Find(&devices).Error; err != nil {
 		log.Printf("Error fetching device tokens: %v", err)
 		return err
 	}
 
 	log.Printf("Fetched %d device tokens", len(devices))
 
-	// get only tokens
-	tokens := []string{}
-
+	tokens := make([]string, 0, len(devices))
 	for _, device := range devices {
 		tokens = append(tokens, device.Token)
 	}
@@ -93,7 +97,8 @@ func (ns *notificationServiceImpl) SendPush(n *Notification) error {
 
 	batchResponse, err := ns.client.SendMulticast(context.Background(), message)
 	if err != nil {
-		log.Fatalf("Error sending multicast message: %v", err)
+		log.Printf("Error sending multicast message: %v", err)
+		return err
 	}
 
 	log.Printf("Successfully sent %d messages", batchResponse.SuccessCount)
