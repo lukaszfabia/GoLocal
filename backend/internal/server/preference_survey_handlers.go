@@ -1,9 +1,9 @@
 package server
 
 import (
-	"backend/internal/database"
 	"backend/internal/forms"
 	"backend/internal/models"
+	"backend/internal/notifications"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -114,7 +114,13 @@ func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 
 		ids := []uint{userId}
 
-		n := database.NewNotification(title, body, nil, ids)
+		// n := database.NewNotification(title, body, nil, ids)
+		n := notifications.Notification{
+			Title:    title,
+			Body:     body,
+			Image:    nil,
+			UsersIds: ids,
+		}
 
 		s.db.NotificationService().SendPush(&n)
 

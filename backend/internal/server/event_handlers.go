@@ -1,14 +1,11 @@
 package server
 
 import (
-	"backend/internal/database"
 	"backend/internal/forms"
 	"backend/internal/models"
 	"backend/pkg/functools"
 	"backend/pkg/image"
-	"backend/pkg/normalizer"
 	"backend/pkg/parsers"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -39,12 +36,6 @@ func (s *Server) EventHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeMultipartForm[forms.Event](r)
-	// Get user from ctx
-	user, ok := r.Context().Value("user").(*models.User)
-	if !ok {
-		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
-		return
-	}
 
 	if err != nil {
 		s.InvalidFormResponse(w)
@@ -62,26 +53,23 @@ func (s *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 
 	form.ImageURL = url
 
-	// normalize tags
-	form.Tags = normalizer.Normalizer(form.Tags)
-
 	event, err := s.db.EventService().CreateEvent(*form)
 	if err != nil {
 		s.InvalidFormResponse(w)
 		return
 	}
 
-	title := fmt.Sprintf("You've been organizer of %s", form.Title)
-	body := "Check events info!"
-	// dont send to requester
-	ids := functools.Filter(func(e uint) bool {
-		return e != user.ID
-	}, form.Organizers)
+	// title := fmt.Sprintf("You've been organizer of %s", form.Title)
+	// body := "Check events info!"
+	// // dont send to requester
+	// ids := functools.Filter(func(e uint) bool {
+	// 	return e != user.ID
+	// }, form.Organizers)
 
-	n := database.NewNotification(title, body, nil, ids)
+	// n := database.NewNotification(title, body, nil, ids, 0)
 
-	// already logged err
-	s.db.NotificationService().SendPush(&n)
+	// // already logged err
+	// s.db.NotificationService().SendPush(&n)
 
 	s.NewResponse(w, http.StatusCreated, event)
 }
@@ -104,14 +92,13 @@ func (s *Server) getEvent(w http.ResponseWriter, r *http.Request) {
 		limit = -1 // take all records
 	}
 
-	preloads := []string{
+	res, err := s.db.EventService().GetEvents(params, limit, []string{
 		"Location",
 		"Location.Address",
 		"Tags",
 		"EventOrganizers",
 		"Votes",
-	}
-	res, err := s.db.EventService().GetEvents(params, limit, preloads)
+	})
 
 	if err != nil {
 		s.NewResponse(w, http.StatusNotFound, "No such a events")

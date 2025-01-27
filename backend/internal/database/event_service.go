@@ -2,7 +2,9 @@ package database
 
 import (
 	"backend/internal/forms"
+	"backend/internal/location"
 	"backend/internal/models"
+	"backend/pkg/normalizer"
 	"fmt"
 	"log"
 	"strings"
@@ -44,22 +46,23 @@ func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) 
 		FinishDate:  event.FinishDate,
 	}
 
-	err := e.db.Transaction(func(tx *gorm.DB) error {
-		var location models.Location
+	event.Tags = normalizer.Normalizer(event.Tags)
 
+	location, err := location.FetchLocation(event.Lon, event.Lat)
+	if err != nil {
+		return models.Event{}, err
+	}
+
+	err = e.db.Transaction(func(tx *gorm.DB) error {
 		var organizers []*models.User
 		if err := e.db.Where("id IN ?", event.Organizers).Find(&organizers).Error; err != nil {
-			return err
-		}
-
-		if err := e.db.First(&location, "id = ?", event.LocationID).Error; err != nil {
 			return err
 		}
 
 		tags, _ := getOrCreateTags(tx, event.Tags)
 
 		newEvent.Tags = tags
-		newEvent.LocationID = event.LocationID
+		newEvent.LocationID = location.ID
 		newEvent.Location = &location
 		newEvent.EventOrganizers = organizers
 
