@@ -1,7 +1,8 @@
-package database
+package notifications
 
 import (
 	"backend/internal/models"
+	"backend/pkg/functools"
 	"context"
 	"errors"
 	"log"
@@ -11,35 +12,23 @@ import (
 )
 
 // Notification model which is sent to groups of users
-type notification struct {
-	title    string
-	body     string
-	image    *string // optionally add image
-	usersIds []uint  // usrs group
-}
-
-func NewNotification(title, body string, image *string, usersIds []uint) notification {
-	return notification{
-		title:    title,
-		body:     body,
-		image:    image,
-		usersIds: usersIds,
-	}
+type Notification struct {
+	Title    string
+	Body     string
+	Image    *string // optionally add image
+	UsersIds []uint  // usrs group
+	Author   uint
 }
 
 type NotificationService interface {
 	// Set client before you call send push notification
 	SetClient(client *messaging.Client)
-	SendPush(n *notification) error
+	SendPush(n *Notification) error
 }
 
 type notificationServiceImpl struct {
 	client *messaging.Client
 	db     *gorm.DB
-}
-
-func (s *service) NotificationService() NotificationService {
-	return s.notificationService
 }
 
 func NewNotificationService(db *gorm.DB) NotificationService {
@@ -54,17 +43,22 @@ func (ns *notificationServiceImpl) SetClient(client *messaging.Client) {
 	log.Println("Client has been set")
 }
 
-func (ns *notificationServiceImpl) SendPush(n *notification) error {
+func (ns *notificationServiceImpl) SendPush(n *Notification) error {
 	if ns.client == nil {
 		log.Println("No provided client")
 		return errors.New("no provided client")
 	}
 
-	log.Println("Fetching device tokens for users:", n.usersIds)
+	// remove here author
+	ids := functools.Filter(func(e uint) bool {
+		return e != n.Author
+	}, n.UsersIds)
+
+	log.Println("Fetching device tokens for users:", ids)
 
 	var devices []*models.DeviceToken
 
-	if err := ns.db.Preload("Users", "users.id IN ?", n.usersIds).Find(&devices).Error; err != nil {
+	if err := ns.db.Preload("Users", "users.id IN ?", ids).Find(&devices).Error; err != nil {
 		log.Printf("Error fetching device tokens: %v", err)
 		return err
 	}
@@ -81,13 +75,13 @@ func (ns *notificationServiceImpl) SendPush(n *notification) error {
 	log.Printf("Collected %d tokens", len(tokens))
 
 	notification := &messaging.Notification{
-		Title: n.title,
-		Body:  n.body,
+		Title: n.Title,
+		Body:  n.Body,
 	}
 
-	if n.image != nil {
-		notification.ImageURL = *n.image
-		log.Printf("Notification image URL set: %s", *n.image)
+	if n.Image != nil {
+		notification.ImageURL = *n.Image
+		log.Printf("Notification image URL set: %s", *n.Image)
 	}
 
 	message := &messaging.MulticastMessage{

@@ -21,7 +21,7 @@ import (
 
 type providerKey string
 
-const providerK providerKey = "provider"
+const _provider providerKey = "provider"
 
 func (s *Server) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.RefreshTokenRequest](r)
@@ -125,7 +125,7 @@ func (s *Server) Callback(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	provider := vars["provider"]
 
-	req := r.WithContext(context.WithValue(r.Context(), providerK, provider))
+	req := r.WithContext(context.WithValue(r.Context(), _provider, provider))
 
 	user, err := gothic.CompleteUserAuth(w, req)
 	if err != nil {
@@ -168,7 +168,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if provider != "" {
 		// callback returns tokens in the future
-		req := r.WithContext(context.WithValue(context.Background(), providerK, provider))
+		req := r.WithContext(context.WithValue(context.Background(), _provider, provider))
 
 		_, err := gothic.CompleteUserAuth(w, req)
 		if err != nil {
@@ -209,7 +209,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 	// get user from ctx
-	user, ok := r.Context().Value("user").(*models.User)
+	user, ok := r.Context().Value(_user).(*models.User)
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 		return
@@ -232,7 +232,7 @@ func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.CodeRequest](r)
-	user, ok := r.Context().Value("user").(*models.User)
+	user, ok := r.Context().Value(_user).(*models.User)
 
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
@@ -261,7 +261,7 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.NewPasswordRequest](r)
-	user, ok := r.Context().Value("user").(*models.User)
+	user, ok := r.Context().Value(_user).(*models.User)
 
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")

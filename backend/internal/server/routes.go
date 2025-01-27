@@ -1,6 +1,7 @@
 package server
 
 import (
+	"backend/internal/server/event"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,6 +31,14 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
+
+	// newwww
+	eventHandler := event.EventHandler{
+		EventService:        s.db.EventService(),
+		NotificationService: s.db.NotificationService(),
+	}
+
+	// newwww
 
 	r.HandleFunc("/", s.HelloWorldHandler)
 
@@ -85,7 +94,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).Methods(http.MethodGet)
 
 	event := auth.PathPrefix("/event").Subrouter()
-	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
+	// newwww
+	event.Use(eventHandler.Validate)
+	event.HandleFunc(`/{limit:[0-9]*}`, eventHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	vote := auth.PathPrefix("/vote").Subrouter()
