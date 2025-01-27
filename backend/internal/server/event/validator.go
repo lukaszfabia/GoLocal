@@ -43,29 +43,28 @@ func (h *EventHandler) Validate(next http.Handler) http.Handler {
 func post(w http.ResponseWriter, r *http.Request) context.Context {
 	form, err := parsers.DecodeMultipartForm[forms.Event](r)
 	if err != nil {
-		return nil
-	}
-
-	if !functools.In(form.EventType, models.EventTypes) {
 		app.InvalidDataResponse(w)
 		return nil
 	}
 
-	ctx := context.WithValue(r.Context(), _eventForm, form)
-	return ctx
+	if !functools.In(form.EventType, models.EventTypes) {
+		app.NewResponse(w, http.StatusBadRequest, map[string]string{"error": "Invalid event type"})
+		return nil
+	}
+
+	return context.WithValue(r.Context(), _eventForm, form)
 }
 
-func get(_ http.ResponseWriter, r *http.Request) context.Context {
+func get(w http.ResponseWriter, r *http.Request) context.Context {
 	params := parsers.ParseURLQuery(r, forms.Event{}, "lon", "lat", "accuracy", "street", "street_number", "country", "city")
 
 	limitStr := mux.Vars(r)["limit"]
 	limit, err := strconv.Atoi(limitStr)
-
 	if err != nil {
-		limit = -1 // take all records
+		app.NewResponse(w, http.StatusBadRequest, map[string]string{"error": "Invalid limit"})
+		return nil
 	}
 
 	ctx := context.WithValue(r.Context(), _params, params)
-	ctx = context.WithValue(ctx, _limit, limit)
-	return ctx
+	return context.WithValue(ctx, _limit, limit)
 }
