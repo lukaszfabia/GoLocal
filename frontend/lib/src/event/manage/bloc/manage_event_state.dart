@@ -13,10 +13,11 @@ class ManageEventState extends Equatable {
     this.endDate,
     this.isAdultsOnly = false,
     required this.organizers,
-    this.location,
     this.image,
     this.message,
     this.id,
+    this.lat,
+    this.lon,
   });
   final ManageEventStatus status;
   final int? id;
@@ -28,8 +29,9 @@ class ManageEventState extends Equatable {
   final DateTime? endDate;
   final bool isAdultsOnly;
   final List<String> organizers;
-  final Location? location;
   final File? image;
+  final double? lat;
+  final double? lon;
 
   final String? message;
 
@@ -44,7 +46,8 @@ class ManageEventState extends Equatable {
         endDate,
         isAdultsOnly,
         organizers,
-        location,
+        lat,
+        lon,
         message,
         image,
       ];
@@ -62,6 +65,8 @@ class ManageEventState extends Equatable {
     Location? location,
     String? message,
     File? image,
+    double? lat,
+    double? lon,
   }) {
     return ManageEventState(
       status: status ?? this.status,
@@ -73,7 +78,8 @@ class ManageEventState extends Equatable {
       endDate: endDate ?? this.endDate,
       isAdultsOnly: isAdultsOnly ?? this.isAdultsOnly,
       organizers: organizers ?? this.organizers,
-      location: location ?? this.location,
+      lat: lat ?? this.lat,
+      lon: lon ?? this.lon,
       message: message ?? this.message,
       image: image ?? this.image,
     );
@@ -90,7 +96,8 @@ class ManageEventState extends Equatable {
           endDate: event.endDate,
           isAdultsOnly: event.isAdultOnly,
           organizers: event.eventOrganizers.map((e) => e.email).toList(),
-          location: event.location,
+          lat: event.location?.coords?.latitude,
+          lon: event.location?.coords?.longitude,
           image: File(event.imageUrl ?? ''),
         );
 }

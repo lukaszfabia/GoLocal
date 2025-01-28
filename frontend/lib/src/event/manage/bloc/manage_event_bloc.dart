@@ -82,6 +82,8 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
         tags: state.tags,
         image: state.image!,
         eventType: state.type!.name,
+        lat: state.lat.toString(),
+        lon: state.lon.toString(),
       );
       try {
         final created = await _repository.createEvent(dto);

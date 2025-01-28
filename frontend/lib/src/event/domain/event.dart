@@ -107,8 +107,8 @@ class EventDTO {
     required this.isAdultOnly,
     required this.eventType,
     required this.tags,
-    this.lat = "0",
-    this.lon = "0",
+    required this.lat,
+    required this.lon,
   });
 
   Future<FormData> toFormData() async {
