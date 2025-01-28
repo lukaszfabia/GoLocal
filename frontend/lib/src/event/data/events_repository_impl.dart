@@ -10,8 +10,6 @@ class EventsRepositoryImpl implements IEventsRepository {
   Future<List<Event>> getEvents() async {
     final response = await _dioClient.dio.get('/auth/event/10');
 
-    print(response.data);
-
     final data = response.data['data'] as List<dynamic>;
 
     return data.map((json) => Event.fromJson(json)).toList();

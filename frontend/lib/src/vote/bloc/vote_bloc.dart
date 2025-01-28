@@ -7,6 +7,17 @@ import 'package:meta/meta.dart';
 part 'vote_event.dart';
 part 'vote_state.dart';
 
+/// Bloc responsible for handling vote-related events and states.
+///
+/// This Bloc manages the following events:
+/// - [LoadVotes]: Loads the list of votes from the repository.
+/// - [CreateVote]: Creates a new vote and reloads the list of votes.
+/// - [UpdateVote]: Updates an existing vote and reloads the list of votes.
+/// - [DeleteVote]: Deletes a vote and reloads the list of votes.
+/// - [VoteOnOption]: Registers a vote on a specific option and reloads the list of votes.
+///
+/// The Bloc interacts with an [IVotesRepository] to perform the necessary
+/// operations and updates the state accordingly.
 class VoteBloc extends Bloc<VoteEvent, VoteState> {
   final IVotesRepository votesRepository;
 

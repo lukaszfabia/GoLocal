@@ -1,6 +1,8 @@
 package server
 
 import (
+	"backend/internal/server/account"
+	"backend/internal/server/event"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,6 +32,18 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
+
+	// newwww
+	eventHandler := event.EventHandler{
+		EventService:        s.db.EventService(),
+		NotificationService: s.db.NotificationService(),
+	}
+
+	accountHandler := account.AccountHandler{
+		UserService: s.db.UserService(),
+	}
+
+	// newwww
 
 	r.HandleFunc("/", s.HelloWorldHandler)
 
@@ -71,22 +85,37 @@ func (s *Server) RegisterRoutes() http.Handler {
 	preference.HandleFunc("/preference-survey", s.getSurvey)
 
 	// recommendation routes
-	api.HandleFunc("/recommendation/{userID:[0-9]+}", s.getRecommendations)
+	auth.HandleFunc("/recommendations", s.getRecommendations)
 
-	auth.HandleFunc("/account/", s.AccountHandler).
+	auth.HandleFunc("/account/", accountHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
 
-	// events
+	// events to remove
 	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
 
 	// votes
 	api.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).Methods(http.MethodGet)
 
+	//-------------------------------------Event-------------------------------------//
+
 	event := auth.PathPrefix("/event").Subrouter()
-	event.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).
+
+	promoRouter := event.PathPrefix("/{id}/promo").Subrouter()
+	promoRouter.Use(eventHandler.ValidatePromoteEvent)
+	promoRouter.HandleFunc("", eventHandler.PromoteEvent)
+
+	reportRouter := event.PathPrefix("/report").Subrouter()
+	reportRouter.Use(eventHandler.ValidateReportEvent)
+	reportRouter.HandleFunc("", eventHandler.ReportEvent)
+
+	defaultRouter := event.PathPrefix("").Subrouter()
+	defaultRouter.Use(eventHandler.Validate)
+	defaultRouter.HandleFunc(`/{limit:[0-9]*}`, eventHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
+
+	//-------------------------------------Vote-------------------------------------//
 
 	vote := auth.PathPrefix("/vote").Subrouter()
 	vote.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).

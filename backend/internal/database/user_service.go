@@ -3,6 +3,7 @@ package database
 import (
 	"backend/internal/forms"
 	"backend/internal/models"
+	"backend/pkg/parsers"
 	"log"
 
 	"gorm.io/gorm"
@@ -16,9 +17,12 @@ type UserService interface {
 	// Get user using cond like: "email = joe.doe@example.com", use fmt.Sprintf
 	GetUser(cond string) (*models.User, error)
 
-	SaveUser(user *models.User) (*models.User, error)
+	SaveUser(new *forms.EditAccount, old *models.User) (*models.User, error)
 	DeleteUser(user *models.User) error
 	AddDevice(device *forms.Device) error
+
+	VerifyUser(user models.User) (models.User, error)
+	ChangePassword(newPassword string, user models.User) error
 }
 
 func NewUserService(db *gorm.DB) UserService {
@@ -27,6 +31,25 @@ func NewUserService(db *gorm.DB) UserService {
 
 type userServiceImpl struct {
 	db *gorm.DB
+}
+
+// ChangePassword implements UserService.
+func (u *userServiceImpl) ChangePassword(newPassword string, user models.User) error {
+	user.Password = &newPassword
+
+	if err := u.db.Save(user).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userServiceImpl) VerifyUser(user models.User) (models.User, error) {
+	user.IsVerified = true
+
+	if err := u.db.Save(user).Error; err != nil {
+		return models.User{}, err
+	}
+	return user, nil
 }
 
 func (u *userServiceImpl) GetOrCreateUser(user *models.User) (*models.User, error) {
@@ -51,14 +74,26 @@ func (u *userServiceImpl) GetUser(cond string) (*models.User, error) {
 	return res, nil
 }
 
-func (u *userServiceImpl) SaveUser(user *models.User) (*models.User, error) {
-	if err := u.db.Save(&user).Error; err != nil {
+func (u *userServiceImpl) SaveUser(new *forms.EditAccount, old *models.User) (*models.User, error) {
+
+	// Assign all form fields to the user model
+	old.FirstName = new.FirstName
+	old.LastName = new.LastName
+	old.Email = new.Email
+	old.Password = &new.Password
+	old.Bio = &new.Bio
+
+	parsedDate := parsers.ParseDate(new.Birthday)
+	old.Birthday = &parsedDate
+
+	if err := u.db.Save(&old).Error; err != nil {
 		return nil, err
 	}
 
 	newUser := &models.User{}
 
-	if err := u.db.First(newUser, "email = ?", user.Email).Error; err != nil {
+	// potential to remov
+	if err := u.db.First(newUser, "email = ?", old.Email).Error; err != nil {
 		return nil, err
 	}
 
@@ -74,7 +109,6 @@ func (u *userServiceImpl) DeleteUser(user *models.User) error {
 }
 
 func (u *userServiceImpl) AddDevice(device *forms.Device) error {
-
 	token := models.DeviceToken{
 		Token:     device.Token,
 		OSVersion: device.OSVersion,
@@ -82,8 +116,9 @@ func (u *userServiceImpl) AddDevice(device *forms.Device) error {
 	}
 
 	return u.db.Transaction(func(tx *gorm.DB) error {
-		var user models.User = models.User{}
-		if err := u.db.Model(user).First(user, "id = ?", device.UserID).Error; err != nil {
+		var user models.User
+		if err := u.db.Model(&user).First(&user, "id = ?", device.UserID).Error; err != nil {
+			log.Println("Error fetching user:", err)
 			return err
 		}
 

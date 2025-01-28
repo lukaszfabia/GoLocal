@@ -26,7 +26,7 @@ class VoteCard extends StatelessWidget {
     var optionCounts = vote.options.map((option) => option.votesCount).toList();
     var totalVotes = optionCounts.reduce((a, b) => a + b);
 
-    bool canVote = !(vote.type == VoteType.CANNOT_CHANGE_VOTE &&
+    bool canVote = !(vote.type == VoteType.cannotChangeVote &&
         vote.options.any((option) => option.isSelected));
 
     return Card(
@@ -37,17 +37,19 @@ class VoteCard extends StatelessWidget {
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundImage: vote.event.imageUrl == null
+              backgroundImage: vote.event?.imageUrl == null
                   ? AssetImage('assets/image_not_found.png')
-                  : NetworkImage(vote.event.imageUrl!),
+                  : NetworkImage(vote.event!.imageUrl!),
             ),
-            title: Text(vote.event.title,
+            title: Text(vote.event?.title ?? "Title not available",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(__formatLocation(vote.event.location)),
+            subtitle: Text(__formatLocation(vote.event?.location)),
             trailing: Icon(Icons.star_border),
             onTap: () {
-              context.push('${AppRoute.events.path}/${vote.event.id}',
-                  extra: vote.event);
+              if (vote.event != null) {
+                context.push('${AppRoute.events.path}/${vote.event!.id}',
+                    extra: vote.event);
+              }
             },
           ),
           Padding(

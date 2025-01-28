@@ -12,7 +12,6 @@ class AuthService {
     return _dio.post('/sign-up/', data: data);
   }
 
-  //TODO
   Future<Response> logout() {
     return Future<Response>.value(
         Response(requestOptions: RequestOptions(path: '')));

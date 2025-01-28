@@ -42,30 +42,26 @@ class UserLocalDataSource implements LocalDataSource {
       'birthDate': '1990-01-01',
     },
   ];
-  @override
+
   Future<bool> create(Map<String, dynamic> data) {
     users.add(data);
     return Future.value(true);
   }
 
-  @override
   Future<bool> delete(
     Map<String, dynamic> data,
   ) {
     return Future.value(users.remove(data));
   }
 
-  @override
   Future<List<Map<String, dynamic>>> getAll() {
     return Future.value(users);
   }
 
-  @override
   Future<Map<String, dynamic>> getById(int id) {
     return Future.value(users.firstWhere((element) => element['id'] == id));
   }
 
-  @override
   Future<bool> update(Map<String, dynamic> data) {
     users[users.indexWhere((element) => element['id'] == data['id'])] = data;
     return Future.value(true);

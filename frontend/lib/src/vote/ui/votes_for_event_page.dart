@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
-import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/data/votes_repository_event_filter.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/vote/ui/vote_card.dart';
 import 'package:golocal/src/vote/ui/vote_list.dart';
 
 class VotesForEventPage extends StatelessWidget {

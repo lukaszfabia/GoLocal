@@ -1,10 +1,10 @@
 package server
 
 import (
-	"fmt"
+	"backend/internal/models"
+	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 // @Summary Get Recommendations
@@ -16,32 +16,53 @@ import (
 func (s *Server) getRecommendations(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/recommendation/"), "/")
-		if len(pathParts) < 1 {
-			s.NewResponse(w, http.StatusBadRequest, "Missing user ID")
+		userId := r.Header.Get("User-Id")
+		if userId == "" {
+			log.Println("Unauthorized access")
+			s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 			return
 		}
-		userID64, err := strconv.ParseUint(pathParts[0], 10, 32)
-		if err != nil {
-			s.NewResponse(w, http.StatusBadRequest, "Invalid user ID")
-			return
-		}
-		userID := uint(userID64)
 
-		events, err := s.db.EventService().GetEvents(map[string]any{}, 0)
-		for _, event := range events {
-			fmt.Println(event)
+		_, err := s.db.UserService().GetUser(userId)
+		if err != nil {
+			s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
+			return
 		}
+
+		preloads := []string{
+			"Tags",
+		}
+		events, err := s.db.EventService().GetEvents(nil, 1000, preloads)
 		if err != nil {
 			s.NewResponse(w, http.StatusInternalServerError, "Error fetching events")
 			return
 		}
-		survey, err := s.db.RecommendationService().Predict(events, userID)
+
+		log.Println("Events fetched")
+
+		userIdUint, err := strconv.ParseUint(userId, 10, 32)
+		if err != nil {
+			s.NewResponse(w, http.StatusBadRequest, "Invalid User-Id")
+			return
+		}
+
+		recommendedEventIds, err := s.db.RecommendationService().Predict(events, uint(userIdUint), 10)
 		if err != nil {
 			s.NewResponse(w, http.StatusInternalServerError, "Error fetching survey")
 			return
 		}
-		s.NewResponse(w, http.StatusOK, survey)
+
+		recommendedEvents := []*models.Event{}
+		for _, id := range recommendedEventIds {
+			event, err := s.db.EventService().GetEvent(id)
+			if err != nil {
+				log.Printf("Error fetching event with ID: %d", id)
+				continue
+			}
+			recommendedEvents = append(recommendedEvents, event)
+		}
+
+		s.NewResponse(w, http.StatusOK, recommendedEvents)
 	default:
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}

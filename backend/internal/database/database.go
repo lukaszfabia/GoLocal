@@ -2,6 +2,7 @@ package database
 
 import (
 	"backend/internal/models"
+	"backend/internal/notifications"
 	"backend/internal/recommendation"
 	"context"
 	"database/sql"
@@ -42,6 +43,7 @@ var allModels []any = []any{
 	&models.Recommendation{},
 	&models.BlacklistedTokens{},
 	&models.DeviceToken{},
+	&models.ReportedEvent{},
 }
 
 var (
@@ -76,7 +78,7 @@ type Service interface {
 	EventService() EventService
 	TokenService() TokenService
 	VoteService() VoteService
-	NotificationService() NotificationService
+	NotificationService() notifications.NotificationService
 }
 
 type service struct {
@@ -87,10 +89,14 @@ type service struct {
 	recommendationService   recommendation.RecommendationService
 	tokenService            TokenService
 	dummyService            DummyService
-	notificationService     NotificationService
+	notificationService     notifications.NotificationService
+	eventService            EventService
+	voteService             VoteService
+}
 
-	eventService EventService
-	voteService  VoteService
+// NotificationService implements Service.
+func (s *service) NotificationService() notifications.NotificationService {
+	return s.notificationService
 }
 
 // Initializes new database connection and services
@@ -115,9 +121,9 @@ func New() Service {
 		recommendationService := recommendation.NewRecommendationService(db)
 		eventService := NewEventService(db)
 		voteService := NewVoteService(db)
-		notificationService := NewNotificationService(db)
+		notificationService := notifications.NewNotificationService(db)
 
-		return &service{
+		dbInstance = &service{
 			db:                      db,
 			userService:             userService,
 			tokenService:            tokenService,
@@ -128,6 +134,8 @@ func New() Service {
 			voteService:             voteService,
 			notificationService:     notificationService,
 		}
+
+		return dbInstance
 	}
 }
 

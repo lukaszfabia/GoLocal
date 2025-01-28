@@ -6,10 +6,13 @@ import 'package:golocal/src/preference_survey/domain/preference_survey.dart';
 part 'preference_survey_event.dart';
 part 'preference_survey_state.dart';
 
+/// Bloc for managing the state of the preference survey.
 class PreferenceSurveyBloc
     extends Bloc<PreferenceSurveyEvent, PreferenceSurveyState> {
+  /// The repository for fetching and submitting the preference survey.
   final IPreferenceSurveyRepository _recommendationService;
 
+  /// Creates a [PreferenceSurveyBloc] with the given [IPreferenceSurveyRepository].
   PreferenceSurveyBloc(this._recommendationService)
       : super(PreferenceSurveyLoading()) {
     on<LoadPreferenceSurvey>((event, emit) async {

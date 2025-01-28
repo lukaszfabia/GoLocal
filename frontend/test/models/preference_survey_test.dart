@@ -4,21 +4,26 @@ import 'package:golocal/src/preference_survey/domain/preference_survey_question.
 
 void main() {
   group('PreferenceSurvey', () {
-    test('fromJson creates a valid PreferenceSurvey object', () {
+    test('parses JSON creates a valid PreferenceSurvey object', () {
       final json = {
-        'ID': 1,
-        'title': 'Survey Title',
-        'description': 'Survey Description',
+        'id': 1,
+        'title': 'Survey title',
+        'description': 'Survey description',
         'questions': [
           {
-            'ID': 1,
-            'text': 'Question 1',
-            'type': 'SINGLE_CHOICE',
+            'id': 1,
+            'text': 'Question text',
+            'type': 'TOGGLE',
             'options': [
-              {'ID': 1, 'text': 'Option 1', 'isSelected': false},
-              {'ID': 2, 'text': 'Option 2', 'isSelected': true},
+              {
+                'id': 1,
+                'text': 'Option text',
+              },
+              {
+                'id': 2,
+                'text': 'Option text',
+              }
             ],
-            'toggle': null,
           },
         ],
       };
@@ -26,41 +31,94 @@ void main() {
       final survey = PreferenceSurvey.fromJson(json);
 
       expect(survey.id, 1);
-      expect(survey.title, 'Survey Title');
-      expect(survey.description, 'Survey Description');
+      expect(survey.title, 'Survey title');
+      expect(survey.description, 'Survey description');
       expect(survey.questions.length, 1);
 
       final question = survey.questions.first;
       expect(question.id, 1);
-      expect(question.text, 'Question 1');
-      expect(question.type, QuestionType.singleChoice);
-      expect(question.options?.length, 2);
+      expect(question.text, 'Question text');
+      expect(question.type, QuestionType.toggle);
+      expect(question.options!.length, 2);
 
-      final option1 = question.options?.first;
-      expect(option1?.id, 1);
-      expect(option1?.text, 'Option 1');
-      expect(option1?.isSelected, false);
-
-      final option2 = question.options?.last;
-      expect(option2?.id, 2);
-      expect(option2?.text, 'Option 2');
-      expect(option2?.isSelected, true);
+      var id = 1;
+      for (final option in question.options!) {
+        expect(option.id, id++);
+        expect(option.text, 'Option text');
+      }
     });
 
-    test('fromJson handles missing optional fields', () {
+    test('from JSON handles missing required fields', () {
       final json = {
-        'ID': 2,
-        'title': 'Survey Title 2',
-        'description': 'Survey Description 2',
+        'id': 1,
+        'title': null,
+        'questions': [
+          {
+            'id': 1,
+            'text': 'Question text',
+            'type': 'TOGGLE',
+            'options': [
+              {
+                'id': 1,
+                'text': 'Option text',
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(() => PreferenceSurvey.fromJson(json), throwsA(isA<TypeError>()));
+
+      final json2 = {
+        'id': 1,
+        'title': 'Survey title',
+        'questions': null,
+      };
+
+      expect(() => PreferenceSurvey.fromJson(json2), throwsA(isA<TypeError>()));
+
+      final json3 = {
+        'id': 1,
+        'title': 'Survey title',
         'questions': [],
       };
 
-      final survey = PreferenceSurvey.fromJson(json);
+      expect(() => PreferenceSurvey.fromJson(json3), throwsA(isA<TypeError>()));
 
-      expect(survey.id, 2);
-      expect(survey.title, 'Survey Title 2');
-      expect(survey.description, 'Survey Description 2');
-      expect(survey.questions.isEmpty, true);
+      final json4 = {
+        'id': 1,
+        'title': 'Survey title',
+        'questions': [
+          {
+            'id': 1,
+            'text': 'Question text',
+            'type': 'TOGGLE',
+            'options': null,
+          },
+        ],
+      };
+
+      expect(() => PreferenceSurvey.fromJson(json4), throwsA(isA<TypeError>()));
+
+      final json5 = {
+        'id': 1,
+        'title': 'Survey title',
+        'questions': [
+          {
+            'id': 1,
+            'text': 'Question text',
+            'type': 'TOGGLE',
+            'options': [
+              {
+                'id': 1,
+                'text': null,
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(() => PreferenceSurvey.fromJson(json5), throwsA(isA<TypeError>()));
     });
   });
 }

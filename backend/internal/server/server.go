@@ -24,8 +24,6 @@ type Server struct {
 
 	db    database.Service
 	store store.Store
-	// Firebase messaging provider
-	// notificationProvider *messaging.Client
 }
 
 type response struct {
@@ -62,10 +60,14 @@ func NewServer() *http.Server {
 	opt := option.WithCredentialsFile("./golocal-firebase.json")
 
 	fApp, err := firebase.NewApp(context.Background(), nil, opt)
-	client, _ := fApp.Messaging(context.Background())
-
 	if err != nil {
 		log.Printf("Failed to init firebase app: %s", err.Error())
+	}
+
+	client, err := fApp.Messaging(context.Background())
+
+	if err != nil {
+		log.Printf("No client: %s", err.Error())
 	}
 
 	NewServer := &Server{

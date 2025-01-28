@@ -61,9 +61,11 @@ type Event struct {
 	FinishDate  *time.Time            `json:"finishDate" form:"finishDate"`
 	IsAdultOnly bool                  `form:"isAdultOnly" json:"isAdultOnly"`
 	EventType   string                `json:"eventType" form:"eventType"`
-	LocationID  uint                  `json:"locationID" form:"locationID"`
 	ImageURL    string                `json:"-" form:"-"`
 	Tags        []string              `json:"tags" form:"tags"` // list with user input tags
+
+	Lon string `json:"lon" form:"lon"` // coords to get more info
+	Lat string `json:"lat" form:"lat"`
 }
 
 type VoteInVotingForm struct {
@@ -87,4 +89,16 @@ type VoteOptionForm struct {
 	Text       string `json:"text"`
 	IsSelected bool   `json:"isSelected"`
 	VotesCount int    `json:"votesCount"`
+}
+
+type PreferenceSurveyAnswer struct {
+	PreferenceSurveyID int   `json:"SurveyID"`
+	QuestionID         int   `json:"QuestionID"`
+	UserID             int   `json:"UserID"`
+	Options            []int `json:"Options"`
+}
+
+type ReportForm struct {
+	ID     int    `json:"id"`
+	Reason string `json:"reason"`
 }

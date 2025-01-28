@@ -77,6 +77,7 @@ type Event struct {
 	IsAdultOnly bool      `gorm:"default:true" json:"isAdultOnly"`
 	EventType   EventType `gorm:"type:text;not null" json:"event_type"`
 	Tags        []*Tag    `gorm:"many2many:event_tags" json:"event_tags"` // for ml
+	IsPromoted  bool      `json:"isPromoted"`
 
 	// Timestamp with time zone
 	StartDate  *time.Time `gorm:"type:date;not null" json:"startDate"`
@@ -121,10 +122,11 @@ type VoteAnswer struct {
 
 type VoteOption struct {
 	Model
-	Vote        Vote         `gorm:"foreignKey:VoteID;references:ID;constraint:OnDelete:RESTRICT" json:"vote"`
-	VoteID      uint         `json:"voteId"`
-	Text        string       `gorm:"not null;size:255" json:"text"`
-	VoteAnswers []VoteAnswer `gorm:"foreignKey:VoteOptionID" json:"voteAnswers"`
+	Vote                Vote                `gorm:"foreignKey:VoteID;references:ID;constraint:OnDelete:RESTRICT" json:"vote"`
+	VoteID              uint                `json:"voteId"`
+	Text                string              `gorm:"not null;size:255" json:"text"`
+	ParticipationStatus ParticipationStatus `gorm:"not null" json:"participationStatus"`
+	VoteAnswers         []VoteAnswer        `gorm:"foreignKey:VoteOptionID" json:"voteAnswers"`
 }
 
 type Opinion struct {
@@ -152,6 +154,7 @@ type PreferenceSurvey struct {
 
 type PreferenceSurveyQuestion struct {
 	Model
+	Survey   PreferenceSurvey         `gorm:"foreignKey:SurveyID" json:"survey"`
 	SurveyID uint                     `json:"surveyID"`
 	Text     string                   `gorm:"not null;size:1024" json:"text"`
 	Type     QuestionType             `gorm:"not null" json:"type"`
@@ -160,29 +163,36 @@ type PreferenceSurveyQuestion struct {
 
 type PreferenceSurveyOption struct {
 	Model
-	QuestionID  uint   `json:"questionID"`
-	Text        string `gorm:"not null;size:1024" json:"text"`
-	TagID       uint   `json:"tagID"`
-	Tag         Tag    `gorm:"foreignKey:TagID" json:"tag"`
-	TagPositive bool   `json:"tagPositive"`
+	Question    PreferenceSurveyQuestion `gorm:"foreignKey:QuestionID" json:"question"`
+	QuestionID  uint                     `json:"questionID"`
+	Text        string                   `gorm:"not null;size:1024" json:"text"`
+	Tag         Tag                      `gorm:"foreignKey:TagID" json:"tag"`
+	TagID       uint                     `json:"tagID"`
+	TagPositive bool                     `json:"tagPositive"`
 }
 
 type PreferenceSurveyAnswer struct {
 	Model
+	Survey          PreferenceSurvey               `gorm:"foreignKey:SurveyID" json:"survey"`
 	SurveyID        uint                           `json:"surveyID"`
+	Question        PreferenceSurveyQuestion       `gorm:"foreignKey:QuestionID" json:"question"`
 	QuestionID      uint                           `json:"questionID"`
+	User            User                           `gorm:"foreignKey:UserID" json:"user"`
 	UserID          uint                           `json:"userID"`
 	SelectedOptions []PreferenceSurveyAnswerOption `gorm:"foreignKey:AnswerID" json:"options"`
 }
 
 type PreferenceSurveyAnswerOption struct {
 	Model
-	AnswerID uint `json:"answerID"`
-	OptionID uint `json:"optionID"`
+	Answer   PreferenceSurveyAnswer `gorm:"foreignKey:AnswerID" json:"answer"`
+	AnswerID uint                   `json:"answerID"`
+	Option   PreferenceSurveyOption `gorm:"foreignKey:OptionID" json:"option"`
+	OptionID uint                   `json:"optionID"`
 }
 
 type Recommendation struct {
 	Model
+	User   User  `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE" json:"user"`
 	UserID uint  `json:"userID"`
 	Tags   []Tag `gorm:"many2many:recommendation_tags" json:"tags"`
 }
@@ -199,4 +209,11 @@ type DeviceToken struct {
 type ErrorResponse struct {
 	Type    int    `json:"type"`
 	Message string `json:"message"`
+}
+
+type ReportedEvent struct {
+	Model
+	Event   *Event `gorm:"foreignKey:EventID" json:"event"`
+	EventID uint   `json:"eventId"`
+	Reason  string `gorm:"not null;size:255" json:"reason"`
 }

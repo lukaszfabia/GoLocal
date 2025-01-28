@@ -7,7 +7,7 @@ part 'events_event.dart';
 part 'events_state.dart';
 
 class EventsBloc extends Bloc<EventsEvent, EventsState> {
-  final IEventsRepository _repository;
+  IEventsRepository _repository;
   EventsBloc(this._repository) : super(EventsState(events: [])) {
     on<FetchEvents>((event, emit) async {
       if (event.refresh) {
@@ -30,6 +30,10 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
           errorMessage: e.toString(),
         ));
       }
+    });
+    on<SwitchRepository>((event, emit) async {
+      _repository = event.newRepository;
+      add(const FetchEvents(refresh: true));
     });
   }
 }

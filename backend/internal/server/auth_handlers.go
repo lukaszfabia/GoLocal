@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -20,7 +21,7 @@ import (
 
 type providerKey string
 
-const providerK providerKey = "provider"
+const _provider providerKey = "provider"
 
 func (s *Server) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.RefreshTokenRequest](r)
@@ -72,7 +73,7 @@ func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Email:     form.Email,
 	}
 
-	user, e := s.db.UserService().SaveUser(user)
+	user, e := s.db.UserService().GetOrCreateUser(user)
 
 	if e != nil {
 		log.Println("Error saving user:", e)
@@ -124,7 +125,7 @@ func (s *Server) Callback(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	provider := vars["provider"]
 
-	req := r.WithContext(context.WithValue(r.Context(), providerK, provider))
+	req := r.WithContext(context.WithValue(r.Context(), _provider, provider))
 
 	user, err := gothic.CompleteUserAuth(w, req)
 	if err != nil {
@@ -167,7 +168,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if provider != "" {
 		// callback returns tokens in the future
-		req := r.WithContext(context.WithValue(context.Background(), providerK, provider))
+		req := r.WithContext(context.WithValue(context.Background(), _provider, provider))
 
 		_, err := gothic.CompleteUserAuth(w, req)
 		if err != nil {
@@ -208,7 +209,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 	// get user from ctx
-	user, ok := r.Context().Value("user").(*models.User)
+	user, ok := r.Context().Value(_user).(*models.User)
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 		return
@@ -231,7 +232,7 @@ func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.CodeRequest](r)
-	user, ok := r.Context().Value("user").(*models.User)
+	user, ok := r.Context().Value(_user).(*models.User)
 
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
@@ -248,9 +249,7 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.IsVerified = true
-
-	if _, err := s.db.UserService().SaveUser(user); err != nil {
+	if _, err := s.db.UserService().VerifyUser(*user); err != nil {
 		s.NewResponse(w, http.StatusInternalServerError, "Failed to save user")
 		return
 	}
@@ -260,7 +259,7 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.NewPasswordRequest](r)
-	user, ok := r.Context().Value("user").(*models.User)
+	user, ok := r.Context().Value(_user).(*models.User)
 
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
@@ -272,9 +271,7 @@ func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	user.Password = &form.Password
-
-	_, err = s.db.UserService().SaveUser(user)
+	err = s.db.UserService().ChangePassword(form.Password, *user)
 
 	if err != nil {
 		s.NewResponse(w, http.StatusInternalServerError, "Could not change password")
@@ -322,6 +319,30 @@ func (s *Server) DeviceTokenRegistrationHandler(w http.ResponseWriter, r *http.R
 		s.NewResponse(w, http.StatusBadRequest, "Failed to decode form")
 		return
 	}
+
+	userId := r.Header.Get("User-Id")
+	log.Println("User-Id:", userId)
+	if userId == "" {
+		log.Println("Unauthorized access")
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
+	}
+
+	_, err = s.db.UserService().GetUser(userId)
+	if err != nil {
+		log.Println("Error fetching user: " + err.Error())
+		s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	userIDInt, err := strconv.Atoi(userId)
+	if err != nil {
+		log.Println(userId)
+		log.Println("Invalid User-Id: " + err.Error())
+		s.NewResponse(w, http.StatusBadRequest, "Invalid User-Id")
+		return
+	}
+	form.UserID = userIDInt
 
 	if err := s.db.UserService().AddDevice(form); err != nil {
 		s.NewResponse(w, http.StatusInternalServerError, "Failed to add device to user")

@@ -12,6 +12,7 @@ import (
 )
 
 const MAX_CAPACITY = 1000
+const CAN_CLEAR_DATABASE = false
 
 type DummyService interface {
 	Cook()
@@ -32,24 +33,72 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
+	// d.clearDatabase()
+	//
 	// d.coords()
 	// d.address()
 	// d.location()
 	// d.user1()
 	// d.tags()
-	// d.comments()
-	// d.votes()
 	// d.event1()
 	// d.event2()
 	// d.opinion()
 	// d.followers()
+	// d.comments()
+	// d.votes()
 	// d.user2()
-	d.generateMockSurvey()
+	// d.generateMockSurvey()
 	// d.easyLoginUser()
 	// d.generateRecommendations()
 }
 
-// &models.Opinion{},
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
+func (d *dummyServiceImpl) clearDatabase() {
+	log.Println("Clearing WHOLE database...")
+
+	if !CAN_CLEAR_DATABASE {
+		log.Println("Cannot clear database")
+		return
+	}
+
+	time.Sleep(10 * time.Second)
+
+	sql := `
+        DELETE FROM user_followers;
+        DELETE FROM user_following;
+        DELETE FROM event_organizers;
+        DELETE FROM event_tags;
+        DELETE FROM devices;
+        DELETE FROM recommendation_tags;
+        DELETE FROM vote_answers;
+        DELETE FROM vote_options;
+        DELETE FROM votes;
+        DELETE FROM comments;
+        DELETE FROM opinions;
+        DELETE FROM preference_survey_answer_options;
+        DELETE FROM preference_survey_answers;
+        DELETE FROM preference_survey_options;
+        DELETE FROM preference_survey_questions;
+        DELETE FROM preference_surveys;
+        DELETE FROM recommendations;
+        DELETE FROM device_tokens;
+        DELETE FROM users;
+        DELETE FROM locations;
+        DELETE FROM coords;
+        DELETE FROM addresses;
+        DELETE FROM events;
+        DELETE FROM tags;
+        DELETE FROM blacklisted_tokens;
+    `
+
+	if err := d.db.Exec(sql).Error; err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Database cleared")
+}
+
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) user2() {
 	var users []*models.User
 	if err := d.db.Find(&users).Error; err != nil {
@@ -60,7 +109,7 @@ func (d *dummyServiceImpl) user2() {
 		var votes []*models.VoteAnswer
 		var comments []*models.Comment
 
-		if err := d.db.Model(&models.Vote{}).Where("user_id = ?", user.ID).Find(&votes).Error; err != nil {
+		if err := d.db.Model(&models.VoteAnswer{}).Where("user_id = ?", user.ID).Find(&votes).Error; err != nil {
 			log.Println("user2: Error fetching votes for user", user.ID, err)
 		} else {
 			user.Votes = votes
@@ -79,6 +128,7 @@ func (d *dummyServiceImpl) user2() {
 
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) user1() {
 	// take all locations
 
@@ -116,6 +166,7 @@ func (d *dummyServiceImpl) user1() {
 	}
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) easyLoginUser() {
 	var count int64
 	if err := d.db.Model(&models.User{}).Where("email = ?", "a@a.a").Count(&count).Error; err != nil {
@@ -158,6 +209,7 @@ func (d *dummyServiceImpl) easyLoginUser() {
 	}
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) location() {
 	var coords []*models.Coords
 	var addresses []*models.Address
@@ -198,6 +250,7 @@ func (d *dummyServiceImpl) location() {
 	}
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) address() {
 	for i := 0; i < MAX_CAPACITY; i++ {
 		address := &models.Address{
@@ -212,6 +265,7 @@ func (d *dummyServiceImpl) address() {
 	}
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) coords() {
 	for i := 0; i < MAX_CAPACITY; i++ {
 		longitude := d.f.Longitude()
@@ -226,8 +280,11 @@ func (d *dummyServiceImpl) coords() {
 			log.Println(err)
 		}
 	}
+
+	log.Println("Coords generated")
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) comments() {
 	// take events and users
 	var users []*models.User
@@ -257,8 +314,11 @@ func (d *dummyServiceImpl) comments() {
 			}
 		}
 	}
+
+	log.Println("Comments generated")
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) votes() {
 	var users []*models.User
 	var events []*models.Event
@@ -275,26 +335,16 @@ func (d *dummyServiceImpl) votes() {
 
 	for i := 0; i < len(events); i++ {
 		for j := 0; j < d.f.Number(0, 4); j++ {
-			Options :=
-				[]models.VoteOption{}
+			vote := &models.Vote{}
+			err := error(nil)
 
-			for k := 0; k < d.f.Number(2, 5); k++ {
-				Options = append(Options, models.VoteOption{Text: d.f.Noun()})
+			if d.f.Bool() {
+				vote, err = d.generateRandomVote(events[i])
+			} else {
+				vote, err = d.generateAttendanceVote(events[i])
 			}
 
-			vote := &models.Vote{
-				EventID: events[i].ID,
-				Text:    d.f.Question(),
-				VoteType: func() models.VoteType {
-					if d.f.Bool() {
-						return models.CanChangeVote
-					}
-					return models.CannotChangeVote
-				}(),
-				Options: Options,
-			}
-
-			if err := d.db.Create(vote).Error; err != nil {
+			if err != nil {
 				log.Println(err)
 				continue
 			}
@@ -320,8 +370,71 @@ func (d *dummyServiceImpl) votes() {
 			}
 		}
 	}
+
+	log.Println("Votes generated")
 }
 
+func (d *dummyServiceImpl) generateRandomVote(event *models.Event) (*models.Vote, error) {
+	Options :=
+		[]models.VoteOption{}
+
+	for k := 0; k < d.f.Number(2, 5); k++ {
+		Options = append(Options, models.VoteOption{Text: d.f.Noun(), ParticipationStatus: models.NotApplicable})
+	}
+
+	vote := &models.Vote{
+		EventID: event.ID,
+		Text:    d.f.Question(),
+		VoteType: func() models.VoteType {
+			if d.f.Bool() {
+				return models.CanChangeVote
+			}
+			return models.CannotChangeVote
+		}(),
+		Options: Options,
+	}
+
+	if err := d.db.Create(vote).Error; err != nil {
+		return nil, err
+	}
+
+	return vote, nil
+}
+
+func (d *dummyServiceImpl) generateAttendanceVote(event *models.Event) (*models.Vote, error) {
+	Options :=
+		[]models.VoteOption{}
+
+	if d.f.Bool() {
+		Options = append(Options, models.VoteOption{Text: "Interested", ParticipationStatus: models.Interested})
+		Options = append(Options, models.VoteOption{Text: "Will participate", ParticipationStatus: models.WillParticipate})
+		Options = append(Options, models.VoteOption{Text: "Not interested", ParticipationStatus: models.NotInterested})
+	} else {
+		Options = append(Options, models.VoteOption{Text: "Will participate", ParticipationStatus: models.WillParticipate})
+		Options = append(Options, models.VoteOption{Text: "Not interested", ParticipationStatus: models.NotInterested})
+		Options = append(Options, models.VoteOption{Text: "I don't know yet", ParticipationStatus: models.NotApplicable})
+	}
+
+	vote := &models.Vote{
+		EventID: event.ID,
+		Text:    d.f.Question(),
+		VoteType: func() models.VoteType {
+			if d.f.Bool() {
+				return models.CanChangeVote
+			}
+			return models.CannotChangeVote
+		}(),
+		Options: Options,
+	}
+
+	if err := d.db.Create(vote).Error; err != nil {
+		return nil, err
+	}
+
+	return vote, nil
+}
+
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) followers() {
 	var users []*models.User
 	if err := d.db.Find(&users).Error; err != nil {
@@ -355,14 +468,18 @@ func (d *dummyServiceImpl) followers() {
 			d.db.Model(&user).Association("Following").Append(following)
 		}
 	}
+
+	log.Println("Followers generated")
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) opinion() {
 	// TODO
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) tags() {
-	// check if there are already 300 tags
+	// check if there are already 30 tags
 	tags := []*models.Tag{}
 	if err := d.db.Find(&tags).Error; err != nil {
 		log.Println(err)
@@ -381,13 +498,13 @@ func (d *dummyServiceImpl) tags() {
 		}
 	}
 
-	if len(tags) >= 300 {
+	if len(tags) >= 30 {
 		log.Println("Tags already exist")
 		return
 	}
 
 	var i = 0
-	for i < 300 {
+	for i < 30 {
 		t := &models.Tag{
 			Name: d.f.Hobby(),
 		}
@@ -398,8 +515,11 @@ func (d *dummyServiceImpl) tags() {
 			i++
 		}
 	}
+
+	log.Println("Tags generated")
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) event1() {
 	// take all locations and people
 
@@ -456,8 +576,11 @@ func (d *dummyServiceImpl) event1() {
 			log.Println(err)
 		}
 	}
+
+	log.Println("Events generated")
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) event2() {
 	var events []*models.Event
 
@@ -486,6 +609,8 @@ func (d *dummyServiceImpl) event2() {
 			log.Println("Error saving event", event.ID, err)
 		}
 	}
+
+	log.Println("Event details generated")
 }
 
 func generateEventTitle(eventType models.EventType) string {
@@ -514,6 +639,7 @@ func generateEventTitle(eventType models.EventType) string {
 	return title
 }
 
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
 func (d *dummyServiceImpl) generateMockSurvey() {
 	// delete if survey already exists
 
@@ -673,15 +799,18 @@ func (d *dummyServiceImpl) generateMockSurvey() {
 	log.Println("Mock survey saved successfully")
 }
 
-func (d *dummyServiceImpl) generateRecommendations() error {
+//lint:ignore U1000 Ignore unused function as dynamically used in seeder
+func (d *dummyServiceImpl) generateRecommendations() {
 	var users []*models.User
 	if err := d.db.Find(&users).Error; err != nil {
-		return fmt.Errorf("error fetching users: %w", err)
+		log.Println("error fetching users:", err)
+		return
 	}
 
 	var tags []*models.Tag
 	if err := d.db.Find(&tags).Error; err != nil {
-		return fmt.Errorf("error fetching tags: %w", err)
+		log.Println("error fetching tags:", err)
+		return
 	}
 
 	for _, user := range users {
@@ -701,5 +830,5 @@ func (d *dummyServiceImpl) generateRecommendations() error {
 		}
 	}
 
-	return nil
+	log.Println("Recommendations generated")
 }

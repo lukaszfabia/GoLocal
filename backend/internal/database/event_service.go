@@ -2,7 +2,9 @@ package database
 
 import (
 	"backend/internal/forms"
+	"backend/internal/location"
 	"backend/internal/models"
+	"backend/pkg/normalizer"
 	"fmt"
 	"log"
 	"strings"
@@ -11,14 +13,51 @@ import (
 )
 
 type EventService interface {
-	GetEvents(params map[string]any, limit int) ([]*models.Event, error)
+	GetEvents(params map[string]any, limit int, preloadOptions []string) ([]*models.Event, error)
 	CreateEvent(event forms.Event) (models.Event, error)
 	DeleteEvent(id int) (models.Event, error)
 	UpdateEvent() (models.Event, error)
+	GetEvent(eventId uint) (*models.Event, error)
+	PromoteEvent(id int) (*models.Event, error)
+	ReportEvent(form forms.ReportForm) error
 }
 
 type eventServiceImpl struct {
 	db *gorm.DB
+}
+
+func (e *eventServiceImpl) ReportEvent(form forms.ReportForm) error {
+	var event models.Event
+	if err := e.db.First(&event, "id = ?", form.ID).Error; err != nil {
+		return fmt.Errorf("failed to find event: %w", err)
+	}
+
+	eventToReport := &models.ReportedEvent{
+		Reason:  form.Reason,
+		EventID: event.ID,
+	}
+
+	if err := e.db.Create(eventToReport).Error; err != nil {
+		return fmt.Errorf("failed to create reported event: %w", err)
+	}
+
+	return nil
+}
+
+func (e *eventServiceImpl) PromoteEvent(id int) (*models.Event, error) {
+	var event models.Event
+
+	if err := e.db.First(&event, "id = ?", id).Error; err != nil {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	event.IsPromoted = true
+
+	if err := e.db.Save(&event).Error; err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }
 
 func NewEventService(db *gorm.DB) EventService {
@@ -43,22 +82,23 @@ func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) 
 		FinishDate:  event.FinishDate,
 	}
 
-	err := e.db.Transaction(func(tx *gorm.DB) error {
-		var location models.Location
+	event.Tags = normalizer.Normalizer(event.Tags)
 
+	location, err := location.FetchLocation(event.Lon, event.Lat)
+	if err != nil {
+		return models.Event{}, err
+	}
+
+	err = e.db.Transaction(func(tx *gorm.DB) error {
 		var organizers []*models.User
 		if err := e.db.Where("id IN ?", event.Organizers).Find(&organizers).Error; err != nil {
-			return err
-		}
-
-		if err := e.db.First(&location, "id = ?", event.LocationID).Error; err != nil {
 			return err
 		}
 
 		tags, _ := getOrCreateTags(tx, event.Tags)
 
 		newEvent.Tags = tags
-		newEvent.LocationID = event.LocationID
+		newEvent.LocationID = location.ID
 		newEvent.Location = &location
 		newEvent.EventOrganizers = organizers
 
@@ -126,6 +166,10 @@ func getOrCreateTags(tx *gorm.DB, tags []string) ([]*models.Tag, error) {
 func (e *eventServiceImpl) DeleteEvent(id int) (models.Event, error) { return models.Event{}, nil }
 func (e *eventServiceImpl) UpdateEvent() (models.Event, error)       { return models.Event{}, nil }
 
+type PreloadOption struct {
+	Association string
+}
+
 /*
 Filter Events by given params. Result length <= limit.
 
@@ -139,14 +183,12 @@ Returns:
   - list of events
   - error occured during transaction
 */
-func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*models.Event, error) {
-	q := e.db.
-		Preload("Location").
-		Preload("Location.Address").
-		Preload("Tags").
-		Preload("EventOrganizers").
-		Preload("Votes").
-		Model(&models.Event{})
+func (e *eventServiceImpl) GetEvents(params map[string]any, limit int, preloadOptions []string) ([]*models.Event, error) {
+	q := e.db.Model(&models.Event{})
+
+	for _, option := range preloadOptions {
+		q = q.Preload(option)
+	}
 
 	if limit > 0 {
 		q = q.Limit(limit)
@@ -215,4 +257,18 @@ func (e *eventServiceImpl) GetEvents(params map[string]any, limit int) ([]*model
 	}
 
 	return res, nil
+}
+
+func (e *eventServiceImpl) GetEvent(eventId uint) (*models.Event, error) {
+	var event models.Event
+	if err := e.db.Preload("Location").
+		Preload("Location.Address").
+		Preload("Tags").
+		Preload("EventOrganizers").
+		Preload("Votes").
+		First(&event, "id = ?", eventId).Error; err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }

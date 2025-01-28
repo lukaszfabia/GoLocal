@@ -98,6 +98,11 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 			log.Println("Failed to update vote:", err)
 			return fmt.Errorf("failed to update vote")
 		}
+
+		if voteOption.ParticipationStatus == models.NotInterested {
+			dbInstance.recommendationService.ModifyAttendancePreference(user.ID, destVote.EventID, false)
+		}
+
 		return nil
 	})
 }

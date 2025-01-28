@@ -18,7 +18,7 @@ class VotesRepositoryDummy implements IVotesRepository {
           VoteOption(id: 2, text: 'Option 2', votesCount: 2, isSelected: false),
         ],
         event: mockEvents[0],
-        type: VoteType.CAN_CHANGE_VOTE,
+        type: VoteType.canChangeVote,
         endsAt: DateTime.now().add(Duration(days: 1)),
       ),
       Vote(
@@ -30,7 +30,7 @@ class VotesRepositoryDummy implements IVotesRepository {
           VoteOption(
               id: 4, text: 'Option 2.2', votesCount: 123, isSelected: true),
         ],
-        type: VoteType.CAN_CHANGE_VOTE,
+        type: VoteType.canChangeVote,
         event: mockEvents[1],
         endsAt: DateTime.now().add(Duration(days: 2)),
       )
@@ -39,7 +39,9 @@ class VotesRepositoryDummy implements IVotesRepository {
 
   @override
   Future<List<Vote>> getVotesForEvent(String eventId) async {
-    return _votes.where((vote) => vote.event.id.toString() == eventId).toList();
+    return _votes
+        .where((vote) => vote.event?.id.toString() == eventId)
+        .toList();
   }
 
   @override
@@ -64,7 +66,6 @@ class VotesRepositoryDummy implements IVotesRepository {
 
   @override
   Future<void> updateVote(Vote vote) async {
-    print("Updating vote: $vote");
     final index = _votes.indexWhere((v) => v.id == vote.id);
     if (index != -1) {
       _votes[index] = vote;
@@ -73,7 +74,6 @@ class VotesRepositoryDummy implements IVotesRepository {
 
   @override
   Future<void> voteOnOption(int voteId, int optionId) async {
-    print("Voting on option: $optionId for vote: $voteId");
     final vote = await getVote(voteId.toString());
     final updatedOptions = vote.options.map((option) {
       if (option.id == optionId) {
