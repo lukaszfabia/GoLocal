@@ -190,11 +190,11 @@ type PreferenceSurveyAnswerOption struct {
 	OptionID uint                   `json:"optionID"`
 }
 
-type Recommendation struct {
+type UserPreference struct {
 	Model
 	User   User  `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE" json:"user"`
 	UserID uint  `json:"userID"`
-	Tags   []Tag `gorm:"many2many:recommendation_tags" json:"tags"`
+	Tags   []Tag `gorm:"many2many:user_preferences_tags" json:"tags"`
 }
 
 type DeviceToken struct {

@@ -40,7 +40,7 @@ var allModels []any = []any{
 	&models.PreferenceSurveyOption{},
 	&models.PreferenceSurveyAnswerOption{},
 
-	&models.Recommendation{},
+	&models.UserPreference{},
 	&models.BlacklistedTokens{},
 	&models.DeviceToken{},
 	&models.ReportedEvent{},

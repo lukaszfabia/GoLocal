@@ -12,7 +12,7 @@ import (
 
 type VoteService interface {
 	GetVotes(params map[string]any, limit int) ([]*models.Vote, error)
-	Vote(params forms.VoteInVotingForm, user models.User) error
+	Vote(params forms.VoteInVotingForm, user models.User) (*models.VoteAnswer, error)
 	// CreateVote(Vote forms.Vote) (models.Vote, error)
 	// DeleteVote(id int) (models.Vote, error)
 	// UpdateVote() (models.Vote, error)
@@ -32,11 +32,13 @@ func (s *service) VoteService() VoteService {
 	return s.voteService
 }
 
-func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) error {
-	return v.db.Transaction(func(tx *gorm.DB) error {
+func (v *voteServiceImpl) Vote(form forms.VoteInVotingForm, user models.User) (*models.VoteAnswer, error) {
+	var newAnswer *models.VoteAnswer
+
+	err := v.db.Transaction(func(tx *gorm.DB) error {
 		// get vote
 		destVote := &models.Vote{}
-		if err := v.db.First(destVote, "id = ?", params.VoteID).Error; err != nil {
+		if err := v.db.First(destVote, "id = ?", form.VoteID).Error; err != nil {
 			log.Println("Error fetching vote:", err)
 			return err
 		}
@@ -49,7 +51,7 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 
 		// check if user already voted
 		var existingAnswer models.VoteAnswer
-		if err := v.db.First(&existingAnswer, "vote_id = ? AND user_id = ? AND deleted_at IS NULL ", params.VoteID, user.ID).Error; err == nil {
+		if err := v.db.First(&existingAnswer, "vote_id = ? AND user_id = ? AND deleted_at IS NULL ", form.VoteID, user.ID).Error; err == nil {
 			log.Println("User already voted")
 		}
 
@@ -68,9 +70,9 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 		}
 
 		// get vote answer
-		newAnswer := &models.VoteAnswer{
-			VoteOptionID: uint(params.VoteOptionID),
-			VoteID:       uint(params.VoteID),
+		newAnswer = &models.VoteAnswer{
+			VoteOptionID: uint(form.VoteOptionID),
+			VoteID:       uint(form.VoteID),
 			UserID:       user.ID,
 		}
 		if err := v.db.Create(newAnswer).Error; err != nil {
@@ -80,7 +82,7 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 
 		// get vote option
 		voteOption := &models.VoteOption{}
-		if err := v.db.First(voteOption, "id = ?", params.VoteOptionID).Error; err != nil {
+		if err := v.db.First(voteOption, "id = ?", form.VoteOptionID).Error; err != nil {
 			log.Println("Failed to get vote options:", err)
 			return fmt.Errorf("failed to get vote options")
 		}
@@ -105,6 +107,12 @@ func (v *voteServiceImpl) Vote(params forms.VoteInVotingForm, user models.User) 
 
 		return nil
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return newAnswer, nil
 }
 
 func (v *voteServiceImpl) GetVotes(params map[string]any, limit int) ([]*models.Vote, error) {

@@ -10,7 +10,7 @@ import (
 type RecommendationService interface {
 	Predict([]*models.Event, uint, int) ([]uint, error)
 	ModifyAttendancePreference(uint, uint, bool) error
-	GetUserPreferences(uint) (*models.Recommendation, error)
+	GetUserPreferences(uint) (*models.UserPreference, error)
 }
 
 type recommendationServiceImpl struct {
@@ -33,23 +33,13 @@ func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId ui
 		userTags[tag.Name] = struct{}{}
 	}
 
-	allTags := []string{}
-	for _, event := range allEvents {
-		for _, tag := range event.Tags {
-			allTags = append(allTags, tag.Name)
-		}
-	}
-	for tag := range userTags {
-		allTags = append(allTags, tag)
-	}
-
-	recommendedEvents := newFunction(s, allEvents, userPreferences, count)
+	recommendedEvents := getRecommendedEvents(s, allEvents, userPreferences, count)
 
 	return recommendedEvents, nil
 }
 
-func (s *recommendationServiceImpl) GetUserPreferences(userId uint) (*models.Recommendation, error) {
-	var userPreferences models.Recommendation
+func (s *recommendationServiceImpl) GetUserPreferences(userId uint) (*models.UserPreference, error) {
+	var userPreferences models.UserPreference
 	if err := s.db.Preload("Tags").First(&userPreferences, "user_id = ?", userId).Error; err != nil {
 		return nil, err
 	}
@@ -67,16 +57,26 @@ func (s *recommendationServiceImpl) ModifyAttendancePreference(userId uint, even
 		return err
 	}
 
+	// Track tags to be removed
+	var tagsToRemove []models.Tag
+
 	for _, tag := range event.Tags {
 		if positive && !containsTag(userPreferences.Tags, tag) {
 			userPreferences.Tags = append(userPreferences.Tags, *tag)
 		} else {
 			for i, userTag := range userPreferences.Tags {
 				if userTag.Name == tag.Name {
+					tagsToRemove = append(tagsToRemove, userTag)
 					userPreferences.Tags = append(userPreferences.Tags[:i], userPreferences.Tags[i+1:]...)
 					break
 				}
 			}
+		}
+	}
+
+	if len(tagsToRemove) > 0 {
+		if err := s.db.Model(&userPreferences).Association("Tags").Delete(tagsToRemove); err != nil {
+			return err
 		}
 	}
 
