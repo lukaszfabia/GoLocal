@@ -814,7 +814,7 @@ func (d *dummyServiceImpl) generateRecommendations() {
 	}
 
 	for _, user := range users {
-		recommendation := &models.Recommendation{
+		recommendation := &models.UserPreference{
 			UserID: user.ID,
 			Tags:   []models.Tag{},
 		}

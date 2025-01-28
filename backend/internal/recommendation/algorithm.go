@@ -7,7 +7,38 @@ import (
 	"sort"
 )
 
-func newFunction(s *recommendationServiceImpl, allEvents []*models.Event, userPreferences *models.Recommendation, count int) []uint {
+type IndexCosineSim struct {
+	Index     int
+	CosineSim float64
+}
+
+func sortIndicesByCosineSim(cosineSim []float64) []int {
+	indexCosineSims := make([]IndexCosineSim, len(cosineSim))
+	for i := range cosineSim {
+		indexCosineSims[i] = IndexCosineSim{
+			Index: i,
+			CosineSim: func() float64 {
+				if math.IsNaN(cosineSim[i]) {
+					return 0
+				}
+				return cosineSim[i]
+			}(),
+		}
+	}
+
+	sort.Slice(indexCosineSims, func(i, j int) bool {
+		return indexCosineSims[i].CosineSim > indexCosineSims[j].CosineSim
+	})
+
+	sortedIndices := make([]int, len(cosineSim))
+	for i, ics := range indexCosineSims {
+		sortedIndices[i] = ics.Index
+	}
+
+	return sortedIndices
+}
+
+func getRecommendedEvents(s *recommendationServiceImpl, allEvents []*models.Event, userPreferences *models.UserPreference, count int) []uint {
 	vectors := s.countVectorizer(allEvents, userPreferences)
 
 	userVector := vectors[len(vectors)-1]
@@ -18,13 +49,7 @@ func newFunction(s *recommendationServiceImpl, allEvents []*models.Event, userPr
 		cosineSim[i] = s.cosineSimilarity(userVector, vec)
 	}
 
-	sortedIndices := make([]int, len(cosineSim))
-	for i := range sortedIndices {
-		sortedIndices[i] = i
-	}
-	sort.Slice(sortedIndices, func(i, j int) bool {
-		return cosineSim[sortedIndices[i]] > cosineSim[sortedIndices[j]]
-	})
+	sortedIndices := sortIndicesByCosineSim(cosineSim)
 
 	recommendedEvents := []uint{}
 	for _, idx := range sortedIndices {
@@ -41,7 +66,7 @@ func newFunction(s *recommendationServiceImpl, allEvents []*models.Event, userPr
 	return recommendedEvents
 }
 
-func (s *recommendationServiceImpl) countVectorizer(events []*models.Event, userPreferences *models.Recommendation) [][]int {
+func (s *recommendationServiceImpl) countVectorizer(events []*models.Event, userPreferences *models.UserPreference) [][]int {
 	tagSet := make(map[string]struct{})
 	for _, event := range events {
 		for _, tag := range event.Tags {

@@ -75,7 +75,7 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			tags = append(tags, tag)
 		}
 
-		recommendation := models.Recommendation{
+		recommendation := models.UserPreference{
 			UserID: answer.UserID,
 			Tags:   tags,
 		}
