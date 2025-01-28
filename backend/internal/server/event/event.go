@@ -9,6 +9,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type EventHandler struct {
@@ -31,12 +34,11 @@ func (h *EventHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// base crud use cases
+
 func (h *EventHandler) get(w http.ResponseWriter, r *http.Request) {
 	params := r.Context().Value(_params).(map[string]any)
 	limit := r.Context().Value(_limit).(int)
-
-	log.Println(params)
-	log.Println(limit)
 
 	res, err := h.EventService.GetEvents(params, limit, []string{
 		"Location",
@@ -86,4 +88,40 @@ func (h *EventHandler) post(w http.ResponseWriter, r *http.Request) {
 	h.NotificationService.SendPush(notification)
 
 	app.NewResponse(w, http.StatusCreated, event)
+}
+
+func (h *EventHandler) delete(w http.ResponseWriter, r *http.Request) {}
+func (h *EventHandler) put(w http.ResponseWriter, r *http.Request)    {}
+
+func (h *EventHandler) PromoteEvent(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		app.NewResponse(w, http.StatusBadRequest, map[string]interface{}{
+			"message": "invalid event ID",
+		})
+		return
+	}
+
+	event, err := h.EventService.PromoteEvent(id)
+	if err != nil {
+		app.NewResponse(w, http.StatusNotFound, map[string]interface{}{
+			"message": "event not found",
+		})
+		return
+	}
+
+	app.NewResponse(w, http.StatusOK, event)
+}
+
+func (h *EventHandler) ReportEvent(w http.ResponseWriter, r *http.Request) {
+	form, _ := r.Context().Value(_reportForm).(*forms.ReportForm)
+
+	if err := h.EventService.ReportEvent(*form); err != nil {
+		app.NewResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	app.NewResponse(w, http.StatusCreated, nil)
 }

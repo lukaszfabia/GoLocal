@@ -43,6 +43,7 @@ var allModels []any = []any{
 	&models.Recommendation{},
 	&models.BlacklistedTokens{},
 	&models.DeviceToken{},
+	&models.ReportedEvent{},
 }
 
 var (
