@@ -1,5 +1,14 @@
 import 'package:golocal/src/shared/model_base.dart';
 
+/// A class representing a voting option in a poll or survey.
+///
+/// The [VoteOption] class extends the [Model] class and includes properties
+/// for the option's text, the number of votes it has received, and whether
+/// it is currently selected.
+///
+/// The class provides methods for JSON serialization and deserialization,
+/// as well as a method for creating a copy of an instance with modified
+/// properties.
 class VoteOption extends Model {
   final String text;
   final int votesCount;
