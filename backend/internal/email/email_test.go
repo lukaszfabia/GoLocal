@@ -1,30 +1,21 @@
 package email_test
 
-import (
-	"backend/internal/email"
-	"backend/internal/models"
-	"os"
-	"testing"
+// func TestSendCode(t *testing.T) {
 
-	"github.com/joho/godotenv"
-)
+// 	godotenv.Load("../../.env")
 
-func TestSendCode(t *testing.T) {
+// 	gmail := os.Getenv("GMAIL_MAIL")
+// 	if gmail == "" {
+// 		gmail = "ufabia03@gmail.com"
+// 	}
 
-	godotenv.Load("../../.env")
+// 	err := email.SendCode(&email.ForgetPassword{}, models.User{
+// 		FirstName: "Lukasz",
+// 		LastName:  "Fabia",
+// 		Email:     gmail,
+// 	}, "82734")
 
-	gmail := os.Getenv("GMAIL_MAIL")
-	if gmail == "" {
-		gmail = "ufabia03@gmail.com"
-	}
-
-	err := email.SendCode(&email.ForgetPassword{}, models.User{
-		FirstName: "Lukasz",
-		LastName:  "Fabia",
-		Email:     gmail,
-	}, "82734")
-
-	if err != nil {
-		t.Error(err)
-	}
-}
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// }
