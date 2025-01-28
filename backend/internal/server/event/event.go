@@ -65,6 +65,7 @@ func (h *EventHandler) post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, ok := r.Context().Value("user").(*models.User)
+	log.Println(user)
 	if !ok {
 		log.Println("Error: User data not found in context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)

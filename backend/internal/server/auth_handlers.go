@@ -209,7 +209,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 	// get user from ctx
-	user, ok := r.Context().Value(_user).(*models.User)
+	user, ok := r.Context().Value("user").(*models.User)
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 		return
@@ -232,7 +232,7 @@ func (s *Server) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.CodeRequest](r)
-	user, ok := r.Context().Value(_user).(*models.User)
+	user, ok := r.Context().Value("user").(*models.User)
 
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
@@ -259,7 +259,7 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	form, err := parsers.DecodeJSON[forms.NewPasswordRequest](r)
-	user, ok := r.Context().Value(_user).(*models.User)
+	user, ok := r.Context().Value("user").(*models.User)
 
 	if !ok {
 		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")

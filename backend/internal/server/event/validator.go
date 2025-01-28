@@ -29,6 +29,7 @@ func (h *EventHandler) Validate(next http.Handler) http.Handler {
 		switch r.Method {
 		case http.MethodPost:
 			ctx = post(w, r)
+
 			if ctx != nil {
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return

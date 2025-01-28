@@ -9,12 +9,9 @@ import (
 	"strings"
 )
 
-type UserKey string
-
-const _user UserKey = "user"
-
 func (s *Server) isAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Validation...")
 		authorization := r.Header.Get("Authorization")
 
 		// no bearer token
@@ -56,10 +53,12 @@ func (s *Server) isAuth(next http.Handler) http.Handler {
 		}
 
 		// set user in ctx
-		ctx := context.WithValue(r.Context(), _user, user)
+		ctx := context.WithValue(r.Context(), "user", user)
 		r = r.WithContext(ctx)
 
 		// go to next handler
+		log.Printf("Done... %v\n", user)
+
 		next.ServeHTTP(w, r)
 	})
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -74,8 +75,12 @@ func TestParseCoords(t *testing.T) {
 				t.Errorf("ParseCoords() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("ParseCoords() = %v, want %v", got, tt.want)
+			if got.Latitude != tt.want.Latitude {
+				t.Errorf("ParseCoords() = %v, want %v", got.Latitude, tt.want.Latitude)
+			}
+
+			if got.Longitude != tt.want.Longitude {
+				t.Errorf("ParseCoords() = %v, want %v", got.Longitude, tt.want.Longitude)
 			}
 		})
 	}
@@ -91,9 +96,11 @@ func TestParseAddr(t *testing.T) {
 		{
 			name: "valid address",
 			input: map[string]any{
-				"address.road":         "Main Street",
-				"address.house_number": "123",
-				"display_name":         "Main Street 123, Warsaw, Poland",
+				"address": map[string]any{
+					"road":         "Main Street",
+					"house_number": "123",
+				},
+				"display_name": "Main Street 123, Warsaw, Poland",
 			},
 			want: models.Address{
 				Street:         "Main Street",
@@ -105,11 +112,28 @@ func TestParseAddr(t *testing.T) {
 		{
 			name: "missing street",
 			input: map[string]any{
-				"address.house_number": "123",
-				"display_name":         "Main Street 123, Warsaw, Poland",
+				"address": map[string]any{
+					"house_number": "123",
+				},
+				"display_name": "Main Street 123, Warsaw, Poland",
 			},
 			want:    models.Address{},
 			wantErr: true,
+		},
+		{
+			name: "missing house_number",
+			input: map[string]any{
+				"address": map[string]any{
+					"road": "Main Street",
+				},
+				"display_name": "Main Street, Warsaw, Poland",
+			},
+			want: models.Address{
+				Street:         "Main Street",
+				StreetNumber:   "",
+				AdditionalInfo: "Main Street, Warsaw, Poland",
+			},
+			wantErr: false,
 		},
 	}
 
@@ -133,59 +157,74 @@ func TestFetchLocation(t *testing.T) {
 		w.Write([]byte(`{
 			"lon": "21.0122",
 			"lat": "52.2297",
-			"address.road": "Main Street",
-			"address.house_number": "123",
-			"display_name": "Main Street 123, Warsaw, Poland",
-			"address.city": "Warsaw",
-			"address.postcode": "00-001",
-			"address.country": "Poland"
+			"address": {
+				"road": "Main Street",
+				"house_number": "123",
+				"city": "Warsaw",
+				"postcode": "00-001",
+				"country": "Poland"
+			},
+			"display_name": "Main Street 123, Warsaw, Poland"
 		}`))
 	}))
 	defer server.Close()
 
-	// mockowanie
+	// Mockowanie funkcji GetUrl
 	originalGetUrl := location.GetUrl
 	location.GetUrl = func(lon, lat string, format string) (*url.URL, error) {
 		return url.Parse(server.URL)
 	}
 	defer func() { location.GetUrl = originalGetUrl }()
 
-	location, err := location.FetchLocation("21.0122", "52.2297")
+	// Wywołanie FetchLocation
+	loc, err := location.FetchLocation("21.0122", "52.2297")
 	if err != nil {
 		t.Errorf("FetchLocation() error = %v", err)
 		return
 	}
 
-	addr := &models.Address{
-		Street:         "Main Street",
-		StreetNumber:   "123",
-		AdditionalInfo: "Main Street 123, Warsaw, Poland",
-	}
-
-	if fmt.Sprint(*addr) != fmt.Sprint(*location.Address) {
-		t.Errorf("want %v, have %v", *addr, *location.Address)
-	}
-
-	coords := &models.Coords{
+	expectedCords := &models.Coords{
 		Longitude: 21.0122,
 		Latitude:  52.2297,
 	}
 
-	if fmt.Sprint(*coords) != fmt.Sprint(*location.Coords) {
-		t.Errorf("want %v, have %v", *coords, *location.Coords)
+	// Sprawdzanie adresu
+	expectedAddress := &models.Address{
+		Street:         "Main Street",
+		StreetNumber:   "123",
+		AdditionalInfo: "Main Street 123, Warsaw, Poland",
+	}
+	if !reflect.DeepEqual(loc.Address, expectedAddress) {
+		t.Errorf("FetchLocation() Address = %v, want %v", loc.Address, expectedAddress)
+	}
+	if loc.Coords.Longitude != expectedCords.Longitude || loc.Coords.Latitude != expectedCords.Latitude {
+		t.Errorf("Bad coords: expected (%f, %f), got (%f, %f)", expectedCords.Longitude, expectedCords.Latitude, loc.Coords.Longitude, loc.Coords.Latitude)
 	}
 
-	// reset
-	location.Address = nil
-	location.Coords = nil
-
-	expected := models.Location{
-		City:    "Warsaw",
-		Country: "Poland",
-		Zip:     "00-001",
+	if loc.City != "Warsaw" {
+		t.Errorf("FetchLocation() Coords = %v, want %v", loc.City, "Warsaw")
 	}
 
-	if fmt.Sprint(location) != fmt.Sprint(expected) {
-		t.Errorf("FetchLocation() = %v\n, want %v", location, expected)
+	if loc.Zip != "00-001" {
+		t.Errorf("FetchLocation() Zip = %v, want %v", loc.Zip, "00-001")
+	}
+}
+
+func TestGetUrl(t *testing.T) {
+	var lon, lat string = "23.23", "32.12"
+
+	have, err := location.GetUrl(lon, lat, "json")
+
+	if err != nil {
+		t.Error("Error occured during getting url")
+	}
+
+	expected, err := url.Parse(fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%s&lon=%s", lat, lon))
+	if err != nil {
+		t.Errorf("Error parsing expected URL: %v", err)
+	}
+
+	if expected.String() != have.String() {
+		t.Errorf("GetUrl() want %s, have %s", expected.String(), have.String())
 	}
 }
