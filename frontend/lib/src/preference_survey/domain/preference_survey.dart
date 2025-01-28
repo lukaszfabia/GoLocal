@@ -3,6 +3,8 @@ import 'package:golocal/src/preference_survey/domain/preference_survey_question.
 
 /// A model representing a preference survey.
 ///
+/// {@canonicalFor preference_survey.PreferenceSurvey}
+///
 /// This class extends the [Model] class and contains information about a
 /// preference survey, including its title, description, and a list of
 /// questions.
