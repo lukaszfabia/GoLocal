@@ -20,12 +20,12 @@ type Notification struct {
 }
 
 type NotificationService interface {
-	SetClient(client messagingClient)
+	SetClient(client MessagingClient)
 	SendPush(n *Notification) error
 }
 
 type notificationServiceImpl struct {
-	client messagingClient
+	client MessagingClient
 	db     *gorm.DB
 }
 
@@ -36,7 +36,7 @@ func NewNotificationService(db *gorm.DB) NotificationService {
 	}
 }
 
-func (ns *notificationServiceImpl) SetClient(client messagingClient) {
+func (ns *notificationServiceImpl) SetClient(client MessagingClient) {
 	ns.client = client
 	log.Println("Client has been set")
 }

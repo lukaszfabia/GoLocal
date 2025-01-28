@@ -7,6 +7,7 @@ import (
 	"backend/pkg/functools"
 	"backend/pkg/parsers"
 	"context"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -40,6 +41,7 @@ func (h *EventHandler) Validate(next http.Handler) http.Handler {
 	})
 }
 
+// validator for event creation
 func post(w http.ResponseWriter, r *http.Request) context.Context {
 	form, err := parsers.DecodeMultipartForm[forms.Event](r)
 	if err != nil {
@@ -48,6 +50,7 @@ func post(w http.ResponseWriter, r *http.Request) context.Context {
 	}
 
 	if !functools.In(form.EventType, models.EventTypes) {
+		log.Println("Event type is not on the list")
 		app.NewResponse(w, http.StatusBadRequest, map[string]string{"error": "Invalid event type"})
 		return nil
 	}
@@ -55,6 +58,7 @@ func post(w http.ResponseWriter, r *http.Request) context.Context {
 	return context.WithValue(r.Context(), _eventForm, form)
 }
 
+// validator for getting event with q-string
 func get(w http.ResponseWriter, r *http.Request) context.Context {
 	params := parsers.ParseURLQuery(r, forms.Event{}, "lon", "lat", "accuracy", "street", "street_number", "country", "city")
 
