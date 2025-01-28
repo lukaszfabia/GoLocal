@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+// https://nominatim.openstreetmap.org/reverse?format=json&lat=51.12&lon=17.05
+
 var format = "json"
 
 var GetUrl = func(lon, lat string, format string) (*url.URL, error) {
@@ -45,18 +47,27 @@ func ParseCoords(b map[string]any) (models.Coords, error) {
 	return models.Coords{
 		Longitude: lon,
 		Latitude:  lat,
+		Geom:      fmt.Sprintf("POINT(%.4f %.4f)", lon, lat),
 	}, nil
 }
 
 func ParseAddr(b map[string]any) (models.Address, error) {
+	log.Println(b)
 
-	// optional
-	streetNumber, _ := b["address.house_number"].(string)
+	address, ok := b["address"].(map[string]any)
+	if !ok {
+		return models.Address{}, fmt.Errorf("failed to get address map")
+	}
+
+	streetNumber, _ := address["house_number"].(string)
+
 	info, _ := b["display_name"].(string)
 
-	street, ok := b["address.road"].(string)
+	street, ok := address["road"].(string)
 	if !ok {
-		return models.Address{}, fmt.Errorf("failed to get address")
+		if street, ok = address["amenity"].(string); !ok {
+			return models.Address{}, fmt.Errorf("failed to get street or amenity")
+		}
 	}
 
 	return models.Address{
@@ -85,17 +96,22 @@ func ParseBody(body []byte) (models.Location, error) {
 		return models.Location{}, err
 	}
 
-	city, ok := jsonResponse["address.city"].(string)
+	address, ok := jsonResponse["address"].(map[string]any)
+	if !ok {
+		return models.Location{}, fmt.Errorf("failed to get address map")
+	}
+
+	city, ok := address["city"].(string)
 	if !ok {
 		return models.Location{}, fmt.Errorf("no city provided")
 	}
 
-	zip, ok := jsonResponse["address.postcode"].(string)
+	zip, ok := address["postcode"].(string)
 	if !ok {
 		return models.Location{}, fmt.Errorf("no zip provided")
 	}
 
-	country, ok := jsonResponse["address.country"].(string)
+	country, ok := address["country"].(string)
 	if !ok {
 		return models.Location{}, fmt.Errorf("no country provided")
 	}
