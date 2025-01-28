@@ -3,6 +3,7 @@ package server
 import (
 	"backend/internal/server/account"
 	"backend/internal/server/event"
+	"backend/internal/server/vote"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,6 +38,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	eventHandler := event.EventHandler{
 		EventService:        s.db.EventService(),
 		NotificationService: s.db.NotificationService(),
+	}
+
+	voteHandler := vote.VoteHandler{
+		VoteService: s.db.VoteService(),
+		UserService: s.db.UserService(),
 	}
 
 	accountHandler := account.AccountHandler{
@@ -118,7 +124,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	//-------------------------------------Vote-------------------------------------//
 
 	vote := auth.PathPrefix("/vote").Subrouter()
-	vote.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).
+	vote.HandleFunc(`/{limit:[0-9]*}`, voteHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	return r
