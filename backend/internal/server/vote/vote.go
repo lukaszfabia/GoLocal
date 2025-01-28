@@ -1,6 +1,8 @@
-package server
+package vote
 
 import (
+	"backend/internal/app"
+	"backend/internal/database"
 	"backend/internal/forms"
 	"backend/internal/models"
 	"backend/pkg/parsers"
@@ -12,63 +14,67 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *Server) VoteHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		s.getVotes(w, r)
-	case http.MethodPost:
-		s.vote(w, r)
-	default:
-		s.NewResponse(w, http.StatusBadRequest, nil)
-		return
-	}
-
+type VoteHandler struct {
+	VoteService database.VoteService
+	UserService database.UserService
 }
 
-func (s *Server) vote(w http.ResponseWriter, r *http.Request) {
-	form, err := parsers.DecodeJSON[forms.VoteInVotingForm](r)
+func (h *VoteHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.getVotes(w, r)
+	case http.MethodPost:
+		h.vote(w, r)
+	default:
+		app.NewResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+}
 
-	if err != nil {
-		log.Println(err)
-		s.InvalidFormResponse(w)
+func (h *VoteHandler) vote(w http.ResponseWriter, r *http.Request) {
+	log.Println("Starting vote handler")
+
+	form, ok := r.Context().Value(_voteForm).(*forms.VoteInVotingForm)
+	if !ok {
+		log.Println("Error: Form data not found in context")
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
 	userId := r.Header.Get("User-Id")
 	if userId == "" {
-		log.Println("Unauthorized access")
-		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		log.Println("Unauthorized access: missing User-Id header")
+		app.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 		return
 	}
+	log.Println("User ID from header:", userId)
 
-	user, err := s.db.UserService().GetUser(userId)
+	user, err := h.UserService.GetUser(userId)
 	if err != nil {
-		log.Println(err)
-		s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
+		log.Println("Error fetching user:", err)
+		app.NewResponse(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
+	log.Println("Fetched user:", user)
 
-	if _, err := s.db.VoteService().Vote(*form, *user); err != nil {
+	newAnswer, err := h.VoteService.Vote(*form, *user)
+	if err != nil {
 		log.Println("Vote error:", err)
-		s.NewResponse(w, http.StatusBadRequest, err)
+		app.NewResponse(w, http.StatusBadRequest, err)
 		return
 	}
+	log.Println("Vote successful, new answer:", newAnswer)
 
-	s.NewResponse(w, http.StatusOK, "Successfully changed")
+	app.NewResponse(w, http.StatusOK, "Successfully changed")
+	log.Println("Vote handler completed successfully")
 }
 
-func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
-	// GET api/auth/votes/?=all
-	// GET api/auth/votes/?eventID=2
-	// GET api/auth/votes/5?eventID=2&voteType=jakistamtyp
-
+func (h *VoteHandler) getVotes(w http.ResponseWriter, r *http.Request) {
 	var vote models.Vote
-
 	params := parsers.ParseURLQuery(r, vote, "eventID", "voteType")
 
 	limitStr := mux.Vars(r)["limit"]
 	limit, err := strconv.Atoi(limitStr)
-
 	if err != nil {
 		limit = 5
 	}
@@ -76,25 +82,25 @@ func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
 	userId := r.Header.Get("User-Id")
 	if userId == "" {
 		log.Println("Unauthorized access")
-		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		app.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
 		return
 	}
 
-	user, err := s.db.UserService().GetUser(userId)
+	user, err := h.UserService.GetUser(userId)
 	if err != nil {
 		log.Println(err)
 		message := "Internal server error"
 		if err.Error() == "you can't change vote" {
 			message = "You tried to change vote on a vote that doesn't allow changing votes"
 		}
-		s.NewResponse(w, http.StatusInternalServerError, message)
+		app.NewResponse(w, http.StatusInternalServerError, message)
 		return
 	}
 
-	votes, err := s.db.VoteService().GetVotes(params, limit)
+	votes, err := h.VoteService.GetVotes(params, limit)
 	if err != nil {
 		log.Println(err)
-		s.NewResponse(w, http.StatusBadRequest, nil)
+		app.NewResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 
@@ -133,5 +139,5 @@ func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	s.NewResponse(w, http.StatusOK, transformedVotes)
+	app.NewResponse(w, http.StatusOK, transformedVotes)
 }
