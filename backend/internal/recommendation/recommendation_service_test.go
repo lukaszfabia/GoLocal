@@ -21,7 +21,7 @@ var allModels []any = []any{
 	&models.UserPreference{},
 }
 
-func TestRecommendationService_Predict(t *testing.T) {
+func CreateBaseData(t *testing.T) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		"localhost", "janta", "janta", "go_local_postgres_test", "5764")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -73,6 +73,11 @@ func TestRecommendationService_Predict(t *testing.T) {
 		t.Fatalf("failed to fetch tag: %v", err)
 	}
 
+	var not_recommended_tag models.Tag
+	if err := db.First(&not_recommended_tag, "name = ?", "Sport").Error; err != nil {
+		t.Fatalf("failed to fetch tag: %v", err)
+	}
+
 	recommendation.Tags = append(recommendation.Tags, recommendation_tag1, recommendation_tag2)
 
 	if err := db.Create(recommendation).Error; err != nil {
@@ -103,14 +108,6 @@ func TestRecommendationService_Predict(t *testing.T) {
 		},
 	}
 
-	if err := db.Save(&models.Coords{
-		Longitude: longitude,
-		Latitude:  latitude,
-		Geom:      point,
-	}).Error; err != nil {
-		return
-	}
-
 	events := []*models.Event{
 		{
 			StartDate: datePtr,
@@ -119,7 +116,7 @@ func TestRecommendationService_Predict(t *testing.T) {
 		},
 		{
 			StartDate: datePtr,
-			Tags:      []*models.Tag{},
+			Tags:      []*models.Tag{&not_recommended_tag},
 			Location:  &location,
 		},
 		{
@@ -132,6 +129,25 @@ func TestRecommendationService_Predict(t *testing.T) {
 		if err := db.Create(e).Error; err != nil {
 			t.Fatalf("failed to create event: %v", err)
 		}
+	}
+
+	return db, nil
+}
+
+func TestRecommendationService_Predict(t *testing.T) {
+	db, err := CreateBaseData(t)
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user models.User
+	if err := db.First(&user, "email = ?", "t@t.t").Error; err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	var events []*models.Event
+	if err := db.Preload("Tags").Find(&events).Error; err != nil {
+		t.Fatalf("failed to fetch events: %v", err)
 	}
 
 	service := NewRecommendationService(db)

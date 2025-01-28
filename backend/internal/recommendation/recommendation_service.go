@@ -33,6 +33,16 @@ func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId ui
 		userTags[tag.Name] = struct{}{}
 	}
 
+	allTags := []string{}
+	for _, event := range allEvents {
+		for _, tag := range event.Tags {
+			allTags = append(allTags, tag.Name)
+		}
+	}
+	for tag := range userTags {
+		allTags = append(allTags, tag)
+	}
+
 	recommendedEvents := getRecommendedEvents(s, allEvents, userPreferences, count)
 
 	return recommendedEvents, nil

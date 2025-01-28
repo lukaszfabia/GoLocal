@@ -63,13 +63,14 @@ func (d *dummyServiceImpl) clearDatabase() {
 
 	time.Sleep(10 * time.Second)
 
+	// I know you could use a Migrator.DropTable(), but it's not always dropping generated many2many tables
 	sql := `
         DELETE FROM user_followers;
         DELETE FROM user_following;
         DELETE FROM event_organizers;
         DELETE FROM event_tags;
         DELETE FROM devices;
-        DELETE FROM recommendation_tags;
+        DELETE FROM user_preferences_tags;
         DELETE FROM vote_answers;
         DELETE FROM vote_options;
         DELETE FROM votes;
@@ -80,7 +81,7 @@ func (d *dummyServiceImpl) clearDatabase() {
         DELETE FROM preference_survey_options;
         DELETE FROM preference_survey_questions;
         DELETE FROM preference_surveys;
-        DELETE FROM recommendations;
+        DELETE FROM user_preferences;
         DELETE FROM device_tokens;
         DELETE FROM users;
         DELETE FROM locations;
