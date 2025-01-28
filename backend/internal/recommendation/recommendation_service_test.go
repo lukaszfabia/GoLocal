@@ -165,3 +165,87 @@ func TestRecommendationService_Predict(t *testing.T) {
 	assert.Equal(t, events[0].ID, recommended[0])
 	assert.Equal(t, events[2].ID, recommended[1])
 }
+
+func TestRecommendationService_ModifyAttendancePreference(t *testing.T) {
+	db, err := CreateBaseData(t)
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user models.User
+	if err := db.First(&user, "email = ?", "t@t.t").Error; err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	var event models.Event
+	if err := db.Joins("JOIN event_tags ON event_tags.event_id = events.id").
+		Joins("JOIN tags ON tags.id = event_tags.tag_id").
+		Where("tags.name = ?", "Music").
+		Preload("Tags").
+		First(&event).Error; err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	service := NewRecommendationService(db)
+	if err := service.ModifyAttendancePreference(user.ID, event.ID, false); err != nil {
+		t.Errorf("ModifyAttendancePreference returned error: %v", err)
+	}
+
+	var userPreference models.UserPreference
+	if err := db.Preload("Tags").First(&userPreference, "user_id = ?", user.ID).Error; err != nil {
+		t.Fatalf("failed to fetch user preference: %v", err)
+	}
+
+	found := false
+	for _, tag := range userPreference.Tags {
+		if tag.Name == "Music" {
+			found = true
+			break
+		}
+	}
+	if found {
+		t.Error("expected tag to be removed from user preferences, but it's still there")
+	}
+}
+
+func TestRecommendationService_NoUserPreferences(t *testing.T) {
+	db, err := CreateBaseData(t)
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user = models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "tt@t.t",
+	}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	service := NewRecommendationService(db)
+	_, err = service.GetUserPreferences(user.ID)
+
+	assert.Error(t, err)
+}
+
+func TestRecommendationService_NoUserPreferencesPredict(t *testing.T) {
+	db, err := CreateBaseData(t)
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user = models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "tt@t.t",
+	}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	service := NewRecommendationService(db)
+	_, err = service.Predict(nil, user.ID, 2)
+
+	assert.Error(t, err)
+}

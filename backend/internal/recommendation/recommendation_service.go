@@ -33,16 +33,6 @@ func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId ui
 		userTags[tag.Name] = struct{}{}
 	}
 
-	allTags := []string{}
-	for _, event := range allEvents {
-		for _, tag := range event.Tags {
-			allTags = append(allTags, tag.Name)
-		}
-	}
-	for tag := range userTags {
-		allTags = append(allTags, tag)
-	}
-
 	recommendedEvents := getRecommendedEvents(s, allEvents, userPreferences, count)
 
 	return recommendedEvents, nil
@@ -67,16 +57,26 @@ func (s *recommendationServiceImpl) ModifyAttendancePreference(userId uint, even
 		return err
 	}
 
+	// Track tags to be removed
+	var tagsToRemove []models.Tag
+
 	for _, tag := range event.Tags {
 		if positive && !containsTag(userPreferences.Tags, tag) {
 			userPreferences.Tags = append(userPreferences.Tags, *tag)
 		} else {
 			for i, userTag := range userPreferences.Tags {
 				if userTag.Name == tag.Name {
+					tagsToRemove = append(tagsToRemove, userTag)
 					userPreferences.Tags = append(userPreferences.Tags[:i], userPreferences.Tags[i+1:]...)
 					break
 				}
 			}
+		}
+	}
+
+	if len(tagsToRemove) > 0 {
+		if err := s.db.Model(&userPreferences).Association("Tags").Delete(tagsToRemove); err != nil {
+			return err
 		}
 	}
 
