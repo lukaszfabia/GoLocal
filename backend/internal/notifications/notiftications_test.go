@@ -11,7 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
+
+var config *gorm.Config = &gorm.Config{
+	Logger: logger.Default.LogMode(logger.Silent),
+}
 
 type mockMessagingClient struct {
 	sendMulticastFunc func(ctx context.Context, message *messaging.MulticastMessage) (*messaging.BatchResponse, error)
@@ -32,7 +37,7 @@ func TestSendPush_Success(t *testing.T) {
 
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), config)
 	if err != nil {
 		t.Fatalf("Error opening GORM connection: %v", err)
 	}
@@ -85,19 +90,25 @@ func TestSendPush_DatabaseQueryFailure(t *testing.T) {
 
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		t.Fatalf("Error opening GORM connection: %v", err)
 	}
 
+	// Define the mock messaging client
 	mockClient := &mockMessagingClient{}
 
+	// Initialize the notification service with the mock database and client
 	service := notifications.NewNotificationService(gormDB)
 	service.SetClient(mockClient)
 
-	expectedQuery := `SELECT .* FROM .* WHERE .*`
+	// Define the expected database query and simulate a failure
+	expectedQuery := `SELECT .* FROM .* WHERE .*` // Adjust this regex to match the actual query
 	mock.ExpectQuery(expectedQuery).WithArgs(2).WillReturnError(fmt.Errorf("database error"))
 
+	// Create a test notification
 	notification := &notifications.Notification{
 		Title:    "Test Title",
 		Body:     "Test Body",
@@ -105,10 +116,12 @@ func TestSendPush_DatabaseQueryFailure(t *testing.T) {
 		Author:   1,
 	}
 
+	// Call the SendPush method and expect an error
 	err = service.SendPush(notification)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "database error")
 
+	// Ensure all mock expectations were met
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
@@ -123,7 +136,7 @@ func TestSendPush_FCMClientFailure(t *testing.T) {
 
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), config)
 	if err != nil {
 		t.Fatalf("Error opening GORM connection: %v", err)
 	}
@@ -169,7 +182,7 @@ func TestSendPush_InvalidInput(t *testing.T) {
 
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), config)
 	if err != nil {
 		t.Fatalf("Error opening GORM connection: %v", err)
 	}
@@ -204,7 +217,7 @@ func TestSendPush_NoClient(t *testing.T) {
 
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), config)
 	if err != nil {
 		t.Fatalf("Error opening GORM connection: %v", err)
 	}
