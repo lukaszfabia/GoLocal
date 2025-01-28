@@ -4,6 +4,29 @@ import 'package:golocal/src/event/domain/event.dart';
 
 enum VoteType { canChangeVote, cannotChangeVote }
 
+/// Represents a vote in the system.
+///
+/// A vote can be associated with an event and contains multiple vote options.
+/// The vote can have a type indicating whether the vote can be changed or not,
+/// and an optional end date.
+///
+/// The [Vote] class extends the [Model] class.
+///
+/// Properties:
+/// - `event`: The event associated with the vote.
+/// - `text`: The text description of the vote.
+/// - `options`: The list of vote options.
+/// - `type`: The type of the vote, indicating if it can be changed or not.
+/// - `endsAt`: The end date of the vote.
+///
+/// Constructors:
+/// - `Vote`: Creates a new vote instance.
+/// - `Vote.fromJson`: Creates a new vote instance from a JSON object.
+///
+/// Methods:
+/// - `parseVoteType`: Parses a string to a [VoteType].
+/// - `toJson`: Converts the vote instance to a JSON object.
+/// - `copyWith`: Creates a copy of the vote instance with optional new values.
 class Vote extends Model {
   final Event? event;
   final String text;

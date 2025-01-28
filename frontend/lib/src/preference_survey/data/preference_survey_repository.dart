@@ -5,9 +5,22 @@ import 'package:golocal/src/jwt_token_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:golocal/src/preference_survey/data/ipreference_survey_repository.dart';
 
+/// A repository class for handling preference survey operations.
+///
+/// This class extends [IPreferenceSurveyRepository] and provides methods to
+/// submit survey answers and fetch survey data from a remote server.
 class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
   final DioClient _dioClient = DioClient();
 
+  /// Submits the survey answers to the server.
+  ///
+  /// Takes a [preferenceSurveyId] and a map of [answers] where the key is the
+  /// question ID and the value is a list of selected answer IDs. The method
+  /// retrieves the user's access token, decodes it to get the user ID, and
+  /// constructs a list of [PreferenceSurveyAnswer] objects. It then sends a
+  /// POST request to the server with the answers.
+  ///
+  /// Throws an error if the submission fails.
   @override
   Future<void> submitSurvey(
       int preferenceSurveyId, Map<int, List<int>> answers) async {
@@ -34,6 +47,12 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
     }
   }
 
+  /// Fetches the preference survey data from the server.
+  ///
+  /// Sends a GET request to the server to retrieve the survey data. The method
+  /// parses the response and returns a [PreferenceSurvey] object.
+  ///
+  /// Throws an error if the fetch operation fails.
   @override
   Future<PreferenceSurvey> fetchSurvey() async {
     try {

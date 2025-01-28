@@ -1,6 +1,21 @@
 import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_option.dart';
 
+/// A class representing a preference survey question.
+///
+/// This class extends the [Model] class and contains the following properties:
+/// - `text`: The text of the survey question.
+/// - `type`: The type of the survey question, represented by the [QuestionType] enum.
+/// - `options`: An optional list of [Option] objects representing the possible answers to the question.
+///
+/// The class provides a factory constructor [PreferenceSurveyQuestion.fromJson] to create an instance
+/// from a JSON object, and a private static method [_questionTypeFromString] to convert a string
+/// representation of a question type to a [QuestionType] enum value.
+///
+/// The [QuestionType] enum defines the possible types of survey questions:
+/// - `toggle`: A question with a toggle (yes/no) answer.
+/// - `singleChoice`: A question with a single choice answer.
+/// - `multiSelect`: A question with multiple selectable answers.
 class PreferenceSurveyQuestion extends Model {
   final String text;
   final QuestionType type;
