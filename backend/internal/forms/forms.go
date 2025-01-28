@@ -97,3 +97,8 @@ type PreferenceSurveyAnswer struct {
 	UserID             int   `json:"UserID"`
 	Options            []int `json:"Options"`
 }
+
+type ReportForm struct {
+	ID     int    `json:"id"`
+	Reason string `json:"reason"`
+}

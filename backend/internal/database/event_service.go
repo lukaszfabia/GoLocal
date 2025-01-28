@@ -18,10 +18,46 @@ type EventService interface {
 	DeleteEvent(id int) (models.Event, error)
 	UpdateEvent() (models.Event, error)
 	GetEvent(eventId uint) (*models.Event, error)
+	PromoteEvent(id int) (*models.Event, error)
+	ReportEvent(form forms.ReportForm) error
 }
 
 type eventServiceImpl struct {
 	db *gorm.DB
+}
+
+func (e *eventServiceImpl) ReportEvent(form forms.ReportForm) error {
+	var event models.Event
+	if err := e.db.First(&event, "id = ?", form.ID).Error; err != nil {
+		return fmt.Errorf("failed to find event: %w", err)
+	}
+
+	eventToReport := &models.ReportedEvent{
+		Reason:  form.Reason,
+		EventID: event.ID,
+	}
+
+	if err := e.db.Create(eventToReport).Error; err != nil {
+		return fmt.Errorf("failed to create reported event: %w", err)
+	}
+
+	return nil
+}
+
+func (e *eventServiceImpl) PromoteEvent(id int) (*models.Event, error) {
+	var event models.Event
+
+	if err := e.db.First(&event, "id = ?", id).Error; err != nil {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	event.IsPromoted = true
+
+	if err := e.db.Save(&event).Error; err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }
 
 func NewEventService(db *gorm.DB) EventService {

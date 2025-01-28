@@ -92,17 +92,30 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)
 
-	// events
+	// events to remove
 	api.HandleFunc(`/{limit:[0-9]*}`, s.EventHandler).Methods(http.MethodGet)
 
 	// votes
 	api.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).Methods(http.MethodGet)
 
+	//-------------------------------------Event-------------------------------------//
+
 	event := auth.PathPrefix("/event").Subrouter()
-	// newwww
-	event.Use(eventHandler.Validate)
-	event.HandleFunc(`/{limit:[0-9]*}`, eventHandler.Handle).
+
+	promoRouter := event.PathPrefix("/{id}/promo").Subrouter()
+	promoRouter.Use(eventHandler.ValidatePromoteEvent)
+	promoRouter.HandleFunc("", eventHandler.PromoteEvent)
+
+	reportRouter := event.PathPrefix("/report").Subrouter()
+	reportRouter.Use(eventHandler.ValidateReportEvent)
+	reportRouter.HandleFunc("", eventHandler.ReportEvent)
+
+	defaultRouter := event.PathPrefix("").Subrouter()
+	defaultRouter.Use(eventHandler.Validate)
+	defaultRouter.HandleFunc(`/{limit:[0-9]*}`, eventHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
+
+	//-------------------------------------Vote-------------------------------------//
 
 	vote := auth.PathPrefix("/vote").Subrouter()
 	vote.HandleFunc(`/{limit:[0-9]*}`, s.VoteHandler).

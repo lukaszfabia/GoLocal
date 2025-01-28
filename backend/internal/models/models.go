@@ -77,6 +77,7 @@ type Event struct {
 	IsAdultOnly bool      `gorm:"default:true" json:"isAdultOnly"`
 	EventType   EventType `gorm:"type:text;not null" json:"event_type"`
 	Tags        []*Tag    `gorm:"many2many:event_tags" json:"event_tags"` // for ml
+	IsPromoted  bool      `json:"isPromoted"`
 
 	// Timestamp with time zone
 	StartDate  *time.Time `gorm:"type:date;not null" json:"startDate"`
@@ -208,4 +209,11 @@ type DeviceToken struct {
 type ErrorResponse struct {
 	Type    int    `json:"type"`
 	Message string `json:"message"`
+}
+
+type ReportedEvent struct {
+	Model
+	Event   *Event `gorm:"foreignKey:EventID" json:"event"`
+	EventID uint   `json:"eventId"`
+	Reason  string `gorm:"not null;size:255" json:"reason"`
 }

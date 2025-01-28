@@ -19,7 +19,9 @@ type KeyForEventReq string
 const _eventForm KeyForEventReq = "eventForm"
 const _params KeyForEventReq = "params"
 const _limit KeyForEventReq = "limit"
+const _reportForm KeyForEventReq = "reportForm"
 
+// base validator
 func (h *EventHandler) Validate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var ctx context.Context
@@ -38,6 +40,37 @@ func (h *EventHandler) Validate(next http.Handler) http.Handler {
 		default:
 			next.ServeHTTP(w, r)
 		}
+	})
+}
+
+func (h *EventHandler) ValidatePromoteEvent(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			app.InvalidDataResponse(w)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (h *EventHandler) ValidateReportEvent(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method != http.MethodPost {
+			app.InvalidDataResponse(w)
+			return
+		}
+
+		form, err := parsers.DecodeJSON[forms.ReportForm](r)
+		if err != nil || form.Reason == "" {
+			app.InvalidDataResponse(w)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), _reportForm, form)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
