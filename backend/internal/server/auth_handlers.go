@@ -73,7 +73,7 @@ func (s *Server) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		Email:     form.Email,
 	}
 
-	user, e := s.db.UserService().SaveUser(user)
+	user, e := s.db.UserService().GetOrCreateUser(user)
 
 	if e != nil {
 		log.Println("Error saving user:", e)
@@ -249,9 +249,7 @@ func (s *Server) VerifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.IsVerified = true
-
-	if _, err := s.db.UserService().SaveUser(user); err != nil {
+	if _, err := s.db.UserService().VerifyUser(*user); err != nil {
 		s.NewResponse(w, http.StatusInternalServerError, "Failed to save user")
 		return
 	}
@@ -273,9 +271,7 @@ func (s *Server) PasswordResetCallbackHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	user.Password = &form.Password
-
-	_, err = s.db.UserService().SaveUser(user)
+	err = s.db.UserService().ChangePassword(form.Password, *user)
 
 	if err != nil {
 		s.NewResponse(w, http.StatusInternalServerError, "Could not change password")

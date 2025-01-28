@@ -33,6 +33,10 @@ func (a *Avatar) GetPath(base string, fileName string, ext string) string {
 
 // Saves image and returns new URL
 func SaveImage[T Saveable](file parsers.FileInfo) (string, error) {
+	if file.File == nil {
+		return "", nil
+	}
+
 	var item T
 
 	uuid := uuid.New()

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"mime/multipart"
@@ -70,25 +71,33 @@ func ParseDate(date string) time.Time {
 }
 
 func GetFileFromForm(form *multipart.Form, fieldName string) (FileInfo, error) {
+
 	fileInfo := FileInfo{
 		File:      nil,
 		Extension: "",
 	}
-
-	fileHeaders := form.File[fieldName]
-	if len(fileHeaders) == 0 {
-		return fileInfo, errors.New("file not found in form")
+	// we dont want to return error cuz image is optional
+	if form == nil {
+		return fileInfo, nil
 	}
 
-	file, err := fileHeaders[0].Open() // one file
+	fileHeaders, ok := form.File[fieldName]
+	if !ok || len(fileHeaders) == 0 {
+		return fileInfo, fmt.Errorf("field '%s' not found in form or no file uploaded", fieldName)
+	}
+
+	file, err := fileHeaders[0].Open()
 	if err != nil {
-		return fileInfo, errors.New("failed to retrieve file")
+		return fileInfo, fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+
+	extension := filepath.Ext(fileHeaders[0].Filename)
+	if extension == "" {
+		return fileInfo, fmt.Errorf("file has no extension")
+	}
 
 	fileInfo.File = &file
-
-	fileInfo.Extension = filepath.Ext(fileHeaders[0].Filename)
+	fileInfo.Extension = extension
 
 	return fileInfo, nil
 }

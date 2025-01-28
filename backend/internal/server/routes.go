@@ -1,6 +1,7 @@
 package server
 
 import (
+	"backend/internal/server/account"
 	"backend/internal/server/event"
 	"fmt"
 	"log"
@@ -36,6 +37,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	eventHandler := event.EventHandler{
 		EventService:        s.db.EventService(),
 		NotificationService: s.db.NotificationService(),
+	}
+
+	accountHandler := account.AccountHandler{
+		UserService: s.db.UserService(),
 	}
 
 	// newwww
@@ -82,7 +87,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// recommendation routes
 	auth.HandleFunc("/recommendations", s.getRecommendations)
 
-	auth.HandleFunc("/account/", s.AccountHandler).
+	auth.HandleFunc("/account/", accountHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
 
 	auth.HandleFunc("/logout/", s.LogoutHandler).Methods(http.MethodGet)

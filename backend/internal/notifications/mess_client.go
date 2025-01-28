@@ -7,6 +7,6 @@ import (
 )
 
 // sick
-type messagingClient interface {
+type MessagingClient interface {
 	SendMulticast(ctx context.Context, message *messaging.MulticastMessage) (*messaging.BatchResponse, error)
 }
