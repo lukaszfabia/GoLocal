@@ -1,6 +1,8 @@
+import 'package:golocal/src/event/data/events_datasource.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
+import 'package:golocal/src/event/report/report_event_page.dart';
 
 class RecommendedRepositoryImpl implements IEventsRepository {
   final DioClient _dioClient = DioClient();
@@ -24,7 +26,7 @@ class RecommendedRepositoryImpl implements IEventsRepository {
   }
 
   @override
-  Future<Event> createEvent(Event event) async {
+  Future<Event> createEvent(EventDTO event) async {
     // Return null for now
     return Event(
         id: 1,

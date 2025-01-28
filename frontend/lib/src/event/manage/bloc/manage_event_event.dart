@@ -70,7 +70,7 @@ final class UpdateIsAdultsOnly extends ManageEventEvent {
 
 final class UpdateOrganizers extends ManageEventEvent {
   const UpdateOrganizers(this.organizers);
-  final List<User> organizers;
+  final String organizers;
 
   @override
   List<Object> get props => [organizers];
@@ -85,9 +85,8 @@ final class UpdateLocation extends ManageEventEvent {
 }
 
 final class UpdateImage extends ManageEventEvent {
-  const UpdateImage(this.image);
-  final XFile image;
+  const UpdateImage();
 
   @override
-  List<Object> get props => [image];
+  List<Object> get props => [];
 }

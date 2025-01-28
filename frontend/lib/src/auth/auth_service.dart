@@ -5,6 +5,7 @@ class AuthService {
   final Dio _dio = DioClient().dio;
 
   Future<Response> signInWithEmail(Map<String, dynamic> data) {
+    print("logging");
     return _dio.post('/login/', data: data);
   }
 

@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:golocal/src/event/data/events_datasource.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
+import 'package:golocal/src/event/report/report_event_page.dart';
 
 class EventsRepositoryImpl implements IEventsRepository {
   final DioClient _dioClient = DioClient();
+  final EventsDataSource _eventsDataSource = EventsDataSource();
 
   @override
   Future<List<Event>> getEvents() async {
@@ -27,7 +30,12 @@ class EventsRepositoryImpl implements IEventsRepository {
   @override
   Future<Event> createEvent(EventDTO event) async {
     final FormData formData = await event.toFormData();
-    final response = await _dioClient.dio.post('/auth/event',
+    for (var value in formData.fields) {
+      print(value.key);
+      print(value.value);
+    }
+
+    final response = await _dioClient.dio.post('/auth/event/',
         data: formData, options: Options(contentType: 'multipart/form-data'));
     if (response.statusCode == 201) {
       return Event.fromJson(response.data['data']);
@@ -55,7 +63,12 @@ class EventsRepositoryImpl implements IEventsRepository {
 
   @override
   Future<void> reportEvent(int id, String category, String description) async {
-    // Do nothing for now
+    var reason = "${category.toString()}: $description";
+    var data = {'id': id, 'reason': reason};
+    var result = await _eventsDataSource.reportEvent(data);
+    if (result.statusCode != 201) {
+      throw Exception('Failed to report event');
+    }
   }
 
   // @override

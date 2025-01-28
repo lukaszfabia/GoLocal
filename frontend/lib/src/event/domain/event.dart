@@ -15,6 +15,7 @@ class Event extends Model {
   bool isAdultOnly;
   EventType eventType;
   List<Tag> tags;
+  bool isPromoted;
 
   DateTime startDate;
   DateTime? endDate;
@@ -35,6 +36,7 @@ class Event extends Model {
     this.isAdultOnly = false,
     this.location,
     this.endDate,
+    this.isPromoted = false,
   }) : assert(
           endDate == null || endDate.isAfter(startDate),
           eventOrganizers.isNotEmpty,
@@ -61,6 +63,7 @@ class Event extends Model {
                 .map((e) => User.fromJson(e))
                 .toList()
             : [],
+        isPromoted = json['isPromoted'] ?? false,
         super.fromJson();
 
   @override
@@ -76,6 +79,7 @@ class Event extends Model {
     data['endDate'] = endDate?.toString();
     data['location'] = location?.toJson() ?? {};
     data['eventOrganizers'] = eventOrganizers.map((e) => e.toJson()).toList();
+    data['isPromoted'] = isPromoted;
     return data;
   }
 }
@@ -90,7 +94,8 @@ class EventDTO {
   bool isAdultOnly;
   String eventType;
   List<String> tags;
-  var location;
+  String lon;
+  String lat;
 
   EventDTO({
     required this.organizers,
@@ -102,21 +107,27 @@ class EventDTO {
     required this.isAdultOnly,
     required this.eventType,
     required this.tags,
-    required this.location,
+    this.lat = "0",
+    this.lon = "0",
   });
 
   Future<FormData> toFormData() async {
+    var filename = image.path.split('/').last;
+    var imageFile =
+        await MultipartFile.fromFile(image.path, filename: filename);
+
     final data = FormData.fromMap({
       'organizers': organizers,
       'title': title,
       'description': description,
-      'image': await MultipartFile.fromFile(image.path),
-      'startDate': startDate,
-      'endDate': endDate,
+      'image': imageFile,
+      'startDate': startDate.toIso8601String(),
+      'finishDate': endDate.toIso8601String(),
       'isAdultOnly': isAdultOnly,
       'eventType': eventType,
       'tags': tags,
-      'location': location,
+      'lon': lon,
+      'lat': lat,
     });
     return data;
   }

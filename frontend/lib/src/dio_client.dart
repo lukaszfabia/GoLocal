@@ -35,13 +35,15 @@ class DioClient {
           handler.next(options);
         },
         onError: (error, handler) async {
-          if (error.response?.statusCode == 401) {
+          if (error.response?.statusCode == 401 &&
+              error.response?.statusMessage == 'Unauthorized') {
             final refreshToken = await _tokenStorage.getRefreshToken();
             if (refreshToken != null) {
               try {
-                final response = await dio.post('/api/refresh-token/', data: {
+                final response = await dio.post('/refresh-token/', data: {
                   'refresh': refreshToken,
                 });
+                print('Refresh token response: $response');
                 final newAccessToken = response.data['data']['access'];
                 await _tokenStorage.saveAccessToken(newAccessToken);
                 final newRefreshToken = response.data['data']['refresh'];
@@ -52,10 +54,14 @@ class DioClient {
                 Map<String, dynamic> decodedToken =
                     JwtDecoder.decode(newAccessToken);
                 options.headers['User-Id'] = decodedToken['sub'];
+                if (options.data is FormData) {
+                  options.data = FormData.fromMap(options.data.fields);
+                }
+
                 final retryResponse = await dio.fetch(options);
                 return handler.resolve(retryResponse);
               } catch (e) {
-                await _tokenStorage.clearTokens();
+                // await _tokenStorage.clearTokens();
                 return handler.reject(
                   DioException(
                       requestOptions: error.requestOptions,

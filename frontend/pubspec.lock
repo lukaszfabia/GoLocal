@@ -8,7 +8,7 @@ packages:
       sha256: f256b0c0ba6c7577c15e2e4e114755640a875e885099367bf6e012b19314c834
       url: "https://pub.dev"
     source: hosted
-    version: "76.0.0"
+    version: "72.0.0"
   _flutterfire_internals:
     dependency: transitive
     description:
@@ -182,6 +182,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  file_selector_linux:
+    dependency: transitive
+    description:
+      name: file_selector_linux
+      sha256: "54cbbd957e1156d29548c7d9b9ec0c0ebb6de0a90452198683a7d23aed617a33"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.3+2"
+  file_selector_macos:
+    dependency: transitive
+    description:
+      name: file_selector_macos
+      sha256: "271ab9986df0c135d45c3cdb6bd0faa5db6f4976d3e4b437cf7d0f258d941bfc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.4+2"
+  file_selector_platform_interface:
+    dependency: transitive
+    description:
+      name: file_selector_platform_interface
+      sha256: a3994c26f10378a039faa11de174d7b78eb8f79e4dd0af2a451410c1a5c3f66b
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.2"
+  file_selector_windows:
+    dependency: transitive
+    description:
+      name: file_selector_windows
+      sha256: "8f5d2f6590d51ecd9179ba39c64f722edc15226cc93dcc8698466ad36a4a85a4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.3+3"
   firebase_core:
     dependency: "direct main"
     description:
@@ -814,7 +846,7 @@ packages:
       sha256: "55ea5a652e38a1dfb32943a7973f3681a60f872f8c3a05a14664ad54ef9c6696"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.5"
+    version: "0.6.4"
   timezone:
     dependency: transitive
     description:

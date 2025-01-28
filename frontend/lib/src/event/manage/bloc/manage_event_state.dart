@@ -27,7 +27,7 @@ class ManageEventState extends Equatable {
   final DateTime? startDate;
   final DateTime? endDate;
   final bool isAdultsOnly;
-  final List<User> organizers;
+  final List<String> organizers;
   final Location? location;
   final File? image;
 
@@ -58,7 +58,7 @@ class ManageEventState extends Equatable {
     DateTime? startDate,
     DateTime? endDate,
     bool? isAdultsOnly,
-    List<User>? organizers,
+    List<String>? organizers,
     Location? location,
     String? message,
     File? image,
@@ -89,7 +89,8 @@ class ManageEventState extends Equatable {
           startDate: event.startDate,
           endDate: event.endDate,
           isAdultsOnly: event.isAdultOnly,
-          organizers: event.eventOrganizers,
+          organizers: event.eventOrganizers.map((e) => e.email).toList(),
           location: event.location,
+          image: File(event.imageUrl ?? ''),
         );
 }

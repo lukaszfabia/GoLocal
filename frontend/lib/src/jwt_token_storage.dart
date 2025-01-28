@@ -23,6 +23,7 @@ class TokenStorage {
   }
 
   Future<void> clearTokens() async {
+    print("clearing tokens");
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
   }

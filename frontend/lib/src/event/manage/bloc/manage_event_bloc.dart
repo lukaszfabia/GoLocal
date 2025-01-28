@@ -58,10 +58,17 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
       emit(state.copyWith(isAdultsOnly: event.isAdultsOnly));
     });
     on<UpdateOrganizers>((event, emit) {
-      emit(state.copyWith(organizers: event.organizers));
+      var organizers = List.of(state.organizers);
+      organizers.add(event.organizers);
+      emit(state.copyWith(organizers: organizers));
     });
     on<UpdateLocation>((event, emit) {
       emit(state.copyWith(location: event.location));
+    });
+    on<UpdateImage>((event, emit) async {
+      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+      emit(state.copyWith(image: File(image.path)));
     });
     on<SaveEvent>((event, emit) async {
       emit(state.copyWith(status: ManageEventStatus.loading));
@@ -71,8 +78,7 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
         startDate: state.startDate!,
         endDate: state.endDate!,
         isAdultOnly: state.isAdultsOnly,
-        location: state.location,
-        organizers: state.organizers.map((e) => e.id).toList(),
+        organizers: state.organizers.map((e) => 1).toList(),
         tags: state.tags,
         image: state.image!,
         eventType: state.type!.name,
@@ -84,6 +90,7 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
           message: 'Event saved successfully',
         ));
       } catch (e) {
+        print(e);
         emit(state.copyWith(
           status: ManageEventStatus.error,
           message: e.toString(),

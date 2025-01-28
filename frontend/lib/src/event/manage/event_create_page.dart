@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/manage/bloc/manage_event_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EventCreatePage extends StatefulWidget {
   const EventCreatePage({super.key, this.event});
@@ -71,7 +74,35 @@ class _EventCreatePageState extends State<EventCreatePage> {
   }
 
   Widget imageSection(ManageEventState state, BuildContext context) {
-    return Placeholder();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Event Image",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        GestureDetector(
+          onTap: () async {
+            context.read<ManageEventBloc>().add(UpdateImage());
+          },
+          child: Container(
+            height: 150,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: state.image == null
+                ? Center(child: Text("Tap to select an image"))
+                : Image.file(
+                    state.image!,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+        ),
+      ],
+    );
   }
 
   Column tagsSection(ManageEventState state, BuildContext context) {
@@ -180,11 +211,11 @@ class _EventCreatePageState extends State<EventCreatePage> {
           children: [
             for (var organizer in state.organizers)
               Chip(
-                label: Text(organizer.firstName),
+                label: Text(organizer),
                 onDeleted: () {
                   context
                       .read<ManageEventBloc>()
-                      .add(UpdateTags(tag, remove: true));
+                      .add(UpdateOrganizers(organizer));
                 },
               ),
           ],
@@ -277,6 +308,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
                   context: context,
                   initialDate: state.startDate ?? DateTime.now(),
                 );
+
                 field.didChange(date);
 
                 if (date != null && context.mounted) {
@@ -384,7 +416,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
       initialTime: TimeOfDay.fromDateTime(initialDate),
     );
     if (time == null || !context.mounted) return null;
-    return DateTime(
+    return DateTime.utc(
       date.year,
       date.month,
       date.day,

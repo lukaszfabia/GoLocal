@@ -4,6 +4,7 @@ import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/report/report_event_page.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
 class EventsRepositoryDummy implements IEventsRepository {
