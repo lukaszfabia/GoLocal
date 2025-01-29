@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_option.dart';
+import 'package:golocal/src/shared/dialog.dart';
 import '../bloc/preference_survey_bloc.dart';
 import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
 import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
@@ -50,7 +51,16 @@ class _PreferenceSurveyFormState extends State<_PreferenceSurveyForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PreferenceSurveyBloc, PreferenceSurveyState>(
+    return BlocConsumer<PreferenceSurveyBloc, PreferenceSurveyState>(
+      listener: (context, state) {
+        if (state is PreferenceSurveySubmitted) {
+          showMyDialog(context,
+              title: "Thank you!",
+              message: "Your survey has been submitted.",
+              doublePop: true);
+        }
+      },
+      buildWhen: (previous, current) => current is! PreferenceSurveySubmitted,
       builder: (context, state) {
         if (state is PreferenceSurveyLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -60,6 +70,7 @@ class _PreferenceSurveyFormState extends State<_PreferenceSurveyForm> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       state.survey.description,
@@ -78,8 +89,6 @@ class _PreferenceSurveyFormState extends State<_PreferenceSurveyForm> {
                   ],
                 ),
               ));
-        } else if (state is PreferenceSurveySubmitted) {
-          return const Center(child: Text('Survey submitted successfully!'));
         } else if (state is PreferenceSurveyError) {
           return Center(
             child: Column(
@@ -104,17 +113,21 @@ class _PreferenceSurveyFormState extends State<_PreferenceSurveyForm> {
   }
 
   Widget _buildQuestion(int index, PreferenceSurveyQuestion question) {
-    switch (question.type) {
-      case QuestionType.toggle:
-        return _buildToggleQuestion(
-            index, question.text, question.options![0].isSelected);
-      case QuestionType.singleChoice:
-        return _buildSingleSelectQuestion(
-            index, question.text, question.options ?? [], 0);
-      case QuestionType.multiSelect:
-        return _buildMultiSelectQuestion(
-            index, question.text, question.options ?? []);
-    }
+    return Card(
+      elevation: 3.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: switch (question.type) {
+          (QuestionType.toggle) => _buildToggleQuestion(
+              index, question.text, question.options![0].isSelected),
+          (QuestionType.singleChoice) => _buildSingleSelectQuestion(
+              index, question.text, question.options ?? [], 0),
+          (QuestionType.multiSelect) => _buildMultiSelectQuestion(
+              index, question.text, question.options ?? []),
+        },
+      ),
+    );
   }
 
   Widget _buildToggleQuestion(int index, String question, bool initialValue) {
