@@ -4,7 +4,7 @@ import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:go_router/go_router.dart';
-import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
 
 class VoteCard extends StatelessWidget {

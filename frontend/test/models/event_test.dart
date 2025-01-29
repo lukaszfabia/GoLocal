@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golocal/src/event/location/address.dart';
-import 'package:golocal/src/event/location/coords.dart';
-import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/domain/address.dart';
+import 'package:golocal/src/event/domain/coords.dart';
+import 'package:golocal/src/event/domain/location.dart';
 
 void main() {
   var coordsJson = {

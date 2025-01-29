@@ -1,20 +1,16 @@
 import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/event/domain/participationstatus_enum.dart';
 
-class Vote extends Model {
+class Comment extends Model {
   int userId;
   int eventId;
+  String content;
   ParticipationStatus state;
-  Vote({
+  Comment({
     required super.id,
     required this.userId,
     required this.eventId,
     required this.state,
+    required this.content,
   });
-
-  Vote.fromJson(super.json)
-      : userId = json['userId'],
-        eventId = json['eventId'],
-        state = json['state'],
-        super.fromJson();
 }

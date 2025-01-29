@@ -1,1 +1,1 @@
-export '../src/preference_survey/data/preference_survey_repository.dart';
+export '../src/survey/data/preference_survey_repository.dart';
