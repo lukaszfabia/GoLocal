@@ -141,8 +141,10 @@ class EventDetailPage extends StatelessWidget {
           left: 16,
           child: Row(
             children: [
-              if (event.isAdultOnly) _buildBadge("18+", Colors.redAccent),
-              if (event.isPromoted) _buildBadge("Promoted", Colors.orange),
+              if (event.isAdultOnly)
+                BadgeWidget(text: "18+", backgroundColor: Colors.redAccent),
+              if (event.isPromoted)
+                BadgeWidget(text: "Promoted", backgroundColor: Colors.orange),
             ],
           ),
         ),
@@ -256,25 +258,6 @@ class EventDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      margin: const EdgeInsets.only(right: 6),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
   Future<void> _launchMaps(Location location) async {
     String url;
     final String address;
@@ -304,5 +287,45 @@ class EventDetailPage extends StatelessWidget {
 
   String _formatLocation(Event event) {
     return "${event.location!.city}, ${event.location!.country}";
+  }
+}
+
+class BadgeWidget extends StatelessWidget {
+  const BadgeWidget({
+    super.key,
+    required this.backgroundColor,
+    this.text,
+    this.textColor = Colors.white,
+    this.child,
+    this.fontSize = 12,
+  }) : assert(text != null || child != null);
+
+  final String? text;
+  final Color backgroundColor;
+  final double fontSize;
+
+  final Color textColor;
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(right: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: child ??
+          Text(
+            text!,
+            style: TextStyle(
+              color: textColor,
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+    );
   }
 }
