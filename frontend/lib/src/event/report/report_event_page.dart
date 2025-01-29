@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/report/bloc/report_event_bloc.dart';
+import 'package:golocal/src/shared/dialog.dart';
 
 enum ReportCategory {
   inappropriate("Inappropriate content"),
@@ -41,10 +42,15 @@ class ReportEventPage extends StatelessWidget {
               BlocConsumer<ReportEventBloc, ReportEventState>(
                 listener: (context, state) {
                   if (state.status == ReportEventStatus.success) {
-                    _showSuccessDialog(context);
+                    showMyDialog(context,
+                        doublePop: true,
+                        title: 'Report sent',
+                        message:
+                            'Your report will be revieved by our staff as soon as possible. We will take appropriate actions if needed. Thank you for contributing to a safe environment :)');
                   } else if (state.status == ReportEventStatus.error) {
-                    _showFailureDialog(
-                        context, state.message ?? 'An unknown error occured');
+                    showMyDialog(context,
+                        message: state.message ?? 'An unknown error occured',
+                        title: 'Error');
                   }
                 },
                 builder: (context, state) {
@@ -149,50 +155,6 @@ class ReportEventPage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Future<dynamic> _showSuccessDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Report sent'),
-          actionsAlignment: MainAxisAlignment.center,
-          content: Text(
-              'Your report will be revieved bby our staff as soon as possible. We will take appropriate actions if needed. Thank you for contributing to a safe environment :)'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<dynamic> _showFailureDialog(BuildContext context, String message) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('An error occured'),
-          actionsAlignment: MainAxisAlignment.center,
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                context.pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

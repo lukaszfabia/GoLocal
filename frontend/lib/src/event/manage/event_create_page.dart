@@ -6,6 +6,7 @@ import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/manage/bloc/manage_event_bloc.dart';
+import 'package:golocal/src/shared/dialog.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EventCreatePage extends StatefulWidget {
@@ -35,11 +36,24 @@ class _EventCreatePageState extends State<EventCreatePage> {
             key: _formKey,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<ManageEventBloc, ManageEventState>(
+              child: BlocConsumer<ManageEventBloc, ManageEventState>(
+                listener: (context, state) {
+                  if (state.status == ManageEventStatus.success) {
+                    showMyDialog(context,
+                        title: "Event created!",
+                        message:
+                            "Your event will be soon avaliable to other users",
+                        doublePop: true);
+                  } else if (state.status == ManageEventStatus.error) {
+                    showMyDialog(context,
+                        title: "Error",
+                        message: state.message ?? "An unknown error occured");
+                  }
+                },
                 builder: (context, state) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       imageSection(state, context),
                       SizedBox(height: 8),
@@ -55,13 +69,18 @@ class _EventCreatePageState extends State<EventCreatePage> {
                       SizedBox(height: 8),
                       adultsOnlySection(state, context),
                       SizedBox(height: 8),
-                      OutlinedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<ManageEventBloc>().add(SaveEvent());
-                            }
-                          },
-                          child: Text("Save"))
+                      state.status == ManageEventStatus.loading
+                          ? Center(child: CircularProgressIndicator())
+                          : OutlinedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  context
+                                      .read<ManageEventBloc>()
+                                      .add(SaveEvent());
+                                }
+                              },
+                              child: Text("Save"),
+                            )
                     ],
                   );
                 },

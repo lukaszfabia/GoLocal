@@ -28,15 +28,10 @@ class EventsRepositoryImpl implements IEventsRepository {
   }
 
   @override
-  Future<Event> createEvent(EventDTO event) async {
+  Future<Event?> createEvent(EventDTO event) async {
     final FormData formData = await event.toFormData();
-    for (var value in formData.fields) {
-      print(value.key);
-      print(value.value);
-    }
 
-    final response = await _dioClient.dio.post('/auth/event/',
-        data: formData, options: Options(contentType: 'multipart/form-data'));
+    final response = await _eventsDataSource.createEvent(formData);
     if (response.statusCode == 201) {
       return Event.fromJson(response.data['data']);
     } else {

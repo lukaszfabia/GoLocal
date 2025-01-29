@@ -19,7 +19,7 @@ class DioClient {
           'Content-Type': 'application/json',
         },
         connectTimeout: Duration(seconds: 5),
-        receiveTimeout: Duration(seconds: 10),
+        receiveTimeout: Duration(seconds: 25),
       ),
     );
 
@@ -32,7 +32,17 @@ class DioClient {
             Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
             options.headers['User-Id'] = decodedToken['sub'];
           }
+          print("Request: [${options.method}] ${options.uri}");
+          print("Headers: ${options.headers}");
+          print("Body: ${options.data}");
           handler.next(options);
+        },
+        onResponse: (response, handler) {
+          print(
+              "Response: [${response.statusCode}] ${response.requestOptions.uri}");
+          print("Headers: ${response.headers}");
+          print("Body: ${response.data}");
+          handler.next(response);
         },
         onError: (error, handler) async {
           if (error.response?.statusCode == 401 &&
@@ -74,5 +84,14 @@ class DioClient {
         },
       ),
     );
+  }
+
+  Future<int?> getLoggedUserId() async {
+    final accessToken = await _tokenStorage.getAccessToken();
+    if (accessToken != null) {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
+      return decodedToken['sub'];
+    }
+    return null;
   }
 }
