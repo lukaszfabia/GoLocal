@@ -4,6 +4,7 @@ import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/location/address.dart';
 import 'package:golocal/src/event/location/coords.dart';
 import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/user/domain/user.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -79,10 +80,21 @@ class EventDetailPage extends StatelessWidget {
                       return null;
                     },
                   ),
-                  _buildDetailCard(
-                      "👥 Organized by",
-                      event.eventOrganizers
-                          .map((o) => "${o.firstName} ${o.lastName}")
+                  _buildDetailCard("👥 Organized by", null,
+                      widgets: event.eventOrganizers
+                          .map((user) => Row(
+                                children: [
+                                  _buildAvatars(user),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "${user.firstName} ${user.lastName}",
+                                    style: const TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ))
                           .toList()),
                   const SizedBox(height: 12),
                   _buildVotesCard(context),
@@ -150,8 +162,8 @@ class EventDetailPage extends StatelessWidget {
   }
 
   Widget _buildDetailCard(String label, List<String>? values,
-      {Future<void>? Function()? onTap}) {
-    if (values == null || values.isEmpty) {
+      {Future<void>? Function()? onTap, List<Widget>? widgets}) {
+    if ((values == null || values.isEmpty) && widgets == null) {
       return const SizedBox.shrink();
     }
     return GestureDetector(
@@ -171,16 +183,31 @@ class EventDetailPage extends StatelessWidget {
                     fontWeight: FontWeight.bold, fontSize: 16.0),
               ),
               const SizedBox(height: 6),
-              Text(
-                values.join(', '),
-                style: const TextStyle(fontSize: 14.0, color: Colors.black87),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              if (widgets != null) ...widgets,
+              if (values != null && values.isNotEmpty)
+                Text(
+                  values.join(', '),
+                  style: const TextStyle(fontSize: 14.0, color: Colors.black87),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAvatars(User user) {
+    if (user.avatarUrl == null) {
+      return const CircleAvatar(
+        radius: 16,
+        child: Icon(Icons.person),
+      );
+    }
+    return CircleAvatar(
+      radius: 16,
+      backgroundImage: NetworkImage(user.avatarUrl!),
     );
   }
 
