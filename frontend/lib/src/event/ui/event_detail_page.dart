@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/domain/event.dart';
+import 'package:golocal/src/event/location/address.dart';
+import 'package:golocal/src/event/location/coords.dart';
+import 'package:golocal/src/event/location/location.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailPage extends StatelessWidget {
   final Event event;
@@ -13,7 +17,7 @@ class EventDetailPage extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(134, 255, 255, 255),
+        backgroundColor: const Color.fromARGB(149, 255, 255, 255),
         elevation: 0,
         title: Text(
           event.title,
@@ -28,6 +32,7 @@ class EventDetailPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.info, color: Colors.white),
             onPressed: () {
+              return; // TODO: Disabled for now
               context.push('/events/${event.id}/info');
             },
           ),
@@ -52,20 +57,28 @@ class EventDetailPage extends StatelessWidget {
                   _title(),
                   const SizedBox(height: 8),
                   _buildTags(),
+                  _buildDetailCard("📝 Description", [event.description]),
                   const SizedBox(height: 12),
                   _buildDetailCard(
                       "📅 Starts at", [_formatDate(event.startDate)]),
                   if (event.endDate != null)
                     _buildDetailCard(
                         "⏳ Ends at", [_formatDate(event.endDate!)]),
-                  _buildDetailCard("📍 Location",
-                      event.location != null ? [_formatLocation(event)] : null),
+                  _buildDetailCard(
+                    "📍 Location",
+                    event.location != null ? [_formatLocation(event)] : null,
+                    onTap: () {
+                      if (event.location != null) {
+                        _launchMaps(event.location!);
+                      }
+                      return null;
+                    },
+                  ),
                   _buildDetailCard(
                       "👥 Organized by",
                       event.eventOrganizers
                           .map((o) => "${o.firstName} ${o.lastName}")
                           .toList()),
-                  _buildDetailCard("📝 Description", [event.description]),
                   const SizedBox(height: 12),
                   _buildVotesCard(context),
                 ],
@@ -131,31 +144,36 @@ class EventDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailCard(String label, List<String>? values) {
+  Widget _buildDetailCard(String label, List<String>? values,
+      {Future<void>? Function()? onTap}) {
     if (values == null || values.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Card(
-      elevation: 3.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              label,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              values.join(', '),
-              style: const TextStyle(fontSize: 14.0, color: Colors.black87),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 3.0,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 16.0),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                values.join(', '),
+                style: const TextStyle(fontSize: 14.0, color: Colors.black87),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -223,6 +241,29 @@ class EventDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _launchMaps(Location location) async {
+    String url;
+    final String address;
+    if (location.coords != null) {
+      final latitude = location.coords!.latitude;
+      final longitude = location.coords!.longitude;
+      address = '$latitude,$longitude';
+    } else if (location.address != null) {
+      address =
+          "${location.address!.streetNumber},${location.address!.street},${location.city},${location.country}";
+    } else {
+      return;
+    }
+    //TODO: fix the querry
+    url =
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}';
+
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 
   String _formatDate(DateTime date) {
