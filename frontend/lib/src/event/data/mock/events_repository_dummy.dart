@@ -3,9 +3,9 @@ import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
-import 'package:golocal/src/event/location/location.dart';
-import 'package:golocal/src/event/promote/promote_pack.dart';
-import 'package:golocal/src/event/report/report_event_page.dart';
+import 'package:golocal/src/event/domain/location.dart';
+import 'package:golocal/src/event/promote_page/promote_pack.dart';
+import 'package:golocal/src/event/report_page/report_event_page.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
 class EventsRepositoryDummy implements IEventsRepository {

@@ -1,5 +1,5 @@
 import 'package:golocal/src/shared/model_base.dart';
-import 'package:golocal/src/event/comment/domain/participationstatus_enum.dart';
+import 'package:golocal/src/event/domain/participationstatus_enum.dart';
 
 class Comment extends Model {
   int userId;

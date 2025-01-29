@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
-import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/user/domain/user.dart';

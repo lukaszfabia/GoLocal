@@ -3,21 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/report/bloc/report_event_bloc.dart';
+import 'package:golocal/src/event/domain/report_category_enum.dart';
+import 'package:golocal/src/event/report_page/bloc/report_event_bloc.dart';
 import 'package:golocal/src/shared/dialog.dart';
 import 'dart:async';
-
-enum ReportCategory {
-  inappropriate("Inappropriate content"),
-  spam("Spam"),
-  illegal("Illegal activity"),
-  harmful("Harmful activity"),
-  vandalism("Vandalism"),
-  other("Other");
-
-  const ReportCategory(this.value);
-  final String value;
-}
 
 class ReportEventPage extends StatefulWidget {
   final Event event;
@@ -68,7 +57,7 @@ class _ReportEventPageState extends State<ReportEventPage> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildCategoryChips(context, state),
                     const SizedBox(height: 16),
@@ -87,45 +76,43 @@ class _ReportEventPageState extends State<ReportEventPage> {
 
   //TODO: Make this not expand when a chip is selected
   Widget _buildCategoryChips(BuildContext context, ReportEventState state) {
-    return Container(
-      child: Card(
-        elevation: 3,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Select a reason',
-                  style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8.0,
-                children: ReportCategory.values.map((category) {
-                  bool isSelected = state.category == category.value;
-                  return ChoiceChip(
-                    label: Text(category.value),
-                    selected: isSelected,
-                    selectedColor: Colors.redAccent.withOpacity(0.8),
-                    backgroundColor: Colors.grey.shade300,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        context
-                            .read<ReportEventBloc>()
-                            .add(UpdateCategory(category: category.value));
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Select a reason',
+                style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 8),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8.0,
+              children: ReportCategory.values.map((category) {
+                bool isSelected = state.category == category.value;
+                return ChoiceChip(
+                  label: Text(category.value),
+                  selected: isSelected,
+                  selectedColor: Colors.redAccent.withOpacity(0.8),
+                  backgroundColor: Colors.grey.shade300,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      context
+                          .read<ReportEventBloc>()
+                          .add(UpdateCategory(category: category.value));
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );
@@ -170,32 +157,31 @@ class _ReportEventPageState extends State<ReportEventPage> {
     );
   }
 
-  /// **Submit Button with Loading State**
   Widget _buildSubmitButton(BuildContext context, ReportEventState state) {
-    return Center(
-      child: ElevatedButton(
-        onPressed: state.status == ReportEventStatus.sending
-            ? null
-            : () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  context.read<ReportEventBloc>().add(SendReport());
-                }
-              },
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          elevation: 5,
-        ),
-        child: state.status == ReportEventStatus.sending
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white))
-            : const Text('Submit Report', style: TextStyle(fontSize: 16)),
+    if (state.description.isEmpty || state.category.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return ElevatedButton(
+      onPressed: state.status == ReportEventStatus.sending
+          ? null
+          : () {
+              if (_formKey.currentState!.validate()) {
+                _formKey.currentState!.save();
+                context.read<ReportEventBloc>().add(SendReport());
+              }
+            },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 5,
       ),
+      child: state.status == ReportEventStatus.sending
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: Colors.white))
+          : const Text('Submit Report', style: TextStyle(fontSize: 16)),
     );
   }
 }

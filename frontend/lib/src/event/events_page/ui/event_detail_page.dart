@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/location/address.dart';
-import 'package:golocal/src/event/location/coords.dart';
-import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/domain/address.dart';
+import 'package:golocal/src/event/domain/coords.dart';
+import 'package:golocal/src/event/domain/location.dart';
+import 'package:golocal/src/event/shared/badge_widget.dart';
+import 'package:golocal/src/shared/extensions.dart';
 import 'package:golocal/src/user/domain/user.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -65,11 +67,11 @@ class EventDetailPage extends StatelessWidget {
                   _buildTags(),
                   _buildDetailCard("📝 Description", [event.description]),
                   const SizedBox(height: 12),
-                  _buildDetailCard(
-                      "📅 Starts at", [_formatDate(event.startDate)]),
+                  _buildDetailCard("📅 Starts at",
+                      [event.startDate.formatReadableDate(includeTime: true)]),
                   if (event.endDate != null)
-                    _buildDetailCard(
-                        "⏳ Ends at", [_formatDate(event.endDate!)]),
+                    _buildDetailCard("⏳ Ends at",
+                        [event.endDate!.formatReadableDate(includeTime: true)]),
                   _buildDetailCard(
                     "📍 Location",
                     event.location != null ? [_formatLocation(event)] : null,
@@ -141,8 +143,10 @@ class EventDetailPage extends StatelessWidget {
           left: 16,
           child: Row(
             children: [
-              if (event.isAdultOnly) _buildBadge("18+", Colors.redAccent),
-              if (event.isPromoted) _buildBadge("Promoted", Colors.orange),
+              if (event.isAdultOnly)
+                BadgeWidget(text: "18+", backgroundColor: Colors.redAccent),
+              if (event.isPromoted)
+                BadgeWidget(text: "Promoted", backgroundColor: Colors.orange),
             ],
           ),
         ),
@@ -256,25 +260,6 @@ class EventDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      margin: const EdgeInsets.only(right: 6),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
   Future<void> _launchMaps(Location location) async {
     String url;
     final String address;
@@ -296,10 +281,6 @@ class EventDetailPage extends StatelessWidget {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat("MMM d, yyyy • HH:mm").format(date);
   }
 
   String _formatLocation(Event event) {

@@ -1,12 +1,12 @@
 import 'dart:io';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
-import 'package:golocal/src/event/manage/bloc/manage_event_bloc.dart';
+import 'package:golocal/src/event/manage_page/bloc/manage_event_bloc.dart';
 import 'package:golocal/src/shared/dialog.dart';
 import 'package:golocal/src/shared/position.dart';
 import 'package:image_picker/image_picker.dart';
@@ -517,8 +517,27 @@ class _EventCreatePageState extends State<EventCreatePage> {
   }
 }
 
-extension on DateTime {
-  String toFormattedString() {
+extension DateTimeExtensions on DateTime {
+  String toFormattedFull() {
     return '$day/$month/$year $hour:$minute';
+  }
+
+  String toFormattedString() {
+    return '$day/$month/$year';
+  }
+
+  String toFormattedTime() {
+    return '$hour:$minute';
+  }
+
+  String toFormattedDate() {
+    return '$day/$month/$year';
+  }
+
+  String formatDate({bool showTime = false}) {
+    if (showTime) {
+      return DateFormat("MMM d, yyyy • HH:mm").format(this);
+    }
+    return DateFormat("MMM d, yyyy").format(this);
   }
 }

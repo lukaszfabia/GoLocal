@@ -1,5 +1,5 @@
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/promote/promote_pack.dart';
+import 'package:golocal/src/event/promote_page/promote_pack.dart';
 
 abstract class IEventsRepository {
   Future<List<Event>> getEvents();

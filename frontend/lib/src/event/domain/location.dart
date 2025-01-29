@@ -1,5 +1,5 @@
-import 'package:golocal/src/event/location/address.dart';
-import 'package:golocal/src/event/location/coords.dart';
+import 'package:golocal/src/event/domain/address.dart';
+import 'package:golocal/src/event/domain/coords.dart';
 import 'package:golocal/src/shared/model_base.dart';
 
 class Location extends Model {

@@ -8,7 +8,7 @@ import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
-import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/shared/position.dart';
 import 'package:golocal/src/user/data/user_repository.dart';
 import 'package:golocal/src/user/domain/user.dart';

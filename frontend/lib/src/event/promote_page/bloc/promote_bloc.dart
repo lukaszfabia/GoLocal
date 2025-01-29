@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/promote/promote_pack.dart';
+import 'package:golocal/src/event/promote_page/promote_pack.dart';
 import 'package:meta/meta.dart';
 
 part 'promote_event.dart';

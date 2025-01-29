@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:golocal/src/event/bloc/events_bloc.dart';
-import 'package:golocal/src/event/data/events_repository_impl.dart';
-import 'package:golocal/src/event/data/recommended_repository_impl.dart';
-import 'package:golocal/src/event/ui/event_card.dart';
+import 'package:golocal/src/event/events_page/bloc/events_bloc.dart';
+import 'package:golocal/src/event/data/impl/events_repository_impl.dart';
+import 'package:golocal/src/event/data/impl/recommended_repository_impl.dart';
+import 'package:golocal/src/event/events_page/ui/event_card.dart';
 import 'package:golocal/src/routing/router.dart';
 
 class EventsViewPage extends StatefulWidget {
@@ -88,15 +88,15 @@ class _EventsViewPageState extends State<EventsViewPage> {
             icon: const Icon(Icons.filter_list),
             onPressed: () => _toggleFilterBar(true),
           ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => _toggleSearchBar(true),
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.search),
+          //   onPressed: () => _toggleSearchBar(true),
+          // ),
         ],
       ),
       body: Column(
         children: [
-          SearchBar(showSearchBar: _showSearchBar),
+          // SearchBar(showSearchBar: _showSearchBar),
           FilterBar(showFilterBar: _showFilterBar),
           Expanded(
             child: BlocConsumer<EventsBloc, EventsState>(

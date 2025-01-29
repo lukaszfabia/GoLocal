@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:golocal/src/event/domain/event.dart';
+import 'package:golocal/src/event/events_page/ui/event_detail_page.dart';
+import 'package:golocal/src/event/shared/badge_widget.dart';
+import 'package:golocal/src/shared/extensions.dart';
 import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
@@ -17,7 +20,6 @@ class EventCard extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            height: 220,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               image: DecorationImage(
@@ -41,6 +43,22 @@ class EventCard extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+          Positioned(
+            top: 12, // Position it at the top
+            left: 12, // Align it to the left
+            child: Row(
+              children: [
+                if (event.isPromoted)
+                  BadgeWidget(
+                      text: "🔥Promoted",
+                      backgroundColor: Colors.orange,
+                      fontSize: 14),
+                if (event.isAdultOnly)
+                  BadgeWidget(
+                      text: "🔞18+", backgroundColor: Colors.red, fontSize: 14),
+              ],
             ),
           ),
           Positioned(
@@ -74,7 +92,7 @@ class EventCard extends StatelessWidget {
                     Icon(Icons.event, size: 16, color: Colors.white70),
                     const SizedBox(width: 6),
                     Text(
-                      "${_formatDate(event.startDate)}${event.endDate != null ? " - ${_formatDate(event.endDate!)}" : ""}",
+                      "${(event.startDate.formatReadableDate())}${event.endDate != null ? " - ${event.endDate!.formatReadableDate()}" : ""}",
                       style:
                           const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
@@ -100,13 +118,9 @@ class EventCard extends StatelessWidget {
                 const SizedBox(height: 6),
               ],
             ),
-          ),
+          )
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat("MMM d, yyyy").format(date);
   }
 }

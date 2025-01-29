@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/promote/bloc/promote_bloc.dart';
-import 'package:golocal/src/event/promote/promote_pack.dart';
+import 'package:golocal/src/event/promote_page/bloc/promote_bloc.dart';
+import 'package:golocal/src/event/promote_page/promote_pack.dart';
 import 'package:golocal/src/shared/dialog.dart';
 
 class PromoteEventPage extends StatelessWidget {
