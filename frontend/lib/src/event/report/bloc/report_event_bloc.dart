@@ -1,3 +1,24 @@
+/// Bloc for handling report events.
+///
+/// This Bloc manages the state and events related to reporting an event.
+/// It interacts with an `IEventsRepository` to send the report data.
+///
+/// Events:
+/// - `UpdateCategory`: Updates the category of the report.
+/// - `UpdateDescription`: Updates the description of the report.
+/// - `SendReport`: Sends the report to the repository.
+///
+/// States:
+/// - `ReportEventState`: Holds the current state of the report, including category, description, status, and message.
+///
+/// Methods:
+/// - `_onUpdateCategory`: Handles the `UpdateCategory` event and updates the category in the state.
+/// - `_onUpdateDescription`: Handles the `UpdateDescription` event and updates the description in the state.
+/// - `_onSendReport`: Handles the `SendReport` event, sends the report to the repository, and updates the status in the state.
+///
+/// Parameters:
+/// - `_repository`: The repository used to send the report.
+/// - `eventId`: The ID of the event being reported.
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
