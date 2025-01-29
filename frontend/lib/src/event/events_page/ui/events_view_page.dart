@@ -88,15 +88,15 @@ class _EventsViewPageState extends State<EventsViewPage> {
             icon: const Icon(Icons.filter_list),
             onPressed: () => _toggleFilterBar(true),
           ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => _toggleSearchBar(true),
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.search),
+          //   onPressed: () => _toggleSearchBar(true),
+          // ),
         ],
       ),
       body: Column(
         children: [
-          SearchBar(showSearchBar: _showSearchBar),
+          // SearchBar(showSearchBar: _showSearchBar),
           FilterBar(showFilterBar: _showFilterBar),
           Expanded(
             child: BlocConsumer<EventsBloc, EventsState>(

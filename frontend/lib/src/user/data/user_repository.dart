@@ -1,6 +1,4 @@
-import 'package:golocal/src/shared/repository_base.dart';
 import 'package:golocal/src/user/data/sources/user_datasource.dart';
-import 'package:golocal/src/user/domain/user.dart';
 
 class UserRepository {
   final UserDataSource _userDataSource = UserDataSource();

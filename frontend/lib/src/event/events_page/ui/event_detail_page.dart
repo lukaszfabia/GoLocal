@@ -4,6 +4,8 @@ import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/address.dart';
 import 'package:golocal/src/event/domain/coords.dart';
 import 'package:golocal/src/event/domain/location.dart';
+import 'package:golocal/src/event/shared/badge_widget.dart';
+import 'package:golocal/src/shared/extensions.dart';
 import 'package:golocal/src/user/domain/user.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -65,11 +67,11 @@ class EventDetailPage extends StatelessWidget {
                   _buildTags(),
                   _buildDetailCard("📝 Description", [event.description]),
                   const SizedBox(height: 12),
-                  _buildDetailCard(
-                      "📅 Starts at", [_formatDate(event.startDate)]),
+                  _buildDetailCard("📅 Starts at",
+                      [event.startDate.formatReadableDate(includeTime: true)]),
                   if (event.endDate != null)
-                    _buildDetailCard(
-                        "⏳ Ends at", [_formatDate(event.endDate!)]),
+                    _buildDetailCard("⏳ Ends at",
+                        [event.endDate!.formatReadableDate(includeTime: true)]),
                   _buildDetailCard(
                     "📍 Location",
                     event.location != null ? [_formatLocation(event)] : null,
@@ -281,51 +283,7 @@ class EventDetailPage extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime date) {
-    return DateFormat("MMM d, yyyy • HH:mm").format(date);
-  }
-
   String _formatLocation(Event event) {
     return "${event.location!.city}, ${event.location!.country}";
-  }
-}
-
-class BadgeWidget extends StatelessWidget {
-  const BadgeWidget({
-    super.key,
-    required this.backgroundColor,
-    this.text,
-    this.textColor = Colors.white,
-    this.child,
-    this.fontSize = 12,
-  }) : assert(text != null || child != null);
-
-  final String? text;
-  final Color backgroundColor;
-  final double fontSize;
-
-  final Color textColor;
-
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      margin: const EdgeInsets.only(right: 6),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: child ??
-          Text(
-            text!,
-            style: TextStyle(
-              color: textColor,
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-    );
   }
 }
