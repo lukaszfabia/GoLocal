@@ -3,11 +3,13 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/shared/position.dart';
 import 'package:golocal/src/user/data/user_repository.dart';
 import 'package:golocal/src/user/domain/user.dart';
 import 'package:image_picker/image_picker.dart';
@@ -64,8 +66,17 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
       organizers.add(event.organizers);
       emit(state.copyWith(organizers: organizers));
     });
-    on<UpdateLocation>((event, emit) {
-      emit(state.copyWith(location: event.location));
+    on<UpdateLocation>((event, emit) async {
+      Position? position;
+      try {
+        position = await determinePosition();
+        emit(state.copyWith(lat: position.latitude, lon: position.longitude));
+      } catch (e) {
+        emit(state.copyWith(
+          status: ManageEventStatus.error,
+          message: e.toString(),
+        ));
+      }
     });
     on<UpdateImage>((event, emit) async {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
