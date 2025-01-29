@@ -5,6 +5,7 @@ import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/auth/ui/auth_screen.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/manage/event_create_page.dart';
+import 'package:golocal/src/event/promote/promote_event_page.dart';
 import 'package:golocal/src/event/report/report_event_page.dart';
 import 'package:golocal/src/event/ui/event_detail_page.dart';
 import 'package:golocal/src/event/ui/events_map.dart';
@@ -60,7 +61,6 @@ abstract class AppRouter {
             return ScaffoldShell(navigationShell: navigationShell, title: null);
           },
           branches: [
-            // []
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -102,6 +102,14 @@ abstract class AppRouter {
                       },
                       routes: [
                         GoRoute(
+                          path: "promote",
+                          builder: (context, state) {
+                            final event = state.extra as Event;
+
+                            return PromoteEventPage(event);
+                          },
+                        ),
+                        GoRoute(
                           path: 'report',
                           builder: (context, state) {
                             final event = state.extra as Event;
@@ -132,18 +140,19 @@ abstract class AppRouter {
               navigatorKey: shellNavigatorKeyProfile,
               routes: [
                 GoRoute(
-                    path: AppRoute.profile.path,
-                    builder: (context, state) {
-                      return const ProfilePage();
-                    },
-                    routes: [
-                      GoRoute(
-                        path: AppRoute.survey.path,
-                        builder: (context, state) {
-                          return const PreferenceSurveyPage();
-                        },
-                      ),
-                    ]),
+                  path: AppRoute.profile.path,
+                  builder: (context, state) {
+                    return const ProfilePage();
+                  },
+                  routes: [
+                    GoRoute(
+                      path: AppRoute.survey.path,
+                      builder: (context, state) {
+                        return const PreferenceSurveyPage();
+                      },
+                    ),
+                  ],
+                ),
               ],
             ),
           ],

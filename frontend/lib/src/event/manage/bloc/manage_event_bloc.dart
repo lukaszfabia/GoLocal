@@ -3,11 +3,14 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/shared/position.dart';
+import 'package:golocal/src/user/data/user_repository.dart';
 import 'package:golocal/src/user/domain/user.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -16,6 +19,7 @@ part 'manage_event_state.dart';
 
 class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
   final IEventsRepository _repository;
+  final UserRepository _userRepository = UserRepository();
   final Event? event;
   ManageEventBloc(this._repository, {this.event})
       : super(event == null
@@ -62,8 +66,17 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
       organizers.add(event.organizers);
       emit(state.copyWith(organizers: organizers));
     });
-    on<UpdateLocation>((event, emit) {
-      emit(state.copyWith(location: event.location));
+    on<UpdateLocation>((event, emit) async {
+      Position? position;
+      try {
+        position = await determinePosition();
+        emit(state.copyWith(lat: position.latitude, lon: position.longitude));
+      } catch (e) {
+        emit(state.copyWith(
+          status: ManageEventStatus.error,
+          message: e.toString(),
+        ));
+      }
     });
     on<UpdateImage>((event, emit) async {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -72,18 +85,19 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
     });
     on<SaveEvent>((event, emit) async {
       emit(state.copyWith(status: ManageEventStatus.loading));
+      final int? userId = await _userRepository.getLoggedUserId();
       final dto = EventDTO(
         title: state.title,
         description: state.description,
         startDate: state.startDate!,
         endDate: state.endDate!,
         isAdultOnly: state.isAdultsOnly,
-        organizers: state.organizers.map((e) => 1).toList(),
+        organizers: [userId!],
         tags: state.tags,
         image: state.image!,
         eventType: state.type!.name,
-        lat: state.lat.toString(),
-        lon: state.lon.toString(),
+        lat: "51.084426",
+        lon: "17.041830",
       );
       try {
         final created = await _repository.createEvent(dto);
@@ -92,7 +106,6 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
           message: 'Event saved successfully',
         ));
       } catch (e) {
-        print(e);
         emit(state.copyWith(
           status: ManageEventStatus.error,
           message: e.toString(),

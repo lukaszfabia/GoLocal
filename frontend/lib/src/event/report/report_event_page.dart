@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/report/bloc/report_event_bloc.dart';
+import 'package:golocal/src/shared/dialog.dart';
+import 'dart:async';
 
 enum ReportCategory {
   inappropriate("Inappropriate content"),
   spam("Spam"),
-  illegal("Illegal content/activity"),
-  harmful("Harmful content/activity"),
+  illegal("Illegal activity"),
+  harmful("Harmful activity"),
   vandalism("Vandalism"),
   other("Other");
 
@@ -17,133 +19,110 @@ enum ReportCategory {
   final String value;
 }
 
-class ReportEventPage extends StatelessWidget {
-  ReportEventPage({super.key, required this.event});
+class ReportEventPage extends StatefulWidget {
   final Event event;
+
+  const ReportEventPage({super.key, required this.event});
+
+  @override
+  _ReportEventPageState createState() => _ReportEventPageState();
+}
+
+class _ReportEventPageState extends State<ReportEventPage> {
   final _formKey = GlobalKey<FormState>();
+  Timer? _debounce;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ReportEventBloc(
         context.read<IEventsRepository>(),
-        eventId: event.id,
+        eventId: widget.event.id,
       ),
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text('Report ${event.title}'),
+          title: Text('Report "${widget.event.title}"'),
         ),
-        body: SingleChildScrollView(
+        body: BlocConsumer<ReportEventBloc, ReportEventState>(
+          listener: (context, state) {
+            if (state.status == ReportEventStatus.success) {
+              showMyDialog(
+                context,
+                doublePop: true,
+                title: 'Report Sent',
+                message:
+                    'Your report has been submitted. Thank you for helping us maintain a safe environment.',
+              );
+            } else if (state.status == ReportEventStatus.error) {
+              showMyDialog(
+                context,
+                title: 'Error',
+                message: state.message ?? 'An unknown error occurred.',
+              );
+            }
+          },
+          builder: (context, state) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCategoryChips(context, state),
+                    const SizedBox(height: 16),
+                    _buildDescriptionField(context, state),
+                    const SizedBox(height: 24),
+                    _buildSubmitButton(context, state),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  //TODO: Make this not expand when a chip is selected
+  Widget _buildCategoryChips(BuildContext context, ReportEventState state) {
+    return Container(
+      child: Card(
+        elevation: 3,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BlocConsumer<ReportEventBloc, ReportEventState>(
-                listener: (context, state) {
-                  if (state.status == ReportEventStatus.success) {
-                    _showSuccessDialog(context);
-                  } else if (state.status == ReportEventStatus.error) {
-                    _showFailureDialog(
-                        context, state.message ?? 'An unknown error occured');
-                  }
-                },
-                builder: (context, state) {
-                  return Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Card(
-                          elevation: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Select a category',
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                                const SizedBox(height: 8),
-                                for (var category in ReportCategory.values)
-                                  RadioListTile<String>(
-                                    title: Text(category.value),
-                                    value: category.value,
-                                    groupValue: state.category,
-                                    onChanged: (value) {
-                                      context.read<ReportEventBloc>().add(
-                                          UpdateCategory(category: value!));
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Card(
-                          elevation: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Description',
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                                const SizedBox(height: 8),
-                                TextFormField(
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  maxLines: 5,
-                                  onChanged: (value) {
-                                    /* 
-                                    TODO: it may not be the best way, dont have time to change it now. it would be good  to have something like 
-                                    debouncing while the user is typing because now the add method is called with every letter change
-                                    */
-                                    context.read<ReportEventBloc>().add(
-                                        UpdateDescription(description: value));
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter some information';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (state.status == ReportEventStatus.sending) {
-                                return;
-                              }
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                context
-                                    .read<ReportEventBloc>()
-                                    .add(SendReport());
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 5,
-                            ),
-                            child: Text('Submit Report'),
-                          ),
-                        ),
-                      ],
+              Text('Select a reason',
+                  style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8.0,
+                children: ReportCategory.values.map((category) {
+                  bool isSelected = state.category == category.value;
+                  return ChoiceChip(
+                    label: Text(category.value),
+                    selected: isSelected,
+                    selectedColor: Colors.redAccent.withOpacity(0.8),
+                    backgroundColor: Colors.grey.shade300,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black87,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
+                    onSelected: (selected) {
+                      if (selected) {
+                        context
+                            .read<ReportEventBloc>()
+                            .add(UpdateCategory(category: category.value));
+                      }
+                    },
                   );
-                },
+                }).toList(),
               ),
             ],
           ),
@@ -152,47 +131,71 @@ class ReportEventPage extends StatelessWidget {
     );
   }
 
-  Future<dynamic> _showSuccessDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Report sent'),
-          actionsAlignment: MainAxisAlignment.center,
-          content: Text(
-              'Your report will be revieved bby our staff as soon as possible. We will take appropriate actions if needed. Thank you for contributing to a safe environment :)'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.pop();
+  Widget _buildDescriptionField(BuildContext context, ReportEventState state) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Description', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 8),
+            TextFormField(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: "Provide additional details...",
+              ),
+              maxLines: 5,
+              initialValue: state.description,
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  context
+                      .read<ReportEventBloc>()
+                      .add(UpdateDescription(description: value));
+                });
               },
-              child: Text('OK'),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter some details';
+                }
+                return null;
+              },
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Future<dynamic> _showFailureDialog(BuildContext context, String message) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('An error occured'),
-          actionsAlignment: MainAxisAlignment.center,
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                context.pop();
+  /// **Submit Button with Loading State**
+  Widget _buildSubmitButton(BuildContext context, ReportEventState state) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: state.status == ReportEventStatus.sending
+            ? null
+            : () {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  context.read<ReportEventBloc>().add(SendReport());
+                }
               },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 5,
+        ),
+        child: state.status == ReportEventStatus.sending
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white))
+            : const Text('Submit Report', style: TextStyle(fontSize: 16)),
+      ),
     );
   }
 }

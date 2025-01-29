@@ -17,4 +17,8 @@ class AuthService {
     return Future<Response>.value(
         Response(requestOptions: RequestOptions(path: '')));
   }
+
+  Future<Response> getUser() {
+    return _dio.get('/user/');
+  }
 }

@@ -5,6 +5,7 @@ enum ManageEventStatus { initial, success, error, loading }
 class ManageEventState extends Equatable {
   const ManageEventState({
     this.status = ManageEventStatus.initial,
+    this.author,
     this.title = '',
     this.description = '',
     this.type,
@@ -20,6 +21,7 @@ class ManageEventState extends Equatable {
     this.lon,
   });
   final ManageEventStatus status;
+  final int? author;
   final int? id;
   final String title;
   final String description;
@@ -37,6 +39,7 @@ class ManageEventState extends Equatable {
 
   @override
   List<Object?> get props => [
+        author,
         status,
         title,
         description,
@@ -54,6 +57,7 @@ class ManageEventState extends Equatable {
 
   ManageEventState copyWith({
     ManageEventStatus? status,
+    int? author,
     String? title,
     String? description,
     EventType? type,
@@ -69,6 +73,7 @@ class ManageEventState extends Equatable {
     double? lon,
   }) {
     return ManageEventState(
+      author: author ?? this.author,
       status: status ?? this.status,
       title: title ?? this.title,
       description: description ?? this.description,

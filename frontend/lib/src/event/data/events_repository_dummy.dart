@@ -4,6 +4,7 @@ import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/event/promote/promote_pack.dart';
 import 'package:golocal/src/event/report/report_event_page.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
@@ -110,5 +111,11 @@ class EventsRepositoryDummy implements IEventsRepository {
   Future<void> reportEvent(int id, String category, String description) async {
     await Future.delayed(Duration(seconds: 1));
     return;
+  }
+
+  @override
+  Future<String> promoteEvent(int id, PromotePack pack) {
+    // TODO: implement promoteEvent
+    throw UnimplementedError();
   }
 }

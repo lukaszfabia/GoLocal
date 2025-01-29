@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/domain/event.dart';
+import 'package:golocal/src/event/location/address.dart';
+import 'package:golocal/src/event/location/coords.dart';
+import 'package:golocal/src/event/location/location.dart';
+import 'package:golocal/src/user/domain/user.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailPage extends StatelessWidget {
   final Event event;
@@ -10,94 +16,144 @@ class EventDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color.fromARGB(149, 255, 255, 255),
+        elevation: 0,
         title: Text(
           event.title,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             overflow: TextOverflow.ellipsis,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
         centerTitle: true,
         actions: [
+          // IconButton(
+          //   icon: const Icon(Icons.info, color: Colors.white),
+          //   onPressed: () {
+          //     return; // TODO: Disabled for now
+          //     context.push('/events/${event.id}/info');
+          //   },
+          // ),
           IconButton(
-            icon: Icon(Icons.info, color: Colors.blueAccent),
-            onPressed: () {
-              context.push('/events/${event.id}/info');
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.report, color: Colors.red),
+            icon: const Icon(Icons.report, color: Colors.red),
             onPressed: () {
               context.push('/events/${event.id}/report', extra: event);
             },
           ),
+          IconButton(
+              onPressed: () {
+                context.push('/events/${event.id}/promote', extra: event);
+              },
+              icon: const Icon(Icons.arrow_circle_up, color: Colors.yellow)),
         ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Card(
-                child: Column(
-                  children: [
-                    _image(),
-                    _title(),
-                  ],
-                ),
+        child: Column(
+          children: [
+            _imageWithOverlay(),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _title(),
+                  const SizedBox(height: 8),
+                  _buildTags(),
+                  _buildDetailCard("📝 Description", [event.description]),
+                  const SizedBox(height: 12),
+                  _buildDetailCard(
+                      "📅 Starts at", [_formatDate(event.startDate)]),
+                  if (event.endDate != null)
+                    _buildDetailCard(
+                        "⏳ Ends at", [_formatDate(event.endDate!)]),
+                  _buildDetailCard(
+                    "📍 Location",
+                    event.location != null ? [_formatLocation(event)] : null,
+                    onTap: () {
+                      if (event.location != null) {
+                        _launchMaps(event.location!);
+                      }
+                      return null;
+                    },
+                  ),
+                  _buildDetailCard("👥 Organized by", null,
+                      widgets: event.eventOrganizers
+                          .map((user) => Row(
+                                children: [
+                                  _buildAvatars(user),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "${user.firstName} ${user.lastName}",
+                                    style: const TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ))
+                          .toList()),
+                  const SizedBox(height: 12),
+                  _buildVotesCard(context),
+                ],
               ),
-              _buildDetailCard("Description", [event.description]),
-              _buildDetailCard("Starts at", [_formatDate(event.startDate)]),
-              if (event.endDate != null)
-                _buildDetailCard("Ends at", [_formatDate(event.endDate!)]),
-              _buildDetailCard("Tags", [for (var tag in event.tags) tag.name]),
-              _buildDetailCard("By", [
-                for (var organizer in event.eventOrganizers)
-                  "${organizer.firstName} ${organizer.lastName}"
-              ]),
-              _buildDetailCard(
-                  "Location",
-                  event.location != null
-                      ? [
-                          event.location!.city,
-                          event.location!.address != null
-                              ? event.location!.address!.street
-                              : "",
-                          event.location!.country,
-                        ].where((element) => element.isNotEmpty).toList()
-                      : null),
-              _buildVotesCard("Related votes", "View", context),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _image() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8.0),
-      child: event.hasImage
-          ? Image.network(
-              event.imageUrl!,
-              fit: BoxFit.fitWidth,
-              width: double.infinity,
-            )
-          : Image.asset(
-              "assets/images/image_not_found.png", // Placeholder if no image
-              fit: BoxFit.fitWidth,
-              width: double.infinity,
+  Widget _imageWithOverlay() {
+    return Stack(
+      children: [
+        Container(
+          height: 280,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: event.hasImage
+                  ? NetworkImage(event.imageUrl!) as ImageProvider
+                  : const AssetImage("assets/images/image_not_found.png"),
+              fit: BoxFit.cover,
             ),
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.5),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.8),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 16,
+          left: 16,
+          child: Row(
+            children: [
+              if (event.isAdultOnly) _buildBadge("18+", Colors.redAccent),
+              if (event.isPromoted) _buildBadge("Promoted", Colors.orange),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _title() {
     return Text(
-      event.title, // Assuming `title` is a property of `Event`
-      style: TextStyle(
+      event.title,
+      style: const TextStyle(
         fontSize: 24.0,
         fontWeight: FontWeight.bold,
         color: Colors.black87,
@@ -105,53 +161,94 @@ class EventDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailCard(String label, List<String>? values) {
-    if (values == null) {
+  Widget _buildDetailCard(String label, List<String>? values,
+      {Future<void>? Function()? onTap, List<Widget>? widgets}) {
+    if ((values == null || values.isEmpty) && widgets == null) {
       return const SizedBox.shrink();
     }
-    return Card(
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
-            ),
-            Text(
-              values.join(', '),
-              style: TextStyle(fontSize: 16.0, color: Colors.black87),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-          ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 3.0,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 16.0),
+              ),
+              const SizedBox(height: 6),
+              if (widgets != null) ...widgets,
+              if (values != null && values.isNotEmpty)
+                Text(
+                  values.join(', '),
+                  style: const TextStyle(fontSize: 14.0, color: Colors.black87),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildVotesCard(
-      String label, String buttonText, BuildContext context) {
+  Widget _buildAvatars(User user) {
+    if (user.avatarUrl == null) {
+      return const CircleAvatar(
+        radius: 16,
+        child: Icon(Icons.person),
+      );
+    }
+    return CircleAvatar(
+      radius: 16,
+      backgroundImage: NetworkImage(user.avatarUrl!),
+    );
+  }
+
+  Widget _buildTags() {
+    return Wrap(
+      spacing: 6,
+      children: event.tags
+          .map(
+            (tag) => Chip(
+              label: Text(tag.name),
+              backgroundColor: Colors.blueGrey.withOpacity(0.2),
+              labelStyle: const TextStyle(color: Colors.black87),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildVotesCard(BuildContext context) {
     return Card(
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      elevation: 3.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              label,
+            const Text(
+              "🗳 Related Votes",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
             ),
+            const SizedBox(height: 8),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
               onPressed: () {
                 context.push('/events/${event.id}/votes', extra: event);
               },
-              child: Text(buttonText),
+              child: const Text("View Votes", style: TextStyle(fontSize: 16)),
             ),
           ],
         ),
@@ -159,7 +256,53 @@ class EventDetailPage extends StatelessWidget {
     );
   }
 
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(right: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchMaps(Location location) async {
+    String url;
+    final String address;
+    if (location.coords != null) {
+      final latitude = location.coords!.latitude;
+      final longitude = location.coords!.longitude;
+      address = '$latitude,$longitude';
+    } else if (location.address != null) {
+      address =
+          "${location.address!.streetNumber},${location.address!.street},${location.city},${location.country}";
+    } else {
+      return;
+    }
+    //TODO: fix the querry
+    url =
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}';
+
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
   String _formatDate(DateTime date) {
-    return '${date.hour}:${date.minute} ${date.day}/${date.month}/${date.year} ';
+    return DateFormat("MMM d, yyyy • HH:mm").format(date);
+  }
+
+  String _formatLocation(Event event) {
+    return "${event.location!.city}, ${event.location!.country}";
   }
 }

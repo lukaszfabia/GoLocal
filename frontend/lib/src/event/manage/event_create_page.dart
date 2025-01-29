@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/manage/bloc/manage_event_bloc.dart';
+import 'package:golocal/src/shared/dialog.dart';
+import 'package:golocal/src/shared/position.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EventCreatePage extends StatefulWidget {
@@ -34,34 +37,61 @@ class _EventCreatePageState extends State<EventCreatePage> {
           child: Form(
             key: _formKey,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<ManageEventBloc, ManageEventState>(
+              padding: const EdgeInsets.all(16.0),
+              child: BlocConsumer<ManageEventBloc, ManageEventState>(
+                listenWhen: (previous, current) =>
+                    current.status != previous.status,
+                listener: (context, state) {
+                  if (state.status == ManageEventStatus.success) {
+                    showMyDialog(context,
+                        title: "Event created!",
+                        message:
+                            "Your event will be soon available to other users",
+                        doublePop: true);
+                  } else if (state.status == ManageEventStatus.error) {
+                    showMyDialog(context,
+                        title: "Error",
+                        message: state.message ?? "An unknown error occurred");
+                  }
+                },
                 builder: (context, state) {
                   return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       imageSection(state, context),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
                       titleSection(state, context),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
                       descriptionSection(state, context),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
                       datesSection(state, context),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
                       eventTypeSection(state, context),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
                       tagsSection(state, context),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
+                      positionSection(state, context),
+                      SizedBox(height: 16),
                       adultsOnlySection(state, context),
-                      SizedBox(height: 8),
-                      OutlinedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<ManageEventBloc>().add(SaveEvent());
-                            }
-                          },
-                          child: Text("Save"))
+                      SizedBox(height: 16),
+                      state.status == ManageEventStatus.loading
+                          ? Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  context
+                                      .read<ManageEventBloc>()
+                                      .add(SaveEvent());
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child:
+                                  Text("Save", style: TextStyle(fontSize: 18)),
+                            )
                     ],
                   );
                 },
@@ -79,29 +109,223 @@ class _EventCreatePageState extends State<EventCreatePage> {
       children: [
         Text(
           "Event Image",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8),
+        Text(
+          "Add an image to represent your event. This will help attendees easily identify your event.",
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
+        SizedBox(height: 12),
         GestureDetector(
           onTap: () async {
             context.read<ManageEventBloc>().add(UpdateImage());
           },
           child: Container(
-            height: 150,
+            height: 200,
             width: double.infinity,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: state.image == null
                 ? Center(child: Text("Tap to select an image"))
-                : Image.file(
-                    state.image!,
-                    fit: BoxFit.cover,
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      state.image!,
+                      fit: BoxFit.cover,
+                    ),
                   ),
           ),
         ),
       ],
+    );
+  }
+
+  TextFormField titleSection(ManageEventState state, BuildContext context) {
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty)
+          return "Please enter a title for your event";
+        if (value.length < 3) return "Title must be at least 3 characters long";
+        return null;
+      },
+      maxLines: 1,
+      initialValue: state.title,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Event Title',
+        hintText: 'Enter the title of your event',
+      ),
+      onChanged: (value) {
+        context.read<ManageEventBloc>().add(UpdateTitle(value));
+      },
+    );
+  }
+
+  TextFormField descriptionSection(
+      ManageEventState state, BuildContext context) {
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty)
+          return "Please provide a description of your event";
+        return null;
+      },
+      maxLines: 3,
+      initialValue: state.description,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Event Description',
+        hintText: 'Describe your event in detail',
+      ),
+      onChanged: (value) {
+        context.read<ManageEventBloc>().add(UpdateDescription(value));
+      },
+    );
+  }
+
+  Widget datesSection(ManageEventState state, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Event Dates",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        Text(
+          "Select the start and end dates for your event. The start date represents when the event begins, and the end date marks when the event finishes.",
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
+        SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: FormField<DateTime?>(
+                initialValue: state.startDate,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) {
+                  if (value == null) {
+                    return "Please provide a start date for the event";
+                  }
+                  return null;
+                },
+                builder: (field) => ListTile(
+                  title: Text('Starts on'),
+                  subtitle: field.errorText != null
+                      ? Text(field.errorText!,
+                          style: TextStyle(color: Colors.red))
+                      : Text(field.value != null
+                          ? (field.value!.toFormattedString())
+                          : 'Select start date'),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    DateTime? date = await selectDateTime(
+                      context: context,
+                      initialDate: state.startDate ?? DateTime.now(),
+                    );
+
+                    field.didChange(date);
+
+                    if (date != null && context.mounted) {
+                      context
+                          .read<ManageEventBloc>()
+                          .add(UpdateStartDate(date));
+                    }
+                  },
+                ),
+              ),
+            ),
+            Expanded(
+              child: FormField<DateTime?>(
+                validator: (value) {
+                  if (value == null) return "Please provide an end date";
+                  if (state.startDate == null) return null;
+                  if (value.isBefore(state.startDate!)) {
+                    return "End date must be after the start date";
+                  }
+                  return null;
+                },
+                initialValue: state.endDate,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                builder: (field) => ListTile(
+                  title: Text('Ends on'),
+                  subtitle: field.errorText != null
+                      ? Text(field.errorText!,
+                          style: TextStyle(color: Colors.red))
+                      : Text(state.endDate != null
+                          ? (state.endDate!.toFormattedString())
+                          : 'Select end date'),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    DateTime? date = await selectDateTime(
+                      context: context,
+                      initialDate:
+                          state.endDate ?? state.startDate ?? DateTime.now(),
+                      firstDate: state.startDate ?? DateTime.now(),
+                    );
+                    if (date != null && context.mounted) {
+                      context.read<ManageEventBloc>().add(UpdateEndDate(date));
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget eventTypeSection(ManageEventState state, BuildContext context) {
+    return FormField<EventType?>(
+      validator: (value) {
+        if (value == null) {
+          return "Please select an event type to categorize your event";
+        }
+        return null;
+      },
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      builder: (field) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Event Type",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          Text(
+            "Choose an event type to categorize your event. This helps users find similar events easily.",
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          ),
+          SizedBox(height: 12),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children: EventType.values.map((eventType) {
+              bool isSelected = state.type == eventType;
+              return ChoiceChip(
+                label: Text(eventType.name),
+                selected: state.type == eventType,
+                onSelected: (isSelected) {
+                  field.didChange(isSelected ? eventType : null);
+                  if (isSelected) {
+                    context.read<ManageEventBloc>().add(UpdateType(eventType));
+                  }
+                },
+                selectedColor: Theme.of(context).primaryColor,
+                backgroundColor: Colors.grey[200],
+                labelStyle: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).primaryColor,
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -110,42 +334,54 @@ class _EventCreatePageState extends State<EventCreatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Help other people find your event easier",
-          style: TextStyle(fontSize: 16),
+          "Help others find your event easily",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        Text('Create tags which describe your event'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
+        Text(
+          'Create tags that describe your event to make it more discoverable.',
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
+        SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: TextField(
-                  controller: _tagsFieldController,
-                  decoration: InputDecoration(
-                    labelText: 'Tag',
-                    border: OutlineInputBorder(),
-                  ),
-                  onSubmitted: (value) {
-                    context.read<ManageEventBloc>().add(UpdateTags(value));
-                    _tagsFieldController.clear();
-                  }),
+                controller: _tagsFieldController,
+                decoration: InputDecoration(
+                  labelText: 'Tag',
+                  hintText: 'Enter a tag',
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                ),
+                onSubmitted: (value) {
+                  _addTag(value, context);
+                },
+              ),
             ),
             SizedBox(width: 8),
-            ElevatedButton(
+            OutlinedButton(
               onPressed: () {
-                context
-                    .read<ManageEventBloc>()
-                    .add(UpdateTags(_tagsFieldController.text));
-                _tagsFieldController.clear();
+                _addTag(_tagsFieldController.text.trim(), context);
               },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.all(16),
+              style: OutlinedButton.styleFrom(
                 shape: CircleBorder(),
+                padding: EdgeInsets.all(14),
               ),
-              child: Icon(Icons.add),
+              child: Icon(Icons.add, color: Theme.of(context).primaryColor),
             ),
           ],
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 12),
+        if (state.tags.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'No tags added yet. Add some tags to make your event more discoverable.',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ),
         Wrap(
           spacing: 8,
           children: [
@@ -157,6 +393,9 @@ class _EventCreatePageState extends State<EventCreatePage> {
                       .read<ManageEventBloc>()
                       .add(UpdateTags(tag, remove: true));
                 },
+                deleteIconColor: Colors.red,
+                backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                deleteIcon: Icon(Icons.remove_circle_outline),
               ),
           ],
         ),
@@ -164,236 +403,88 @@ class _EventCreatePageState extends State<EventCreatePage> {
     );
   }
 
-  Column organizersSection(ManageEventState state, BuildContext context) {
+  Widget positionSection(ManageEventState state, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Tell us more about the organizers",
-          style: TextStyle(fontSize: 16),
+          "Event Location",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8),
+        Text(
+          "Select the location for your event. This will help attendees know where to go.",
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
+        SizedBox(height: 12),
         Row(
           children: [
-            Expanded(
-              child: TextField(
-                  controller: _tagsFieldController,
-                  decoration: InputDecoration(
-                    labelText: 'Organizer',
-                    border: OutlineInputBorder(),
-                  ),
-                  onSubmitted: (value) {
-                    context
-                        .read<ManageEventBloc>()
-                        .add(UpdateOrganizers(value));
-                    _tagsFieldController.clear();
-                  }),
-            ),
-            SizedBox(width: 8),
             ElevatedButton(
               onPressed: () {
-                context
-                    .read<ManageEventBloc>()
-                    .add(UpdateTags(_tagsFieldController.text));
-                _tagsFieldController.clear();
+                context.read<ManageEventBloc>().add(UpdateLocation());
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.all(16),
                 shape: CircleBorder(),
               ),
-              child: Icon(Icons.add),
+              child: Icon(Icons.gps_fixed),
+            ),
+            SizedBox(width: 8),
+            Text(
+              state.lat == null || state.lon == null
+                  ? "No location selected"
+                  : "Lat: ${state.lat}, Lon: ${state.lon}",
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
           ],
         ),
-        SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: [
-            for (var organizer in state.organizers)
-              Chip(
-                label: Text(organizer),
-                onDeleted: () {
-                  context
-                      .read<ManageEventBloc>()
-                      .add(UpdateOrganizers(organizer));
-                },
-              ),
-          ],
-        ),
       ],
-    );
-  }
-
-  TextFormField descriptionSection(
-      ManageEventState state, BuildContext context) {
-    return TextFormField(
-      validator: (value) {
-        if (value == null) return "Please enter description";
-        if (value.isEmpty) return "Please enter description";
-        return null;
-      },
-      maxLines: 3,
-      initialValue: state.description,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: 'Description',
-      ),
-      onChanged: (value) {
-        context.read<ManageEventBloc>().add(UpdateDescription(value));
-      },
-    );
-  }
-
-  TextFormField titleSection(ManageEventState state, BuildContext context) {
-    return TextFormField(
-      validator: (value) {
-        if (value == null) return "Please enter title";
-        if (value.isEmpty) return "Please enter title";
-        if (value.length < 3) {
-          return "Title must be at least 3 characters long";
-        }
-        return null;
-      },
-      maxLines: 1,
-      initialValue: state.title,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: 'Title',
-      ),
-      onChanged: (value) {
-        context.read<ManageEventBloc>().add(UpdateTitle(value));
-      },
     );
   }
 
   Widget adultsOnlySection(ManageEventState state, BuildContext context) {
-    return Row(
-      children: [
-        Text("Adults only"),
-        Switch(
-          value: state.isAdultsOnly,
-          onChanged: (value) {
-            context.read<ManageEventBloc>().add(UpdateIsAdultsOnly(value));
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget datesSection(ManageEventState state, BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: FormField<DateTime?>(
-            initialValue: state.startDate,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) {
-              if (value == null) {
-                return "Provide date";
-              }
-              return null;
-            },
-            builder: (field) => ListTile(
-              title: Text('Starts at'),
-              subtitle: field.errorText != null
-                  ? Text(field.errorText!, style: TextStyle(color: Colors.red))
-                  : Text(
-                      field.value != null
-                          ? (field.value!.toFormattedString())
-                          : 'Select start date',
-                    ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () async {
-                DateTime? date = await selectDateTime(
-                  context: context,
-                  initialDate: state.startDate ?? DateTime.now(),
-                );
-
-                field.didChange(date);
-
-                if (date != null && context.mounted) {
-                  context.read<ManageEventBloc>().add(UpdateStartDate(date));
-                }
-              },
-            ),
-          ),
-        ),
-        Expanded(
-          child: FormField<DateTime?>(
-            validator: (value) {
-              if (value == null) return null;
-              if (state.startDate == null) return null;
-              if (value.isBefore(state.startDate!)) {
-                return "Must be after start date";
-              }
-              return null;
-            },
-            initialValue: state.endDate,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            builder: (field) => ListTile(
-              title: Text('Ends at'),
-              subtitle: field.errorText != null
-                  ? Text(field.errorText!)
-                  : Text(
-                      state.endDate != null
-                          ? (state.endDate!.toFormattedString())
-                          : 'Select end date',
-                    ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () async {
-                DateTime? date = await selectDateTime(
-                  context: context,
-                  initialDate:
-                      state.endDate ?? state.startDate ?? DateTime.now(),
-                  firstDate: state.startDate ?? DateTime.now(),
-                );
-                if (date != null && context.mounted) {
-                  context.read<ManageEventBloc>().add(UpdateEndDate(date));
-                }
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget eventTypeSection(ManageEventState state, BuildContext context) {
-    return FormField<EventType?>(
-      validator: (value) {
-        if (value == null) {
-          return "Choose event type";
-        }
-        return null;
-      },
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      builder: (field) => Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          DropdownMenu<EventType>(
-            initialSelection: state.type,
-            dropdownMenuEntries: EventType.values
-                .map((e) => DropdownMenuEntry(label: e.name, value: e))
-                .toList(),
-            inputDecorationTheme: InputDecorationTheme(
-              border: OutlineInputBorder(),
-            ),
-            label: field.errorText == null
-                ? Text("Event type")
-                : Text(
-                    field.errorText!,
-                    style: TextStyle(color: Colors.red),
-                  ),
-            onSelected: (value) {
-              field.didChange(value);
-              if (value != null) {
-                context.read<ManageEventBloc>().add(UpdateType(value));
-              }
+          Row(
+            children: [
+              Icon(Icons.accessibility_new,
+                  color: Theme.of(context).primaryColor),
+              SizedBox(width: 8),
+              Text(
+                "Adults Only",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          Switch(
+            value: state.isAdultsOnly,
+            onChanged: (value) {
+              context.read<ManageEventBloc>().add(UpdateIsAdultsOnly(value));
             },
-            expandedInsets: EdgeInsets.all(0),
+            activeColor: Theme.of(context).primaryColor,
+            inactiveTrackColor: Colors.grey[300],
+            inactiveThumbColor: Colors.grey,
           ),
         ],
       ),
     );
+  }
+
+  void _addTag(String tag, BuildContext context) {
+    if (tag.isNotEmpty) {
+      context.read<ManageEventBloc>().add(UpdateTags(tag));
+      _tagsFieldController.clear();
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Please enter a tag')));
+    }
   }
 
   Future<DateTime?> selectDateTime({

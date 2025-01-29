@@ -11,8 +11,9 @@ class EventsDataSource {
     return Future.value(Response(requestOptions: RequestOptions(path: '')));
   }
 
-  Future<Response> createEvent(Map<String, dynamic> data) {
-    return Future.value(Response(requestOptions: RequestOptions(path: '')));
+  Future<Response> createEvent(FormData formData) {
+    return _dio.post('/auth/event/',
+        data: formData, options: Options(contentType: 'multipart/form-data'));
   }
 
   Future<Response> updateEvent(Map<String, dynamic> data) {
@@ -25,5 +26,9 @@ class EventsDataSource {
 
   Future<Response> reportEvent(Map<String, dynamic> data) {
     return _dio.post('/auth/event/report', data: data);
+  }
+
+  Future<Response> promoteEvent(Map<String, dynamic> data) {
+    return _dio.put('/auth/event/${data["id"]}/promo');
   }
 }
