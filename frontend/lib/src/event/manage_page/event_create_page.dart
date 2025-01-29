@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -517,8 +517,27 @@ class _EventCreatePageState extends State<EventCreatePage> {
   }
 }
 
-extension on DateTime {
-  String toFormattedString() {
+extension DateTimeExtensions on DateTime {
+  String toFormattedFull() {
     return '$day/$month/$year $hour:$minute';
+  }
+
+  String toFormattedString() {
+    return '$day/$month/$year';
+  }
+
+  String toFormattedTime() {
+    return '$hour:$minute';
+  }
+
+  String toFormattedDate() {
+    return '$day/$month/$year';
+  }
+
+  String formatDate({bool showTime = false}) {
+    if (showTime) {
+      return DateFormat("MMM d, yyyy • HH:mm").format(this);
+    }
+    return DateFormat("MMM d, yyyy").format(this);
   }
 }

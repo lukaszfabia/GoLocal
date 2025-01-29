@@ -1,5 +1,5 @@
 import 'package:golocal/src/shared/model_base.dart';
-import 'package:golocal/src/survey/domain/preference_survey_question.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
 
 /// A model representing a preference survey.
 ///

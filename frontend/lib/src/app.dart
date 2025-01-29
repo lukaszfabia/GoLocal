@@ -8,9 +8,9 @@ import 'package:golocal/src/auth/bloc/auth_bloc.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/vote/data/ivotes_repository.dart';
 import 'package:golocal/src/vote/bloc/vote_bloc.dart';
-import 'package:golocal/src/survey/data/ipreference_survey_repository.dart';
-import 'package:golocal/src/survey/data/preference_survey_repository.dart';
-import 'package:golocal/src/survey/bloc/preference_survey_bloc.dart';
+import 'package:golocal/src/preference_survey/data/ipreference_survey_repository.dart';
+import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
+import 'package:golocal/src/preference_survey/bloc/preference_survey_bloc.dart';
 import 'package:golocal/src/routing/router.dart';
 import 'package:golocal/src/vote/data/votes_repository_impl.dart';
 

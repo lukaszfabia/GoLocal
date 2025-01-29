@@ -10,7 +10,7 @@ import 'package:golocal/src/event/report_page/report_event_page.dart';
 import 'package:golocal/src/event/events_page/ui/event_detail_page.dart';
 import 'package:golocal/src/event/events_page/ui/events_map.dart';
 import 'package:golocal/src/event/events_page/ui/events_view_page.dart';
-import 'package:golocal/src/survey/ui/preference_survey_page.dart';
+import 'package:golocal/src/preference_survey/ui/preference_survey_page.dart';
 import 'package:golocal/src/shared/scaffold_shell.dart';
 import 'package:golocal/src/shared/streamtolistenable.dart';
 import 'package:golocal/src/user/ui/profile_page.dart';

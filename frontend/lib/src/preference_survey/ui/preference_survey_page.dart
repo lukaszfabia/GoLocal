@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:golocal/src/survey/domain/preference_survey_option.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_option.dart';
 import 'package:golocal/src/shared/dialog.dart';
 import '../bloc/preference_survey_bloc.dart';
-import 'package:golocal/src/survey/data/preference_survey_repository.dart';
-import 'package:golocal/src/survey/domain/preference_survey_question.dart';
+import 'package:golocal/src/preference_survey/data/preference_survey_repository.dart';
+import 'package:golocal/src/preference_survey/domain/preference_survey_question.dart';
 
 class PreferenceSurveyPage extends StatelessWidget {
   const PreferenceSurveyPage({super.key});
