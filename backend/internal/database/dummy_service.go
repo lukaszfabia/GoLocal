@@ -16,6 +16,7 @@ const CAN_CLEAR_DATABASE = false
 
 type DummyService interface {
 	Cook()
+	TestData()
 }
 
 type dummyServiceImpl struct {
@@ -30,6 +31,104 @@ func NewDummyService(db *gorm.DB) DummyService {
 
 func (s *service) DummyService() DummyService {
 	return s.dummyService
+}
+
+func (d *dummyServiceImpl) TestData() {
+	user := models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "t@t.t",
+	}
+
+	err := d.db.Create(&user)
+
+	if err != nil {
+		log.Fatalf("failed to create user: %v", err)
+	}
+
+	tags := []*models.Tag{
+		{Name: "Music"},
+		{Name: "Art"},
+		{Name: "Sport"},
+	}
+
+	for _, tag := range tags {
+		if err := d.db.Create(tag).Error; err != nil {
+			log.Fatalf("failed to create tag: %v", err)
+		}
+	}
+
+	recommendation := &models.UserPreference{
+		UserID: user.ID,
+		Tags:   []models.Tag{},
+	}
+
+	var recommendation_tag1 models.Tag
+	var recommendation_tag2 models.Tag
+	if err := d.db.First(&recommendation_tag1, "name = ?", "Music").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+	}
+	if err := d.db.First(&recommendation_tag2, "name = ?", "Art").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+	}
+
+	var not_recommended_tag models.Tag
+	if err := d.db.First(&not_recommended_tag, "name = ?", "Sport").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+	}
+
+	recommendation.Tags = append(recommendation.Tags, recommendation_tag1, recommendation_tag2)
+
+	if err := d.db.Create(recommendation).Error; err != nil {
+		log.Fatalf("failed to create recommendation: %v", err)
+	}
+
+	dateStr := "2021-01-01"
+	date, e := time.Parse(time.DateOnly, dateStr)
+	if e != nil {
+		log.Fatalf("failed to parse date: %v", err)
+	}
+	datePtr := &date
+
+	longitude := 1.
+	latitude := 1.
+	point := fmt.Sprintf("SRID=4326;POINT(%f %f)", longitude, latitude)
+
+	location := models.Location{
+		Coords: &models.Coords{
+			Longitude: longitude,
+			Latitude:  latitude,
+			Geom:      point,
+		},
+		Address: &models.Address{
+			Street:         "Marszałkowska",
+			StreetNumber:   "1",
+			AdditionalInfo: "Warszawa",
+		},
+	}
+
+	events := []*models.Event{
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&recommendation_tag1, &recommendation_tag2},
+			Location:  &location,
+		},
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&not_recommended_tag},
+			Location:  &location,
+		},
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&recommendation_tag1},
+			Location:  &location,
+		},
+	}
+	for _, e := range events {
+		if err := d.db.Create(e).Error; err != nil {
+			log.Fatalf("failed to create event: %v", err)
+		}
+	}
 }
 
 func (d *dummyServiceImpl) Cook() {

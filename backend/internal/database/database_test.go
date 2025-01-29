@@ -11,7 +11,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-func mustStartPostgresContainer() (func(context.Context) error, error) {
+func MustStartPostgresContainer() (func(context.Context) error, error) {
 	var (
 		dbName = "database"
 		dbPwd  = "password"
@@ -54,7 +54,7 @@ func mustStartPostgresContainer() (func(context.Context) error, error) {
 }
 
 func TestMain(m *testing.M) {
-	teardown, err := mustStartPostgresContainer()
+	teardown, err := MustStartPostgresContainer()
 	if err != nil {
 		log.Fatalf("could not start postgres container: %v", err)
 	}
