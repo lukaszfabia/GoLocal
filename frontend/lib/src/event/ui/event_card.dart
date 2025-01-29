@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:golocal/src/event/domain/event.dart';
+import 'package:golocal/src/event/ui/event_detail_page.dart';
 import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
@@ -28,79 +29,114 @@ class EventCard extends StatelessWidget {
               ),
             ),
           ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.8),
+          Stack(
+            children: [
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: event.hasImage
+                        ? NetworkImage(event.imageUrl!) as ImageProvider
+                        : const AssetImage("assets/images/image_not_found.png"),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.8),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 12, // Position it at the top
+                left: 12, // Align it to the left
+                child: Row(
+                  children: [
+                    if (event.isPromoted)
+                      BadgeWidget(
+                          text: "🔥Promoted",
+                          backgroundColor: Colors.orange,
+                          fontSize: 14),
+                    if (event.isAdultOnly)
+                      BadgeWidget(
+                          text: "🔞18+",
+                          backgroundColor: Colors.red,
+                          fontSize: 14),
                   ],
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            bottom: 12,
-            left: 12,
-            right: 12,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  event.eventType.name.toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.orangeAccent,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  event.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
+              Positioned(
+                bottom: 12,
+                left: 12,
+                right: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.event, size: 16, color: Colors.white70),
-                    const SizedBox(width: 6),
                     Text(
-                      "${_formatDate(event.startDate)}${event.endDate != null ? " - ${_formatDate(event.endDate!)}" : ""}",
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 12),
+                      event.eventType.name.toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.orangeAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                if (event.location != null)
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, size: 16, color: Colors.white70),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          "${event.location!.city}, ${event.location!.address?.street}",
+                    Text(
+                      event.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.event, size: 16, color: Colors.white70),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${_formatDate(event.startDate)}${event.endDate != null ? " - ${_formatDate(event.endDate!)}" : ""}",
                           style: const TextStyle(
                               color: Colors.white70, fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    if (event.location != null)
+                      Row(
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 16, color: Colors.white70),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              "${event.location!.city}, ${event.location!.address?.street}",
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                const SizedBox(height: 6),
-              ],
-            ),
-          ),
+                    const SizedBox(height: 6),
+                  ],
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );
