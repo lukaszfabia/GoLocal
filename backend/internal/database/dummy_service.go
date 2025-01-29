@@ -17,11 +17,57 @@ const CAN_CLEAR_DATABASE = false
 type DummyService interface {
 	Cook()
 	TestData()
+	// create 3 users
+	TestUsers() ([]models.User, error)
 }
 
 type dummyServiceImpl struct {
 	db *gorm.DB
 	f  *gofakeit.Faker
+}
+
+// TestUsers implements DummyService.
+func (d *dummyServiceImpl) TestUsers() ([]models.User, error) {
+	strPtr := func(s string) *string { return &s }
+	timePtr := func(t time.Time) *time.Time { return &t }
+
+	users := []models.User{
+		{
+			FirstName:  "John",
+			LastName:   "Doe",
+			Email:      "johndoe@example.com",
+			IsVerified: true,
+			IsPremium:  false,
+			AvatarURL:  strPtr("https://example.com/avatar1.jpg"),
+		}, {
+			FirstName:  "Alice",
+			LastName:   "Smith",
+			Email:      "alicesmith@example.com",
+			IsVerified: false,
+			IsPremium:  true,
+			AvatarURL:  strPtr("https://example.com/avatar2.jpg"),
+			Bio:        strPtr("A passionate gamer and tech enthusiast."),
+			Birthday:   timePtr(time.Date(1990, time.March, 14, 0, 0, 0, 0, time.UTC)),
+		}, {
+			FirstName:  "Bob",
+			LastName:   "Johnson",
+			Email:      "bobjohnson@example.com",
+			IsVerified: true,
+			IsPremium:  false,
+			AvatarURL:  strPtr("https://example.com/avatar3.jpg"),
+			Bio:        strPtr("Lover of sports and technology."),
+		},
+	}
+
+	for _, user := range users {
+		if err := d.db.Create(&user).Error; err != nil {
+			return nil, fmt.Errorf("failed to create user %s", err)
+		}
+	}
+
+	log.Println("Created users")
+
+	return users, nil
 }
 
 func NewDummyService(db *gorm.DB) DummyService {

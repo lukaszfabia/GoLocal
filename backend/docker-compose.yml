@@ -15,24 +15,24 @@ services:
       retries: 3
     networks:
       - go_local_network
-  # api:
-  #   container_name: go_local_api
-  #   restart: always
-  #   build:
-  #     context: .
-  #   ports:
-  #     - ${PORT}:${PORT}
-  #   environment:
-  #     PORT: ${PORT}
-  #     DB_HOST: go_local_postgres
-  #     DB_PORT: ${DB_PORT}
-  #     DB_DATABASE: ${DB_DATABASE}
-  #     DB_USERNAME: ${DB_USERNAME}
-  #     DB_PASSWORD: ${DB_PASSWORD}
-  #   depends_on:
-  #     - db
-  #   networks:
-  #     - go_local_network
+  api:
+    container_name: go_local_api
+    restart: always
+    build:
+      context: .
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      PORT: ${PORT}
+      DB_HOST: go_local_postgres
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - go_local_network
   # pgadmin:
   #   container_name: go_local_pgadmin
   #   image: dpage/pgadmin4
@@ -44,36 +44,6 @@ services:
   #     - "${PGADMIN_PORT}:80"
   #   networks:
   #     - go_local_network
-
-  test_db:
-    container_name: go_local_postgres_test
-    image: postgis/postgis
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: go_local_postgres_test
-      POSTGRES_USER: janta
-      POSTGRES_PASSWORD: janta
-    ports:
-      - "5764:5764"
-    command: [ "postgres", "-c", "port=5764" ]
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "janta" ]
-      interval: 30s
-      retries: 3
-    networks:
-      - go_local_network
-
-  pgadmin:
-    container_name: go_local_pgadmin
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
-    ports:
-      - "${PGADMIN_PORT}:80"
-    networks:
-      - go_local_network
 
 networks:
   go_local_network:
