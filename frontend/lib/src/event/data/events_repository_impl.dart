@@ -3,6 +3,7 @@ import 'package:golocal/src/event/data/events_datasource.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
+import 'package:golocal/src/event/promote/promote_pack.dart';
 import 'package:golocal/src/event/report/report_event_page.dart';
 
 class EventsRepositoryImpl implements IEventsRepository {
@@ -64,6 +65,13 @@ class EventsRepositoryImpl implements IEventsRepository {
     if (result.statusCode != 201) {
       throw Exception('Failed to report event');
     }
+  }
+
+  @override
+  Future<String> promoteEvent(int id, PromotePack pack) async {
+    var data = {'id': id};
+    Response response = await _eventsDataSource.promoteEvent(data);
+    return "Success";
   }
 
   // @override

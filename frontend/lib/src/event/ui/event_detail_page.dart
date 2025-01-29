@@ -29,19 +29,24 @@ class EventDetailPage extends StatelessWidget {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info, color: Colors.white),
-            onPressed: () {
-              return; // TODO: Disabled for now
-              context.push('/events/${event.id}/info');
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.info, color: Colors.white),
+          //   onPressed: () {
+          //     return; // TODO: Disabled for now
+          //     context.push('/events/${event.id}/info');
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.report, color: Colors.red),
             onPressed: () {
               context.push('/events/${event.id}/report', extra: event);
             },
           ),
+          IconButton(
+              onPressed: () {
+                context.push('/events/${event.id}/promote', extra: event);
+              },
+              icon: const Icon(Icons.arrow_circle_up, color: Colors.yellow)),
         ],
       ),
       body: SingleChildScrollView(

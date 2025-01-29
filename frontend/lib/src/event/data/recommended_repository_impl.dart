@@ -2,6 +2,7 @@ import 'package:golocal/src/event/data/events_datasource.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
+import 'package:golocal/src/event/promote/promote_pack.dart';
 import 'package:golocal/src/event/report/report_event_page.dart';
 
 class RecommendedRepositoryImpl implements IEventsRepository {
@@ -57,6 +58,11 @@ class RecommendedRepositoryImpl implements IEventsRepository {
   @override
   Future<void> reportEvent(int id, String category, String description) async {
     // Do nothing for now
+  }
+
+  @override
+  Future<String> promoteEvent(int id, PromotePack pack) {
+    throw UnimplementedError();
   }
 
   // @override

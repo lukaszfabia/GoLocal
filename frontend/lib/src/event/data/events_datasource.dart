@@ -27,4 +27,8 @@ class EventsDataSource {
   Future<Response> reportEvent(Map<String, dynamic> data) {
     return _dio.post('/auth/event/report', data: data);
   }
+
+  Future<Response> promoteEvent(Map<String, dynamic> data) {
+    return _dio.put('/auth/event/${data["id"]}/promo');
+  }
 }
