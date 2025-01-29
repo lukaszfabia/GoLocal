@@ -16,11 +16,58 @@ const CAN_CLEAR_DATABASE = false
 
 type DummyService interface {
 	Cook()
+	TestData()
+	// create 3 users
+	TestUsers() ([]models.User, error)
 }
 
 type dummyServiceImpl struct {
 	db *gorm.DB
 	f  *gofakeit.Faker
+}
+
+// TestUsers implements DummyService.
+func (d *dummyServiceImpl) TestUsers() ([]models.User, error) {
+	strPtr := func(s string) *string { return &s }
+	timePtr := func(t time.Time) *time.Time { return &t }
+
+	users := []models.User{
+		{
+			FirstName:  "John",
+			LastName:   "Doe",
+			Email:      "johndoe@example.com",
+			IsVerified: true,
+			IsPremium:  false,
+			AvatarURL:  strPtr("https://example.com/avatar1.jpg"),
+		}, {
+			FirstName:  "Alice",
+			LastName:   "Smith",
+			Email:      "alicesmith@example.com",
+			IsVerified: false,
+			IsPremium:  true,
+			AvatarURL:  strPtr("https://example.com/avatar2.jpg"),
+			Bio:        strPtr("A passionate gamer and tech enthusiast."),
+			Birthday:   timePtr(time.Date(1990, time.March, 14, 0, 0, 0, 0, time.UTC)),
+		}, {
+			FirstName:  "Bob",
+			LastName:   "Johnson",
+			Email:      "bobjohnson@example.com",
+			IsVerified: true,
+			IsPremium:  false,
+			AvatarURL:  strPtr("https://example.com/avatar3.jpg"),
+			Bio:        strPtr("Lover of sports and technology."),
+		},
+	}
+
+	for _, user := range users {
+		if err := d.db.Create(&user).Error; err != nil {
+			return nil, fmt.Errorf("failed to create user %s", err)
+		}
+	}
+
+	log.Println("Created users")
+
+	return users, nil
 }
 
 func NewDummyService(db *gorm.DB) DummyService {
@@ -30,6 +77,104 @@ func NewDummyService(db *gorm.DB) DummyService {
 
 func (s *service) DummyService() DummyService {
 	return s.dummyService
+}
+
+func (d *dummyServiceImpl) TestData() {
+	user := models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "t@t.t",
+	}
+
+	err := d.db.Create(&user)
+
+	if err != nil {
+		log.Fatalf("failed to create user: %v", err)
+	}
+
+	tags := []*models.Tag{
+		{Name: "Music"},
+		{Name: "Art"},
+		{Name: "Sport"},
+	}
+
+	for _, tag := range tags {
+		if err := d.db.Create(tag).Error; err != nil {
+			log.Fatalf("failed to create tag: %v", err)
+		}
+	}
+
+	recommendation := &models.UserPreference{
+		UserID: user.ID,
+		Tags:   []models.Tag{},
+	}
+
+	var recommendation_tag1 models.Tag
+	var recommendation_tag2 models.Tag
+	if err := d.db.First(&recommendation_tag1, "name = ?", "Music").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+	}
+	if err := d.db.First(&recommendation_tag2, "name = ?", "Art").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+	}
+
+	var not_recommended_tag models.Tag
+	if err := d.db.First(&not_recommended_tag, "name = ?", "Sport").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+	}
+
+	recommendation.Tags = append(recommendation.Tags, recommendation_tag1, recommendation_tag2)
+
+	if err := d.db.Create(recommendation).Error; err != nil {
+		log.Fatalf("failed to create recommendation: %v", err)
+	}
+
+	dateStr := "2021-01-01"
+	date, e := time.Parse(time.DateOnly, dateStr)
+	if e != nil {
+		log.Fatalf("failed to parse date: %v", err)
+	}
+	datePtr := &date
+
+	longitude := 1.
+	latitude := 1.
+	point := fmt.Sprintf("SRID=4326;POINT(%f %f)", longitude, latitude)
+
+	location := models.Location{
+		Coords: &models.Coords{
+			Longitude: longitude,
+			Latitude:  latitude,
+			Geom:      point,
+		},
+		Address: &models.Address{
+			Street:         "Marszałkowska",
+			StreetNumber:   "1",
+			AdditionalInfo: "Warszawa",
+		},
+	}
+
+	events := []*models.Event{
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&recommendation_tag1, &recommendation_tag2},
+			Location:  &location,
+		},
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&not_recommended_tag},
+			Location:  &location,
+		},
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&recommendation_tag1},
+			Location:  &location,
+		},
+	}
+	for _, e := range events {
+		if err := d.db.Create(e).Error; err != nil {
+			log.Fatalf("failed to create event: %v", err)
+		}
+	}
 }
 
 func (d *dummyServiceImpl) Cook() {

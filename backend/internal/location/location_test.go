@@ -169,14 +169,12 @@ func TestFetchLocation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// Mockowanie funkcji GetUrl
 	originalGetUrl := location.GetUrl
 	location.GetUrl = func(lon, lat string, format string) (*url.URL, error) {
 		return url.Parse(server.URL)
 	}
 	defer func() { location.GetUrl = originalGetUrl }()
 
-	// Wywołanie FetchLocation
 	loc, err := location.FetchLocation("21.0122", "52.2297")
 	if err != nil {
 		t.Errorf("FetchLocation() error = %v", err)
@@ -188,7 +186,6 @@ func TestFetchLocation(t *testing.T) {
 		Latitude:  52.2297,
 	}
 
-	// Sprawdzanie adresu
 	expectedAddress := &models.Address{
 		Street:         "Main Street",
 		StreetNumber:   "123",
