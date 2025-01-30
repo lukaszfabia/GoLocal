@@ -2,6 +2,7 @@ package recommendation
 
 import (
 	"backend/internal/models"
+	"fmt"
 	"log"
 
 	"gorm.io/gorm"
@@ -11,6 +12,15 @@ type RecommendationService interface {
 	Predict([]*models.Event, uint, int) ([]uint, error)
 	ModifyAttendancePreference(uint, uint, bool) error
 	GetUserPreferences(uint) (*models.UserPreference, error)
+}
+
+func findEventByID(events []*models.Event, eventID uint) (*models.Event, error) {
+	for _, event := range events {
+		if event.ID == eventID {
+			return event, nil
+		}
+	}
+	return nil, fmt.Errorf("event with ID %d not found", eventID)
 }
 
 type recommendationServiceImpl struct {
@@ -31,9 +41,25 @@ func (s *recommendationServiceImpl) Predict(allEvents []*models.Event, userId ui
 	userTags := make(map[string]struct{})
 	for _, tag := range userPreferences.Tags {
 		userTags[tag.Name] = struct{}{}
+		println(tag.Name)
 	}
 
 	recommendedEvents := getRecommendedEvents(s, allEvents, userPreferences, count)
+
+	for _, eventID := range recommendedEvents {
+		event, err := findEventByID(allEvents, eventID)
+		if err != nil {
+			log.Printf("Error finding event: %v", err)
+			return nil, err
+		}
+
+		for _, tag := range event.Tags {
+			if _, ok := userTags[tag.Name]; ok {
+				log.Print(tag.Name)
+			}
+		}
+		log.Println()
+	}
 
 	return recommendedEvents, nil
 }

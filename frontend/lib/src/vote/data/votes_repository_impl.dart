@@ -34,6 +34,9 @@ class VotesRepositoryImpl implements IVotesRepository {
   Future<List<Vote>> getVotes() async {
     final response = await _dioClient.dio.get('/auth/vote/10');
 
+    if (response.data['data'] == null) {
+      return [];
+    }
     final data = response.data['data'] as List<dynamic>;
 
     return data.map((json) => Vote.fromJson(json)).toList();
