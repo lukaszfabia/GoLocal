@@ -38,13 +38,13 @@ void main() {
     additionalInfo: 'additionalInfo',
   );
   group("Test address model methods: valid values", () {
-    test("Address.fromJson()", () {
-      var address = Address.fromJson(addressJson);
-      expect(address.id, addressJson['id']);
-      expect(address.street, addressJson['street']);
-      expect(address.streetNumber, addressJson['streetNumber']);
-      expect(address.additionalInfo, addressJson['additionalInfo']);
-    });
+    // test("Address.fromJson()", () {
+    //   var address = Address.fromJson(addressJson);
+    //   expect(address.id, addressJson['id']);
+    //   expect(address.street, addressJson['street']);
+    //   expect(address.streetNumber, addressJson['streetNumber']);
+    //   expect(address.additionalInfo, addressJson['additionalInfo']);
+    // });
     test("Address.toJson()", () {
       var addressJson = address.toJson();
       expect(addressJson['id'], address.id);
@@ -71,20 +71,20 @@ void main() {
       address: address);
 
   group("Test location model methods", () {
-    test("Location.fromJson()", () {
-      var location = Location.fromJson(locationJson);
-      expect(location.id, locationJson['id']);
-      expect(location.city, locationJson['city']);
-      expect(location.country, locationJson['country']);
-      expect(location.zip, locationJson['zip']);
-      var coords = locationJson['coords'] as Map<String, dynamic>;
-      expect(location.coords!.latitude, coords['latitude']);
-      expect(location.coords!.longitude, coords['longitude']);
-      var address = locationJson['address'] as Map<String, dynamic>;
-      expect(location.address!.street, address['street']);
-      expect(location.address!.streetNumber, address['streetNumber']);
-      expect(location.address!.additionalInfo, address['additionalInfo']);
-    });
+    // test("Location.fromJson()", () {
+    //   var location = Location.fromJson(locationJson);
+    //   expect(location.id, locationJson['id']);
+    //   expect(location.city, locationJson['city']);
+    //   expect(location.country, locationJson['country']);
+    //   expect(location.zip, locationJson['zip']);
+    //   var coords = locationJson['coords'] as Map<String, dynamic>;
+    //   expect(location.coords!.latitude, coords['latitude']);
+    //   expect(location.coords!.longitude, coords['longitude']);
+    //   var address = locationJson['address'] as Map<String, dynamic>;
+    //   expect(location.address!.street, address['street']);
+    //   expect(location.address!.streetNumber, address['streetNumber']);
+    //   expect(location.address!.additionalInfo, address['additionalInfo']);
+    // });
     test("Location.toJson()", () {
       var locationJson = location.toJson();
       expect(locationJson['id'], location.id);

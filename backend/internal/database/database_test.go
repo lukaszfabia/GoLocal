@@ -3,6 +3,7 @@ package database
 import (
 	"backend/internal/forms"
 	"backend/internal/models"
+	"backend/internal/recommendation"
 	"backend/pkg/parsers"
 	"context"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -22,6 +24,11 @@ func timePtr(t time.Time) *time.Time {
 
 func stringPtr(s string) *string {
 	return &s
+}
+
+func timeApproxEqual(t1, t2 *time.Time) bool {
+	const epsilon = time.Second
+	return t1.Sub(*t2) < epsilon && t2.Sub(*t1) < epsilon
 }
 
 func MustStartPostgresContainer() (func(context.Context) error, error) {
@@ -158,8 +165,12 @@ func TestEventServiceCreate(t *testing.T) {
 		t.Errorf("Want %s have %s", expectedEvent.Description, event.Description)
 	}
 
-	if event.StartDate.Compare(*expectedEvent.StartDate) == 0 && event.FinishDate.Compare(*expectedEvent.FinishDate) == 0 {
-		t.Error("Time are not the same")
+	if !timeApproxEqual(event.StartDate, expectedEvent.StartDate) {
+		t.Errorf("StartDate mismatch. Expected: %v, got: %v", expectedEvent.StartDate, event.StartDate)
+	}
+
+	if !timeApproxEqual(event.FinishDate, expectedEvent.FinishDate) {
+		t.Errorf("FinishDate mismatch. Expected: %v, got: %v", expectedEvent.FinishDate, event.FinishDate)
 	}
 
 	if expectedEvent.Title != event.Title {
@@ -495,6 +506,362 @@ func TestUserServiceAddDevice_Failure(t *testing.T) {
 	if err := srv.UserService().AddDevice(device); err == nil {
 		t.Errorf("Should failed, user does not exists")
 	}
+
+	srv.Drop()
+}
+
+func TestRecommendationService_Predict(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestPreferenceData()
+	if err != nil {
+		t.Error(err)
+	}
+
+	var user models.User
+	if err := db.First(&user, "email = ?", "t@t.t").Error; err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	var events []*models.Event
+	if err := db.Preload("Tags").Find(&events).Error; err != nil {
+		t.Fatalf("failed to fetch events: %v", err)
+	}
+
+	service := recommendation.NewRecommendationService(db)
+	recommended, err := service.Predict(events, user.ID, 2)
+	if err != nil {
+		t.Errorf("Predict returned error: %v", err)
+	}
+	t.Logf("Recommended event IDs: %v", recommended)
+	if len(recommended) == 0 {
+		t.Error("expected at least one recommended event, got none")
+	}
+
+	assert.Equal(t, 2, len(recommended))
+
+	assert.Equal(t, events[0].ID, recommended[0])
+	assert.Equal(t, events[2].ID, recommended[1])
+
+	srv.Drop()
+}
+
+func TestRecommendationService_ModifyAttendancePreference(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestPreferenceData()
+
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user models.User
+	if err := db.First(&user, "email = ?", "t@t.t").Error; err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	var event models.Event
+	if err := db.Joins("JOIN event_tags ON event_tags.event_id = events.id").
+		Joins("JOIN tags ON tags.id = event_tags.tag_id").
+		Where("tags.name = ?", "Music").
+		Preload("Tags").
+		First(&event).Error; err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	service := recommendation.NewRecommendationService(db)
+	if err := service.ModifyAttendancePreference(user.ID, event.ID, false); err != nil {
+		t.Errorf("ModifyAttendancePreference returned error: %v", err)
+	}
+
+	var userPreference models.UserPreference
+	if err := db.Preload("Tags").First(&userPreference, "user_id = ?", user.ID).Error; err != nil {
+		t.Fatalf("failed to fetch user preference: %v", err)
+	}
+
+	found := false
+	for _, tag := range userPreference.Tags {
+		if tag.Name == "Music" {
+			found = true
+			break
+		}
+	}
+	if found {
+		t.Error("expected tag to be removed from user preferences, but it's still there")
+	}
+
+	srv.Drop()
+}
+
+func TestRecommendationService_NoUserPreferences(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestPreferenceData()
+
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user = models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "tt@t.t",
+	}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	service := recommendation.NewRecommendationService(db)
+	_, err = service.GetUserPreferences(user.ID)
+
+	assert.Error(t, err)
+
+	srv.Drop()
+}
+
+func TestRecommendationService_NoUserPreferencesPredict(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestPreferenceData()
+
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	var user = models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "tt@t.t",
+	}
+	if err := db.Create(&user).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	service := recommendation.NewRecommendationService(db)
+	_, err = service.Predict(nil, user.ID, 2)
+
+	assert.Error(t, err)
+
+	srv.Drop()
+}
+
+func TestVote_Vote(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestVoteData()
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	votingService := NewVoteService(db)
+
+	user, err := srv.UserService().GetUser("email = ?", "t@t.t")
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	event, err := srv.EventService().GetEvent(1)
+	if err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	params := map[string]interface{}{
+		"eventID": event.ID,
+	}
+
+	votes, err := votingService.GetVotes(params, 1)
+
+	vote := votes[0]
+
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	voteForm := forms.VoteInVotingForm{
+		VoteID:       int(vote.ID),
+		VoteOptionID: int(vote.Options[0].ID),
+	}
+
+	voteAnswer, err := votingService.Vote(voteForm, *user)
+	assert.NoError(t, err)
+
+	assert.Equal(t, voteAnswer.UserID, user.ID)
+
+	srv.Drop()
+}
+
+func TestVote_VoteExpired(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestVoteData()
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	votingService := NewVoteService(db)
+
+	user, err := srv.UserService().GetUser("email = ?", "t@t.t")
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	event, err := srv.EventService().GetEvent(1)
+	if err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	params := map[string]interface{}{
+		"eventID": event.ID,
+	}
+
+	votes, err := votingService.GetVotes(params, 1)
+
+	vote := votes[0]
+
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	voteForm := forms.VoteInVotingForm{
+		VoteID:       int(vote.ID),
+		VoteOptionID: int(vote.Options[0].ID),
+	}
+
+	endDate := time.Now().Add(-time.Hour)
+	vote.EndDate = timePtr(endDate)
+
+	if err := db.Save(&vote).Error; err != nil {
+		t.Fatalf("failed to save vote: %v", err)
+	}
+
+	voteForm.VoteOptionID = int(vote.Options[1].ID)
+
+	_, err = votingService.Vote(voteForm, *user)
+	assert.Error(t, err)
+
+	srv.Drop()
+}
+
+func TestVote_VoteEventExpired(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestVoteData()
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	votingService := NewVoteService(db)
+
+	user, err := srv.UserService().GetUser("email = ?", "t@t.t")
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	event, err := srv.EventService().GetEvent(1)
+	if err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	params := map[string]interface{}{
+		"eventID": event.ID,
+	}
+
+	votes, err := votingService.GetVotes(params, 1)
+
+	vote := votes[0]
+
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	voteForm := forms.VoteInVotingForm{
+		VoteID:       int(vote.ID),
+		VoteOptionID: int(vote.Options[0].ID),
+	}
+
+	endDate := time.Now().Add(-time.Hour)
+	event.StartDate = timePtr(endDate)
+
+	if err := db.Save(&event).Error; err != nil {
+		t.Fatalf("failed to save event: %v", err)
+	}
+
+	voteForm.VoteOptionID = int(vote.Options[1].ID)
+
+	_, err = votingService.Vote(voteForm, *user)
+	assert.Error(t, err)
+
+	srv.Drop()
+}
+
+func TestVote_VoteChangeNotAllowed(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestVoteData()
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	votingService := NewVoteService(db)
+
+	user, err := srv.UserService().GetUser("email = ?", "t@t.t")
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	event, err := srv.EventService().GetEvent(1)
+	if err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	params := map[string]interface{}{
+		"eventID": event.ID,
+	}
+
+	votes, err := votingService.GetVotes(params, 1)
+
+	vote := votes[0]
+
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	voteForm := forms.VoteInVotingForm{
+		VoteID:       int(vote.ID),
+		VoteOptionID: int(vote.Options[0].ID),
+	}
+
+	voteForm.VoteOptionID = int(vote.Options[1].ID)
+	_, _ = votingService.Vote(voteForm, *user)
+
+	voteForm.VoteOptionID = int(vote.Options[0].ID)
+	_, err = votingService.Vote(voteForm, *user)
+
+	assert.Error(t, err)
+
+	vote.VoteType = models.CanChangeVote
+	if err := db.Save(&vote).Error; err != nil {
+		t.Fatalf("failed to save vote: %v", err)
+	}
+
+	_, err = votingService.Vote(voteForm, *user)
+	assert.NoError(t, err)
 
 	srv.Drop()
 }
