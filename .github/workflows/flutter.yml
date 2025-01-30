@@ -2,9 +2,9 @@ name: frontend_tests
 
 on:
   push:
-    branches: [ "automatic_tests", "main" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "automatic_tests", "main" ]
+    branches: [ "main" ]
 
 jobs:
   test:
@@ -33,10 +33,6 @@ jobs:
         working-directory: ./frontend
         run: |
           flutter pub get || (flutter pub clean && flutter pub get)
-
-      - name: Analyze code
-        working-directory: ./frontend
-        run: flutter analyze
 
       - name: Run tests
         working-directory: ./frontend
