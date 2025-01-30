@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPredict(t *testing.T) {
+func TestRecommendationService_Predict(t *testing.T) {
 	srv := New()
 
 	srv.Sync()
