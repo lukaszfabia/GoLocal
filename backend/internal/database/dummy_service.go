@@ -1031,13 +1031,9 @@ func (d *dummyServiceImpl) TestVoteData() (*gorm.DB, error) {
 		}
 	}
 
-	dateStr := "2021-01-01"
-	date, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		log.Fatalf("failed to parse date: %v", err)
-		return d.db, err
-	}
-	datePtr := &date
+	timePtr := func(t time.Time) *time.Time { return &t }
+
+	date := time.Now().Add(time.Hour * 24)
 
 	longitude := 1.
 	latitude := 1.
@@ -1058,7 +1054,7 @@ func (d *dummyServiceImpl) TestVoteData() (*gorm.DB, error) {
 
 	events := []*models.Event{
 		{
-			StartDate: datePtr,
+			StartDate: timePtr(date),
 			Location:  &location,
 		},
 	}

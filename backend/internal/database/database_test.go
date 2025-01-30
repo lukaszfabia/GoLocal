@@ -784,6 +784,62 @@ func TestVote_VoteEventExpired(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestVote_VoteChangeNotAllowed(t *testing.T) {
+	srv := New()
+
+	srv.Sync()
+
+	db, err := srv.DummyService().TestVoteData()
+	if err != nil {
+		t.Fatalf("failed to create base data: %v", err)
+	}
+
+	votingService := NewVoteService(db)
+
+	user, err := srv.UserService().GetUser("email = ?", "t@t.t")
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	event, err := srv.EventService().GetEvent(1)
+	if err != nil {
+		t.Fatalf("failed to fetch event: %v", err)
+	}
+
+	params := map[string]interface{}{
+		"eventID": event.ID,
+	}
+
+	votes, err := votingService.GetVotes(params, 1)
+
+	vote := votes[0]
+
+	if err != nil {
+		t.Fatalf("failed to fetch user: %v", err)
+	}
+
+	voteForm := forms.VoteInVotingForm{
+		VoteID:       int(vote.ID),
+		VoteOptionID: int(vote.Options[0].ID),
+	}
+
+	voteForm.VoteOptionID = int(vote.Options[1].ID)
+	_, _ = votingService.Vote(voteForm, *user)
+
+	voteForm.VoteOptionID = int(vote.Options[0].ID)
+	_, err = votingService.Vote(voteForm, *user)
+
+	assert.Error(t, err)
+
+	vote.VoteType = models.CanChangeVote
+	if err := db.Save(&vote).Error; err != nil {
+		t.Fatalf("failed to save vote: %v", err)
+	}
+
+	_, err = votingService.Vote(voteForm, *user)
+	assert.NoError(t, err)
+}
+
 func TestClose(t *testing.T) {
 	srv := New()
 
