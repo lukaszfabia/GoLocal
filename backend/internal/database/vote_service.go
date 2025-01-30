@@ -38,7 +38,7 @@ func (v *voteServiceImpl) Vote(form forms.VoteInVotingForm, user models.User) (*
 	err := v.db.Transaction(func(tx *gorm.DB) error {
 		// get vote
 		destVote := &models.Vote{}
-		if err := v.db.First(destVote, "id = ?", form.VoteID).Error; err != nil {
+		if err := v.db.Preload("Event").First(destVote, "id = ?", form.VoteID).Error; err != nil {
 			log.Println("Error fetching vote:", err)
 			return err
 		}
@@ -47,6 +47,12 @@ func (v *voteServiceImpl) Vote(form forms.VoteInVotingForm, user models.User) (*
 		if destVote.EndDate != nil && time.Now().After(*destVote.EndDate) {
 			log.Println("Vote expired")
 			return fmt.Errorf("vote expired")
+		}
+
+		// validate event time
+		if destVote.Event.StartDate != nil && time.Now().After(*destVote.Event.StartDate) {
+			log.Println("Event already started")
+			return fmt.Errorf("event already started")
 		}
 
 		// check if user already voted

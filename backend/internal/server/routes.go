@@ -3,6 +3,7 @@ package server
 import (
 	"backend/internal/server/account"
 	"backend/internal/server/event"
+	recommendation_handler "backend/internal/server/recommendation"
 	"backend/internal/server/vote"
 	"fmt"
 	"log"
@@ -49,6 +50,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 		UserService: s.db.UserService(),
 	}
 
+	recommendationHandler := recommendation_handler.RecommendationHandler{
+		UserService:           s.db.UserService(),
+		EventService:          s.db.EventService(),
+		RecommendationService: s.db.RecommendationService(),
+	}
+
 	// newwww
 
 	r.HandleFunc("/", s.HelloWorldHandler)
@@ -91,7 +98,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	preference.HandleFunc("/preference-survey", s.getSurvey)
 
 	// recommendation routes
-	auth.HandleFunc("/recommendations", s.getRecommendations)
+	auth.HandleFunc("/recommendations", recommendationHandler.Handle).
+		Methods(http.MethodGet)
 
 	auth.HandleFunc("/account/", accountHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)

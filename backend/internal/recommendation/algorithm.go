@@ -124,5 +124,9 @@ func (s *recommendationServiceImpl) cosineSimilarity(vec1, vec2 []int) float64 {
 	}
 	magnitude2 = math.Sqrt(magnitude2)
 
+	if magnitude1 == 0 || magnitude2 == 0 {
+		return 0
+	}
+
 	return float64(dotProduct) / (magnitude1 * magnitude2)
 }
