@@ -234,20 +234,17 @@ func (s *service) Sync() {
 func (s *service) Drop() error {
 	var tables []string
 
-	// Pobranie wszystkich tabel w schemacie 'public'
 	s.db.Raw("SELECT tablename FROM pg_tables WHERE schemaname = 'public'").Scan(&tables)
 
 	if len(tables) == 0 {
-		log.Println("⚠️ Brak tabel do wyczyszczenia.")
+		log.Println("⚠️ No tables")
 		return nil
 	}
 
-	// Tworzenie zapytania TRUNCATE
 	truncateSQL := fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE", strings.Join(tables, ", "))
 
-	// Wykonanie polecenia TRUNCATE
 	if err := s.db.Exec(truncateSQL).Error; err != nil {
-		log.Fatalf("🚨 Błąd podczas czyszczenia tabel: %v", err)
+		log.Fatalf("🚨 Error during clearing: %v", err)
 		return err
 	}
 
