@@ -71,7 +71,6 @@ func (s *service) EventService() EventService {
 }
 
 func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) {
-
 	newEvent := models.Event{
 		Title:       event.Title,
 		Description: event.Description,
@@ -84,30 +83,33 @@ func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) 
 
 	event.Tags = normalizer.Normalizer(event.Tags)
 
-	location, err := location.FetchLocation(event.Lon, event.Lat)
-	if err != nil {
-		return models.Event{}, err
+	ch := location.FetchLocation(event.Lon, event.Lat)
+
+	result := <-ch
+	if result.Err != nil {
+		return models.Event{}, result.Err
 	}
 
-	err = e.db.Transaction(func(tx *gorm.DB) error {
-		var organizers []*models.User
-		if err := e.db.Where("id IN ?", event.Organizers).Find(&organizers).Error; err != nil {
-			return err
-		}
+	location := result.Location
 
-		tags, _ := getOrCreateTags(tx, event.Tags)
+	var organizers []*models.User
 
-		newEvent.Tags = tags
-		newEvent.LocationID = location.ID
-		newEvent.Location = &location
-		newEvent.EventOrganizers = organizers
+	e.db.Where("id IN ? AND email IS NOT NULL", event.Organizers).Find(&organizers)
 
-		return e.db.Create(&newEvent).Error
-	})
-
-	if err != nil {
-		return models.Event{}, err
+	if len(organizers) == 0 {
+		return models.Event{}, fmt.Errorf("no organizers")
 	}
+
+	tags, _ := getOrCreateTags(e.db, event.Tags)
+
+	newEvent.Tags = tags
+	newEvent.LocationID = location.ID
+	newEvent.Location = &location
+	newEvent.EventOrganizers = organizers
+	newEvent.IsAdultOnly = event.IsAdultOnly
+
+	e.db.Create(&newEvent)
+
 	return newEvent, nil
 }
 
@@ -145,6 +147,7 @@ func getOrCreateTags(tx *gorm.DB, tags []string) ([]*models.Tag, error) {
 			if err := tx.Create(&toCreate).Error; err != nil {
 				return err
 			}
+
 			for _, createdTag := range toCreate {
 				tagNames[createdTag.Name] = createdTag
 			}

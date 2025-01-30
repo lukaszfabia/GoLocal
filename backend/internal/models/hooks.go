@@ -12,7 +12,7 @@ import (
 
 // Validation
 
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password is empty")
 	}
@@ -66,7 +66,7 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 		if !isSecurePassword(*u.Password) {
 			return errors.New("password must be at least 5 characters")
 		} else {
-			hashedPassword, err := hashPassword(*u.Password)
+			hashedPassword, err := HashPassword(*u.Password)
 			if err != nil {
 				return err
 			}

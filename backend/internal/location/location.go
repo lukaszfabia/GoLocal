@@ -52,7 +52,6 @@ func ParseCoords(b map[string]any) (models.Coords, error) {
 }
 
 func ParseAddr(b map[string]any) (models.Address, error) {
-	log.Println(b)
 
 	address, ok := b["address"].(map[string]any)
 	if !ok {
@@ -129,43 +128,60 @@ func ParseBody(body []byte) (models.Location, error) {
 	return location, nil
 }
 
-func FetchLocation(lon, lat string) (models.Location, error) {
-	url, err := GetUrl(lon, lat, format)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("invalid url: %w", err)
-	}
+func FetchLocation(lon, lat string) <-chan Result {
+	ch := make(chan Result, 1)
 
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
+	go func() {
+		url, err := GetUrl(lon, lat, format)
+		if err != nil {
+			ch <- Result{Location: models.Location{}, Err: fmt.Errorf("invalid url: %w", err)}
+			return
+		}
 
-	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("failed to make request: %w", err)
-	}
+		client := &http.Client{
+			Timeout: 10 * time.Second,
+		}
 
-	req.Header.Set("User-Agent", "go-local-api/1.0")
+		req, err := http.NewRequest(http.MethodGet, url.String(), nil)
+		if err != nil {
+			ch <- Result{Location: models.Location{}, Err: fmt.Errorf("failed to make request: %w", err)}
+			return
+		}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
+		req.Header.Set("User-Agent", "go-local-api/1.0")
 
-	if resp.StatusCode != http.StatusOK {
-		return models.Location{}, fmt.Errorf("not 2xx response code: %s", resp.Status)
-	}
+		resp, err := client.Do(req)
+		if err != nil {
+			ch <- Result{Location: models.Location{}, Err: fmt.Errorf("failed to send request: %w", err)}
+			return
+		}
+		defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("failed to read body: %w", err)
-	}
+		if resp.StatusCode != http.StatusOK {
+			ch <- Result{Location: models.Location{}, Err: fmt.Errorf("not 2xx response code: %s", resp.Status)}
+			return
+		}
 
-	location, err := ParseBody(body)
-	if err != nil {
-		log.Println(err)
-		return models.Location{}, fmt.Errorf("failed to parse on location: %w", err)
-	}
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			ch <- Result{Location: models.Location{}, Err: fmt.Errorf("failed to read body: %w", err)}
+			return
+		}
 
-	return location, nil
+		location, err := ParseBody(body)
+		if err != nil {
+			log.Println(err)
+			ch <- Result{Location: models.Location{}, Err: fmt.Errorf("failed to parse location: %w", err)}
+			return
+		}
+
+		ch <- Result{Location: location, Err: nil}
+	}()
+
+	return ch
+}
+
+type Result struct {
+	Location models.Location
+	Err      error
 }
