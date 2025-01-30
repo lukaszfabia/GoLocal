@@ -26,6 +26,7 @@ class _EventsViewPageState extends State<EventsViewPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
+    print(_showSearchBar);
   }
 
   @override

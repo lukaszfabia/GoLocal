@@ -127,9 +127,9 @@ class EventDetailPage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.5),
+                  Colors.black.withValues(alpha: 0.5),
                   Colors.transparent,
-                  Colors.black.withOpacity(0.8),
+                  Colors.black.withValues(alpha: 0.8),
                 ],
               ),
             ),
@@ -219,7 +219,7 @@ class EventDetailPage extends StatelessWidget {
           .map(
             (tag) => Chip(
               label: Text(tag.name),
-              backgroundColor: Colors.blueGrey.withOpacity(0.2),
+              backgroundColor: Colors.blueGrey.withValues(alpha: 0.2),
               labelStyle: const TextStyle(color: Colors.black87),
             ),
           )
