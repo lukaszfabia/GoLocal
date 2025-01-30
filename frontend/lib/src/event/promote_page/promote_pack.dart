@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 enum PromotePack {
   oneDay(5.0, "One Day", 1),

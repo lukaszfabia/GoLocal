@@ -19,6 +19,7 @@
 /// Parameters:
 /// - `_repository`: The repository used to send the report.
 /// - `eventId`: The ID of the event being reported.
+library;
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';

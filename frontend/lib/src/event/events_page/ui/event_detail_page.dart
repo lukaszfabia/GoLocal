@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/domain/address.dart';
-import 'package:golocal/src/event/domain/coords.dart';
 import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/event/shared/badge_widget.dart';
 import 'package:golocal/src/shared/extensions.dart';
 import 'package:golocal/src/user/domain/user.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailPage extends StatelessWidget {

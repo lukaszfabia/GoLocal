@@ -228,7 +228,7 @@ func (s *service) Sync() {
 	}
 	log.Println("Migrating models has been done.")
 
-	// s.dummyService.Cook()
+	s.dummyService.Cook()
 }
 
 func (s *service) Drop() error {

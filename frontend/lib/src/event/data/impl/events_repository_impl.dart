@@ -4,7 +4,6 @@ import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
 import 'package:golocal/src/event/promote_page/promote_pack.dart';
-import 'package:golocal/src/event/report_page/report_event_page.dart';
 
 class EventsRepositoryImpl implements IEventsRepository {
   final DioClient _dioClient = DioClient();
@@ -70,7 +69,7 @@ class EventsRepositoryImpl implements IEventsRepository {
   @override
   Future<String> promoteEvent(int id, PromotePack pack) async {
     var data = {'id': id};
-    Response response = await _eventsDataSource.promoteEvent(data);
+    await _eventsDataSource.promoteEvent(data);
     return "Success";
   }
 
