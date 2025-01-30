@@ -16,10 +16,10 @@ const CAN_CLEAR_DATABASE = false
 
 type DummyService interface {
 	Cook()
-	TestData()
 	// create 3 users
 	TestUsers() ([]models.User, error)
 	TestPreferenceData() (*gorm.DB, error)
+	TestVoteData() (*gorm.DB, error)
 }
 
 type dummyServiceImpl struct {
@@ -82,104 +82,6 @@ func NewDummyService(db *gorm.DB) DummyService {
 
 func (s *service) DummyService() DummyService {
 	return s.dummyService
-}
-
-func (d *dummyServiceImpl) TestData() {
-	user := models.User{
-		FirstName: "test",
-		LastName:  "testsowski",
-		Email:     "t@t.t",
-	}
-
-	err := d.db.Create(&user)
-
-	if err != nil {
-		log.Fatalf("failed to create user: %v", err)
-	}
-
-	tags := []*models.Tag{
-		{Name: "Music"},
-		{Name: "Art"},
-		{Name: "Sport"},
-	}
-
-	for _, tag := range tags {
-		if err := d.db.Create(tag).Error; err != nil {
-			log.Fatalf("failed to create tag: %v", err)
-		}
-	}
-
-	recommendation := &models.UserPreference{
-		UserID: user.ID,
-		Tags:   []models.Tag{},
-	}
-
-	var recommendation_tag1 models.Tag
-	var recommendation_tag2 models.Tag
-	if err := d.db.First(&recommendation_tag1, "name = ?", "Music").Error; err != nil {
-		log.Fatalf("failed to fetch tag: %v", err)
-	}
-	if err := d.db.First(&recommendation_tag2, "name = ?", "Art").Error; err != nil {
-		log.Fatalf("failed to fetch tag: %v", err)
-	}
-
-	var not_recommended_tag models.Tag
-	if err := d.db.First(&not_recommended_tag, "name = ?", "Sport").Error; err != nil {
-		log.Fatalf("failed to fetch tag: %v", err)
-	}
-
-	recommendation.Tags = append(recommendation.Tags, recommendation_tag1, recommendation_tag2)
-
-	if err := d.db.Create(recommendation).Error; err != nil {
-		log.Fatalf("failed to create recommendation: %v", err)
-	}
-
-	dateStr := "2021-01-01"
-	date, e := time.Parse(time.DateOnly, dateStr)
-	if e != nil {
-		log.Fatalf("failed to parse date: %v", err)
-	}
-	datePtr := &date
-
-	longitude := 1.
-	latitude := 1.
-	point := fmt.Sprintf("SRID=4326;POINT(%f %f)", longitude, latitude)
-
-	location := models.Location{
-		Coords: &models.Coords{
-			Longitude: longitude,
-			Latitude:  latitude,
-			Geom:      point,
-		},
-		Address: &models.Address{
-			Street:         "Marszałkowska",
-			StreetNumber:   "1",
-			AdditionalInfo: "Warszawa",
-		},
-	}
-
-	events := []*models.Event{
-		{
-			StartDate: datePtr,
-			Tags:      []*models.Tag{&recommendation_tag1, &recommendation_tag2},
-			Location:  &location,
-		},
-		{
-			StartDate: datePtr,
-			Tags:      []*models.Tag{&not_recommended_tag},
-			Location:  &location,
-		},
-		{
-			StartDate: datePtr,
-			Tags:      []*models.Tag{&recommendation_tag1},
-			Location:  &location,
-		},
-	}
-	for _, e := range events {
-		if err := d.db.Create(e).Error; err != nil {
-			log.Fatalf("failed to create event: %v", err)
-		}
-	}
 }
 
 func (d *dummyServiceImpl) Cook() {
@@ -1093,6 +995,114 @@ func (d *dummyServiceImpl) TestPreferenceData() (*gorm.DB, error) {
 			return d.db, err
 		}
 	}
+
+	return d.db, nil
+}
+
+func (d *dummyServiceImpl) TestVoteData() (*gorm.DB, error) {
+	for _, model := range allModels {
+		if err := d.db.AutoMigrate(model); err != nil {
+			log.Fatalf("failed to drop table: %v", err)
+			return d.db, err
+		}
+	}
+
+	user := models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "t@t.t",
+	}
+
+	if err := d.db.Create(&user).Error; err != nil {
+		log.Fatalf("failed to create user: %v", err)
+		return d.db, err
+	}
+
+	tags := []*models.Tag{
+		{Name: "Music"},
+		{Name: "Art"},
+		{Name: "Sport"},
+	}
+
+	for _, tag := range tags {
+		if err := d.db.Create(tag).Error; err != nil {
+			log.Fatalf("failed to create tag: %v", err)
+			return d.db, err
+		}
+	}
+
+	dateStr := "2021-01-01"
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		log.Fatalf("failed to parse date: %v", err)
+		return d.db, err
+	}
+	datePtr := &date
+
+	longitude := 1.
+	latitude := 1.
+	point := fmt.Sprintf("SRID=4326;POINT(%f %f)", longitude, latitude)
+
+	location := models.Location{
+		Coords: &models.Coords{
+			Longitude: longitude,
+			Latitude:  latitude,
+			Geom:      point,
+		},
+		Address: &models.Address{
+			Street:         "Marszałkowska",
+			StreetNumber:   "1",
+			AdditionalInfo: "Warszawa",
+		},
+	}
+
+	events := []*models.Event{
+		{
+			StartDate: datePtr,
+			Location:  &location,
+		},
+	}
+	for _, e := range events {
+		if err := d.db.Create(e).Error; err != nil {
+			log.Fatalf("failed to create event: %v", err)
+			return d.db, err
+		}
+	}
+
+	vote := models.Vote{
+		Event:    *events[0],
+		EventID:  events[0].ID,
+		Text:     "Vote 1",
+		VoteType: models.CannotChangeVote,
+	}
+
+	if err := d.db.Create(&vote).Error; err != nil {
+		log.Fatalf("failed to create vote: %v", err)
+		return d.db, err
+	}
+
+	// Ensure vote options do not have manually set IDs if they are auto-incremented
+	voteOptions := []models.VoteOption{
+		{
+			Text:   "Option 1",
+			VoteID: vote.ID,
+		},
+		{
+			Text:   "Option 2",
+			VoteID: vote.ID,
+		},
+	}
+
+	vote.Options = voteOptions
+
+	for _, vo := range voteOptions {
+		if err := d.db.Create(&vo).Error; err != nil {
+			log.Fatalf("failed to create vote option: %v", err)
+			return d.db, err
+		}
+	}
+
+	d.db.Save(&vote)
 
 	return d.db, nil
 }
