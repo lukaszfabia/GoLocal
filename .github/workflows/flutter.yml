@@ -28,11 +28,15 @@ jobs:
 
       - name: Verify Flutter version
         run: flutter --version
+        - name: Install dependencies
+          working-directory: ./frontend
+          run: |
+            flutter pub get || (flutter pub clean && flutter pub get)
 
-      - name: Install dependencies
+      - name: Analyze code
         working-directory: ./frontend
-        run: flutter pub get
+        run: flutter analyze
 
       - name: Run tests
         working-directory: ./frontend
-        run: flutter test
+        run: flutter test -r expanded
