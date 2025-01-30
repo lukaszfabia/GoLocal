@@ -19,6 +19,7 @@ type DummyService interface {
 	TestData()
 	// create 3 users
 	TestUsers() ([]models.User, error)
+	TestPreferenceData() (*gorm.DB, error)
 }
 
 type dummyServiceImpl struct {
@@ -981,4 +982,117 @@ func (d *dummyServiceImpl) generateRecommendations() {
 	}
 
 	log.Println("Recommendations generated")
+}
+
+func (d *dummyServiceImpl) TestPreferenceData() (*gorm.DB, error) {
+	for _, model := range allModels {
+		if err := d.db.AutoMigrate(model); err != nil {
+			log.Fatalf("failed to drop table: %v", err)
+			return d.db, err
+		}
+	}
+
+	user := models.User{
+		FirstName: "test",
+		LastName:  "testsowski",
+		Email:     "t@t.t",
+	}
+
+	if err := d.db.Create(&user).Error; err != nil {
+		log.Fatalf("failed to create user: %v", err)
+		return d.db, err
+	}
+
+	tags := []*models.Tag{
+		{Name: "Music"},
+		{Name: "Art"},
+		{Name: "Sport"},
+	}
+
+	for _, tag := range tags {
+		if err := d.db.Create(tag).Error; err != nil {
+			log.Fatalf("failed to create tag: %v", err)
+			return d.db, err
+		}
+	}
+
+	recommendation := &models.UserPreference{
+		UserID: user.ID,
+		Tags:   []models.Tag{},
+	}
+
+	var recommendation_tag1 models.Tag
+	var recommendation_tag2 models.Tag
+	if err := d.db.First(&recommendation_tag1, "name = ?", "Music").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+		return d.db, err
+	}
+	if err := d.db.First(&recommendation_tag2, "name = ?", "Art").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+		return d.db, err
+	}
+
+	var not_recommended_tag models.Tag
+	if err := d.db.First(&not_recommended_tag, "name = ?", "Sport").Error; err != nil {
+		log.Fatalf("failed to fetch tag: %v", err)
+		return d.db, err
+	}
+
+	recommendation.Tags = append(recommendation.Tags, recommendation_tag1, recommendation_tag2)
+
+	if err := d.db.Create(recommendation).Error; err != nil {
+		log.Fatalf("failed to create recommendation: %v", err)
+		return d.db, err
+	}
+
+	dateStr := "2021-01-01"
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		log.Fatalf("failed to parse date: %v", err)
+		return d.db, err
+	}
+	datePtr := &date
+
+	longitude := 1.
+	latitude := 1.
+	point := fmt.Sprintf("SRID=4326;POINT(%f %f)", longitude, latitude)
+
+	location := models.Location{
+		Coords: &models.Coords{
+			Longitude: longitude,
+			Latitude:  latitude,
+			Geom:      point,
+		},
+		Address: &models.Address{
+			Street:         "Marszałkowska",
+			StreetNumber:   "1",
+			AdditionalInfo: "Warszawa",
+		},
+	}
+
+	events := []*models.Event{
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&recommendation_tag1, &recommendation_tag2},
+			Location:  &location,
+		},
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&not_recommended_tag},
+			Location:  &location,
+		},
+		{
+			StartDate: datePtr,
+			Tags:      []*models.Tag{&recommendation_tag1},
+			Location:  &location,
+		},
+	}
+	for _, e := range events {
+		if err := d.db.Create(e).Error; err != nil {
+			log.Fatalf("failed to create event: %v", err)
+			return d.db, err
+		}
+	}
+
+	return d.db, nil
 }
