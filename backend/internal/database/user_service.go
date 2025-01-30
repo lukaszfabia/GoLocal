@@ -15,7 +15,7 @@ type UserService interface {
 	GetOrCreateUser(user *models.User) (*models.User, error)
 
 	// Get user using cond like: "email = joe.doe@example.com", use fmt.Sprintf
-	GetUser(cond string) (*models.User, error)
+	GetUser(conds ...interface{}) (*models.User, error)
 
 	SaveUser(new *forms.EditAccount, old *models.User) (*models.User, error)
 	DeleteUser(user *models.User) error
@@ -37,7 +37,7 @@ type userServiceImpl struct {
 func (u *userServiceImpl) ChangePassword(newPassword string, user models.User) error {
 	user.Password = &newPassword
 
-	if err := u.db.Save(user).Error; err != nil {
+	if err := u.db.Save(&user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -64,14 +64,14 @@ func (s *service) UserService() UserService {
 	return s.userService
 }
 
-func (u *userServiceImpl) GetUser(cond string) (*models.User, error) {
-	var res *models.User
+func (u *userServiceImpl) GetUser(conds ...interface{}) (*models.User, error) {
+	var res models.User
 
-	if err := u.db.First(&res, cond).Error; err != nil {
+	if err := u.db.Preload("Devices").First(&res, conds...).Error; err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return &res, nil
 }
 
 func (u *userServiceImpl) SaveUser(new *forms.EditAccount, old *models.User) (*models.User, error) {
@@ -92,7 +92,6 @@ func (u *userServiceImpl) SaveUser(new *forms.EditAccount, old *models.User) (*m
 
 	newUser := &models.User{}
 
-	// potential to remov
 	if err := u.db.First(newUser, "email = ?", old.Email).Error; err != nil {
 		return nil, err
 	}
@@ -115,17 +114,13 @@ func (u *userServiceImpl) AddDevice(device *forms.Device) error {
 		Platform:  device.Platform,
 	}
 
-	return u.db.Transaction(func(tx *gorm.DB) error {
-		var user models.User
-		if err := u.db.Model(&user).First(&user, "id = ?", device.UserID).Error; err != nil {
-			log.Println("Error fetching user:", err)
-			return err
-		}
+	var user models.User
+	if err := u.db.Model(&user).First(&user, "id = ?", device.UserID).Error; err != nil {
+		log.Println("Error fetching user:", err)
+		return err
+	}
 
-		if err := u.db.Model(&user).Association("Devices").Append(&token); err != nil {
-			return err
-		}
+	u.db.Model(&user).Association("Devices").Append(&token)
 
-		return nil
-	})
+	return nil
 }

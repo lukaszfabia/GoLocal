@@ -175,11 +175,15 @@ func TestFetchLocation(t *testing.T) {
 	}
 	defer func() { location.GetUrl = originalGetUrl }()
 
-	loc, err := location.FetchLocation("21.0122", "52.2297")
-	if err != nil {
-		t.Errorf("FetchLocation() error = %v", err)
+	ch := location.FetchLocation("21.0122", "52.2297")
+
+	result := <-ch
+	if result.Err != nil {
+		t.Errorf("FetchLocation() error = %v", result.Err)
 		return
 	}
+
+	loc := result.Location
 
 	expectedCords := &models.Coords{
 		Longitude: 21.0122,

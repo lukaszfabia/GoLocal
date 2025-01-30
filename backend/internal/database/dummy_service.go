@@ -59,15 +59,19 @@ func (d *dummyServiceImpl) TestUsers() ([]models.User, error) {
 		},
 	}
 
+	var res []models.User
+
 	for _, user := range users {
 		if err := d.db.Create(&user).Error; err != nil {
 			return nil, fmt.Errorf("failed to create user %s", err)
 		}
+
+		res = append(res, user)
 	}
 
 	log.Println("Created users")
 
-	return users, nil
+	return res, nil
 }
 
 func NewDummyService(db *gorm.DB) DummyService {

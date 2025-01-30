@@ -69,6 +69,9 @@ type Service interface {
 	// If something go wrong, info is logeed in console.
 	Sync()
 
+	//Clear all tables from db
+	Drop() error
+
 	// Fill database with dummy data
 	DummyService() DummyService
 
@@ -226,6 +229,16 @@ func (s *service) Sync() {
 	log.Println("Migrating models has been done.")
 
 	// s.dummyService.Cook()
+}
+
+func (s *service) Drop() error {
+	for _, table := range allModels {
+		if err := s.db.Migrator().DropTable(table); err != nil {
+			log.Fatalf("failed to remove %v", table)
+		}
+	}
+
+	return nil
 }
 
 func (s *service) RecommendationService() recommendation.RecommendationService {
