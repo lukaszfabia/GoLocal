@@ -9,40 +9,55 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
-  final PageController _pageController = PageController();
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('GoLocal'),
+        centerTitle: true,
+        bottom: TabBar(
+          dividerColor: Colors.transparent,
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Sign In'),
+            Tab(text: 'Sign Up'),
+          ],
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.blue.shade100,
-              Colors.red.shade200,
-            ],
+            colors: [Colors.blue.shade300, Colors.purple.shade400],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Text("GoLocal", style: TextStyle(fontSize: 48.0)),
-            ),
-            Flexible(
-              flex: 2,
-              child: PageView(
-                controller: _pageController,
-                children: [
-                  SignInPage(),
-                  SignUpPage(),
-                ],
-              ),
-            ),
-          ],
+        child: SafeArea(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              SignInForm(),
+              SignUpForm(),
+            ],
+          ),
         ),
       ),
     );
