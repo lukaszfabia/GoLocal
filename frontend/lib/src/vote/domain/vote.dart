@@ -1,7 +1,6 @@
 import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/vote/domain/vote_option.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/domain/event.dart';
 
 enum VoteType { canChangeVote, cannotChangeVote }
 
