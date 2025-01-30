@@ -232,12 +232,23 @@ func (s *service) Sync() {
 }
 
 func (s *service) Drop() error {
-	for _, table := range allModels {
-		if err := s.db.Migrator().DropTable(table); err != nil {
-			log.Fatalf("failed to remove %v", table)
-		}
+	var tables []string
+
+	s.db.Raw("SELECT tablename FROM pg_tables WHERE schemaname = 'public'").Scan(&tables)
+
+	if len(tables) == 0 {
+		log.Println("⚠️ No tables")
+		return nil
 	}
 
+	truncateSQL := fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE", strings.Join(tables, ", "))
+
+	if err := s.db.Exec(truncateSQL).Error; err != nil {
+		log.Fatalf("🚨 Error during clearing: %v", err)
+		return err
+	}
+
+	log.Println("✅ All data from tables removed!")
 	return nil
 }
 
