@@ -114,12 +114,15 @@ func TestEventServiceCreate(t *testing.T) {
 		t.Error(err)
 	}
 
+	sDate := timePtr(time.Now().Add(24 * time.Hour))
+	fDate := timePtr(time.Now().Add(48 * time.Hour))
+
 	form := forms.Event{
 		Organizers:  []uint{users[0].ID, users[1].ID},
 		Title:       "Gaming Expo 2025",
 		Description: "biggest gaming evnet",
-		StartDate:   timePtr(time.Now().Add(24 * time.Hour)),
-		FinishDate:  timePtr(time.Now().Add(48 * time.Hour)),
+		StartDate:   sDate,
+		FinishDate:  fDate,
 		IsAdultOnly: false,
 		EventType:   "WORKSHOP",
 		Tags:        []string{" gaming", "e sport"},
@@ -130,8 +133,8 @@ func TestEventServiceCreate(t *testing.T) {
 	expectedEvent := models.Event{
 		Title:       "Gaming Expo 2025",
 		Description: "biggest gaming evnet",
-		StartDate:   timePtr(time.Now().Add(24 * time.Hour)),
-		FinishDate:  timePtr(time.Now().Add(48 * time.Hour)),
+		StartDate:   sDate,
+		FinishDate:  fDate,
 		IsAdultOnly: false,
 		EventType:   models.Workshop,
 		Tags:        []*models.Tag{{Name: "gaming"}, {Name: "e_sport"}},

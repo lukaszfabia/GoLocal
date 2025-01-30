@@ -232,11 +232,19 @@ func (s *service) Sync() {
 }
 
 func (s *service) Drop() error {
-	for _, table := range allModels {
-		if err := s.db.Migrator().DropTable(table); err != nil {
-			log.Fatalf("failed to remove %v", table)
-		}
-	}
+	// for _, table := range allModels {
+	// 	if err := s.db.Migrator().DropTable(table); err != nil {
+	// 		log.Fatalf("failed to remove %v", table)
+	// 	}
+	// }
+
+	// for _, t := range []string{"event_tags", "event_organizers_event"} {
+	// 	if err := s.db.Exec(fmt.Sprintf("DROP TABLE %s", t)).Error; err != nil {
+	// 		log.Fatalf("Failed to delete %s", t)
+	// 	}
+	// }
+
+	s.db.Exec("DROP DATABSE")
 
 	return nil
 }
