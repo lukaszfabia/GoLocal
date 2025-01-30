@@ -232,12 +232,26 @@ func (s *service) Sync() {
 }
 
 func (s *service) Drop() error {
-	for _, table := range allModels {
-		if err := s.db.Migrator().DropTable(table); err != nil {
-			log.Fatalf("failed to remove %v", table)
-		}
+	var tables []string
+
+	// Pobranie wszystkich tabel w schemacie 'public'
+	s.db.Raw("SELECT tablename FROM pg_tables WHERE schemaname = 'public'").Scan(&tables)
+
+	if len(tables) == 0 {
+		log.Println("⚠️ Brak tabel do wyczyszczenia.")
+		return nil
 	}
 
+	// Tworzenie zapytania TRUNCATE
+	truncateSQL := fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE", strings.Join(tables, ", "))
+
+	// Wykonanie polecenia TRUNCATE
+	if err := s.db.Exec(truncateSQL).Error; err != nil {
+		log.Fatalf("🚨 Błąd podczas czyszczenia tabel: %v", err)
+		return err
+	}
+
+	log.Println("✅ All data from tables removed!")
 	return nil
 }
 
