@@ -23,4 +23,4 @@ jobs:
 
     - name: Test
       working-directory: ./backend
-      run: go test -v ./...
+      run: go test -v
