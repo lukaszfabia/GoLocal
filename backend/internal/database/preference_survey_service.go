@@ -47,6 +47,7 @@ func (s *preferenceSurveyServiceImpl) DeleteSurvey(survey *models.PreferenceSurv
 	return nil
 }
 
+// this is pretty terrible
 func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSurveyAnswer) error {
 	for _, answer := range answers {
 		if err := s.db.Create(&answer).Error; err != nil {
@@ -75,9 +76,17 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			tags = append(tags, tag)
 		}
 
-		recommendation := models.UserPreference{
-			UserID: answer.UserID,
-			Tags:   tags,
+		recommendation := models.UserPreference{}
+
+		if err := s.db.First(&recommendation, "user_id = ?", answer.UserID).Error; err != nil {
+			log.Printf("Couldn't find recommendation with user id %d: %v", answer.UserID, err)
+		}
+
+		if recommendation.ID == 0 {
+			recommendation = models.UserPreference{
+				UserID: answer.UserID,
+				Tags:   tags,
+			}
 		}
 
 		if err := s.db.Save(&recommendation).Error; err != nil {
@@ -85,9 +94,21 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			return err
 		}
 
+		tagsOld := []models.Tag{}
+		if err := s.db.Model(&recommendation).Association("Tags").Find(&tagsOld); err != nil {
+			log.Printf("Couldn't find recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
+		}
+
+		tagsOld = append(tagsOld, tags...)
+
 		if err := s.db.Model(&recommendation).Association("Tags").Replace(tags); err != nil {
 			log.Printf("Couldn't save recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
 			return err
+		}
+
+		tagsNew := []models.Tag{}
+		if err := s.db.Model(&recommendation).Association("Tags").Find(&tagsNew); err != nil {
+			log.Printf("Couldn't find recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
 		}
 	}
 	return nil

@@ -1,15 +1,11 @@
-import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/manage_page/bloc/manage_event_bloc.dart';
 import 'package:golocal/src/shared/dialog.dart';
-import 'package:golocal/src/shared/position.dart';
-import 'package:image_picker/image_picker.dart';
 
 class EventCreatePage extends StatefulWidget {
   const EventCreatePage({super.key, this.event});
@@ -146,8 +142,9 @@ class _EventCreatePageState extends State<EventCreatePage> {
   TextFormField titleSection(ManageEventState state, BuildContext context) {
     return TextFormField(
       validator: (value) {
-        if (value == null || value.isEmpty)
+        if (value == null || value.isEmpty) {
           return "Please enter a title for your event";
+        }
         if (value.length < 3) return "Title must be at least 3 characters long";
         return null;
       },
@@ -168,8 +165,9 @@ class _EventCreatePageState extends State<EventCreatePage> {
       ManageEventState state, BuildContext context) {
     return TextFormField(
       validator: (value) {
-        if (value == null || value.isEmpty)
+        if (value == null || value.isEmpty) {
           return "Please provide a description of your event";
+        }
         return null;
       },
       maxLines: 3,

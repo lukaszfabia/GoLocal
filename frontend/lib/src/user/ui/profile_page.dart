@@ -17,14 +17,12 @@ class ProfilePage extends StatelessWidget {
         ElevatedButton(
             onPressed: () {
               final token = UserRepository().getLoggedUserId();
-              if (token != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('User id: $token'),
-                  ),
-                );
-              }
-            },
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('User id: $token'),
+                ),
+              );
+                        },
             child: Text("Get user id")),
         ElevatedButton(
           onPressed: () {

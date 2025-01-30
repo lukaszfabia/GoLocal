@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/report_category_enum.dart';
@@ -14,10 +13,10 @@ class ReportEventPage extends StatefulWidget {
   const ReportEventPage({super.key, required this.event});
 
   @override
-  _ReportEventPageState createState() => _ReportEventPageState();
+  ReportEventPageState createState() => ReportEventPageState();
 }
 
-class _ReportEventPageState extends State<ReportEventPage> {
+class ReportEventPageState extends State<ReportEventPage> {
   final _formKey = GlobalKey<FormState>();
   Timer? _debounce;
 
@@ -95,7 +94,7 @@ class _ReportEventPageState extends State<ReportEventPage> {
                 return ChoiceChip(
                   label: Text(category.value),
                   selected: isSelected,
-                  selectedColor: Colors.redAccent.withOpacity(0.8),
+                  selectedColor: Colors.redAccent.withValues(alpha: 0.8),
                   backgroundColor: Colors.grey.shade300,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : Colors.black87,

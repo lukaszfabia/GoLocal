@@ -1,9 +1,7 @@
-import 'package:golocal/src/event/data/impl/events_datasource.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/dio_client.dart';
 import 'package:golocal/src/event/promote_page/promote_pack.dart';
-import 'package:golocal/src/event/report_page/report_event_page.dart';
 
 class RecommendedRepositoryImpl implements IEventsRepository {
   final DioClient _dioClient = DioClient();

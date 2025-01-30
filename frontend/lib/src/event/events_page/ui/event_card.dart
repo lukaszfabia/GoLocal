@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/events_page/ui/event_detail_page.dart';
 import 'package:golocal/src/event/shared/badge_widget.dart';
 import 'package:golocal/src/shared/extensions.dart';
-import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -38,8 +36,8 @@ class EventCard extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.8),
+                    Colors.black.withValues(alpha: .3),
+                    Colors.black.withValues(alpha: 0.8),
                   ],
                 ),
               ),
