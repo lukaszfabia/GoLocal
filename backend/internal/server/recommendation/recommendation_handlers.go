@@ -16,6 +16,16 @@ type RecommendationHandler struct {
 	RecommendationService recommendation.RecommendationService
 }
 
+// @Summary Handle Recommendations
+// @Description Handle recommendation requests
+// @Tags recommendations
+// @Accept json
+// @Produce json
+// @Success 200 {object} []models.Event
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 405 {object} map[string]string
+// @Router /api/auth/recommendation/ [get]
 func (h *RecommendationHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -25,6 +35,17 @@ func (h *RecommendationHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get event recommendations
+// @Description Get personalized event recommendations for a user
+// @Tags recommendations
+// @Accept json
+// @Produce json
+// @Param User-Id header string true "User ID"
+// @Success 200 {object} []models.Event
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/recommendation/ [get]
 func (h *RecommendationHandler) getRecommendations(w http.ResponseWriter, r *http.Request) {
 	userId := r.Header.Get("User-Id")
 	if userId == "" {
@@ -56,7 +77,7 @@ func (h *RecommendationHandler) getRecommendations(w http.ResponseWriter, r *htt
 
 	recommendedEventIds, err := h.RecommendationService.Predict(events, uint(userIdUint), 10)
 	if err != nil {
-		app.NewResponse(w, http.StatusInternalServerError, "Error fetching survey")
+		app.NewResponse(w, http.StatusInternalServerError, "Error fetching recommendations")
 		return
 	}
 

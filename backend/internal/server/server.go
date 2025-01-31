@@ -67,7 +67,7 @@ func NewServer() *http.Server {
 	client, err := fApp.Messaging(context.Background())
 
 	if err != nil {
-		log.Printf("No client: %s", err.Error())
+		log.Println(err.Error())
 	}
 
 	NewServer := &Server{

@@ -15,7 +15,135 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/event": {
+        "/api/auth/account/": {
+            "get": {
+                "description": "Retrieve current authenticated user data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get user account",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update authenticated user account details",
+                "consumes": [
+                    "application/json",
+                    " multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Update user account",
+                "parameters": [
+                    {
+                        "description": "Updated account data",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_forms.EditAccount"
+                        }
+                    },
+                    {
+                        "type": "file",
+                        "description": "New avatar image",
+                        "name": "avatar",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the authenticated user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "Delete user account",
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/event": {
             "get": {
                 "description": "Get events based on query parameters",
                 "consumes": [
@@ -29,6 +157,389 @@ const docTemplate = `{
                 ],
                 "summary": "Get Events",
                 "responses": {}
+            }
+        },
+        "/api/auth/event/": {
+            "get": {
+                "description": "Get list of events with filters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Get events",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/backend_internal_models.Event"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new event with given data",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Create an event",
+                "parameters": [
+                    {
+                        "description": "Event data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_forms.Event"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.Event"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/event/report": {
+            "post": {
+                "description": "Report an event issue",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Report an event",
+                "parameters": [
+                    {
+                        "description": "Report details",
+                        "name": "report",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_forms.ReportForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/event/{id}/promo": {
+            "post": {
+                "description": "Promote an existing event by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Promote an event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.Event"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/recommendation/": {
+            "get": {
+                "description": "Get personalized event recommendations for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recommendations"
+                ],
+                "summary": "Get event recommendations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "User-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/backend_internal_models.Event"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/vote/": {
+            "post": {
+                "description": "Submit a user's vote",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "votes"
+                ],
+                "summary": "Cast a vote",
+                "parameters": [
+                    {
+                        "description": "Vote data",
+                        "name": "vote",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_forms.VoteInVotingForm"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "User-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/vote/{limit}": {
+            "get": {
+                "description": "Retrieve votes with filters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "votes"
+                ],
+                "summary": "Get votes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of results",
+                        "name": "limit",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "User-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/backend_internal_forms.VoteForm"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/preference/change-preference-survey": {
@@ -100,25 +611,256 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/recommendation/recommendation": {
-            "get": {
-                "description": "Get recommendations based on user preferences",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "recommendation"
-                ],
-                "summary": "Get Recommendations",
-                "responses": {}
-            }
         }
     },
     "definitions": {
+        "backend_internal_forms.EditAccount": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthday": {
+                    "description": "1970-01-01",
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_forms.Event": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "eventType": {
+                    "type": "string"
+                },
+                "finishDate": {
+                    "type": "string"
+                },
+                "isAdultOnly": {
+                    "type": "boolean"
+                },
+                "lat": {
+                    "type": "string"
+                },
+                "lon": {
+                    "description": "coords to get more info",
+                    "type": "string"
+                },
+                "organizers": {
+                    "description": "list with users ids",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "list with user input tags",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_forms.ReportForm": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_forms.VoteForm": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "event": {
+                    "$ref": "#/definitions/backend_internal_models.Event"
+                },
+                "eventID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_forms.VoteOptionForm"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "voteType": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_forms.VoteInVotingForm": {
+            "type": "object",
+            "properties": {
+                "voteID": {
+                    "type": "integer"
+                },
+                "voteOptionID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_forms.VoteOptionForm": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "isSelected": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "voteID": {
+                    "type": "integer"
+                },
+                "votesCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_models.Address": {
+            "type": "object",
+            "properties": {
+                "additionalInfo": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "streetNumber": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_models.Comment": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "eventID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_models.Coords": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_models.DeviceToken": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "token": {
+                    "description": "FMC token",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.User"
+                    }
+                }
+            }
+        },
         "backend_internal_models.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -127,6 +869,182 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "integer"
+                }
+            }
+        },
+        "backend_internal_models.Event": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.Comment"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "eventOrganizers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.User"
+                    }
+                },
+                "event_tags": {
+                    "description": "for ml",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.Tag"
+                    }
+                },
+                "event_type": {
+                    "$ref": "#/definitions/backend_internal_models.EventType"
+                },
+                "finishDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "isAdultOnly": {
+                    "type": "boolean"
+                },
+                "isPromoted": {
+                    "type": "boolean"
+                },
+                "location": {
+                    "$ref": "#/definitions/backend_internal_models.Location"
+                },
+                "locationID": {
+                    "type": "integer"
+                },
+                "startDate": {
+                    "description": "Timestamp with time zone",
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "votes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.Vote"
+                    }
+                }
+            }
+        },
+        "backend_internal_models.EventType": {
+            "type": "string",
+            "enum": [
+                "WORKSHOP",
+                "CULTURAL",
+                "SPORTS",
+                "SOCIAL",
+                "COMMUNITY",
+                "CHARITY",
+                "PARTY"
+            ],
+            "x-enum-varnames": [
+                "Workshop",
+                "Cultural",
+                "Sports",
+                "Social",
+                "Community",
+                "Charity",
+                "Party"
+            ]
+        },
+        "backend_internal_models.Location": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/backend_internal_models.Address"
+                },
+                "addressID": {
+                    "type": "integer"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "coords": {
+                    "$ref": "#/definitions/backend_internal_models.Coords"
+                },
+                "coordsID": {
+                    "type": "integer"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_models.ParticipationStatus": {
+            "type": "string",
+            "enum": [
+                "INTERESTED",
+                "WILL_PARTICIPATE",
+                "NOT_INTERESTED",
+                "NOT_APPLICABLE"
+            ],
+            "x-enum-varnames": [
+                "Interested",
+                "WillParticipate",
+                "NotInterested",
+                "NotApplicable"
+            ]
+        },
+        "backend_internal_models.PreferenceSurvey": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.PreferenceSurveyQuestion"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -148,14 +1066,23 @@ const docTemplate = `{
                         "$ref": "#/definitions/backend_internal_models.PreferenceSurveyAnswerOption"
                     }
                 },
+                "question": {
+                    "$ref": "#/definitions/backend_internal_models.PreferenceSurveyQuestion"
+                },
                 "questionID": {
                     "type": "integer"
+                },
+                "survey": {
+                    "$ref": "#/definitions/backend_internal_models.PreferenceSurvey"
                 },
                 "surveyID": {
                     "type": "integer"
                 },
                 "updatedAt": {
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/backend_internal_models.User"
                 },
                 "userID": {
                     "type": "integer"
@@ -165,6 +1092,9 @@ const docTemplate = `{
         "backend_internal_models.PreferenceSurveyAnswerOption": {
             "type": "object",
             "properties": {
+                "answer": {
+                    "$ref": "#/definitions/backend_internal_models.PreferenceSurveyAnswer"
+                },
                 "answerID": {
                     "type": "integer"
                 },
@@ -177,6 +1107,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "option": {
+                    "$ref": "#/definitions/backend_internal_models.PreferenceSurveyOption"
+                },
                 "optionID": {
                     "type": "integer"
                 },
@@ -184,6 +1117,302 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "backend_internal_models.PreferenceSurveyOption": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "question": {
+                    "$ref": "#/definitions/backend_internal_models.PreferenceSurveyQuestion"
+                },
+                "questionID": {
+                    "type": "integer"
+                },
+                "tag": {
+                    "$ref": "#/definitions/backend_internal_models.Tag"
+                },
+                "tagID": {
+                    "type": "integer"
+                },
+                "tagPositive": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_models.PreferenceSurveyQuestion": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.PreferenceSurveyOption"
+                    }
+                },
+                "survey": {
+                    "$ref": "#/definitions/backend_internal_models.PreferenceSurvey"
+                },
+                "surveyID": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/backend_internal_models.QuestionType"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_models.QuestionType": {
+            "type": "string",
+            "enum": [
+                "TOGGLE",
+                "SINGLE_CHOICE",
+                "MULTIPLE_CHOICE"
+            ],
+            "x-enum-varnames": [
+                "Toggle",
+                "SingleChoice",
+                "MultipleChoice"
+            ]
+        },
+        "backend_internal_models.Tag": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_internal_models.User": {
+            "type": "object",
+            "properties": {
+                "avatarUrl": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "birthday": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.Comment"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "devices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.DeviceToken"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "followers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.User"
+                    }
+                },
+                "following": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.User"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isPremium": {
+                    "type": "boolean"
+                },
+                "isVerified": {
+                    "type": "boolean"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/backend_internal_models.Location"
+                },
+                "locationID": {
+                    "type": "integer"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "votes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.VoteAnswer"
+                    }
+                }
+            }
+        },
+        "backend_internal_models.Vote": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "event": {
+                    "$ref": "#/definitions/backend_internal_models.Event"
+                },
+                "eventID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.VoteOption"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "voteType": {
+                    "$ref": "#/definitions/backend_internal_models.VoteType"
+                }
+            }
+        },
+        "backend_internal_models.VoteAnswer": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "optionSelected": {
+                    "$ref": "#/definitions/backend_internal_models.VoteOption"
+                },
+                "optionSelectedId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                },
+                "voteId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_models.VoteOption": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "participationStatus": {
+                    "$ref": "#/definitions/backend_internal_models.ParticipationStatus"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "vote": {
+                    "$ref": "#/definitions/backend_internal_models.Vote"
+                },
+                "voteAnswers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_internal_models.VoteAnswer"
+                    }
+                },
+                "voteId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_internal_models.VoteType": {
+            "type": "string",
+            "enum": [
+                "CAN_CHANGE_VOTE",
+                "CANNOT_CHANGE_VOTE"
+            ],
+            "x-enum-varnames": [
+                "CanChangeVote",
+                "CannotChangeVote"
+            ]
         },
         "gorm.DeletedAt": {
             "type": "object",

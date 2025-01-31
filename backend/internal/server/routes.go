@@ -62,7 +62,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.HandleFunc("/ws", s.websocketHandler)
 
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	r.PathPrefix("/docs/").Handler(httpSwagger.WrapHandler)
 
 	api := r.PathPrefix("/api").Subrouter()
 
