@@ -48,19 +48,16 @@ class EventsRepositoryDummy implements IEventsRepository {
 
   @override
   Future<Event> createEvent(EventDTO event) {
-    // TODO: implement createEvent
     throw UnimplementedError();
   }
 
   @override
   Future<void> deleteEvent(String id) {
-    // TODO: implement deleteEvent
     throw UnimplementedError();
   }
 
   @override
   Future<Event> getEvent(String id) {
-    // TODO: implement getEvent
     throw UnimplementedError();
   }
 
@@ -102,7 +99,6 @@ class EventsRepositoryDummy implements IEventsRepository {
 
   @override
   Future<Event> updateEvent(Event event) {
-    // TODO: implement updateEvent
     throw UnimplementedError();
   }
 
@@ -114,7 +110,11 @@ class EventsRepositoryDummy implements IEventsRepository {
 
   @override
   Future<String> promoteEvent(int id, PromotePack pack) {
-    // TODO: implement promoteEvent
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> hasAccessToRecommendedEvents() {
     throw UnimplementedError();
   }
 }

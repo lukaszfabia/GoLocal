@@ -41,7 +41,7 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
       };
 
       await _dioClient.dio
-          .post('/preference/preference-survey/answer', data: data);
+          .post('/auth/preference/preference-survey/answer', data: data);
     } catch (e) {
       print('Error submitting survey: $e');
     }
@@ -57,7 +57,7 @@ class PreferenceSurveyRepository extends IPreferenceSurveyRepository {
   Future<PreferenceSurvey> fetchSurvey() async {
     try {
       final response =
-          await _dioClient.dio.get('/preference/preference-survey');
+          await _dioClient.dio.get('/auth/preference/preference-survey');
       final Map<String, dynamic> data = response.data['data'];
       return PreferenceSurvey.fromJson(data);
     } catch (e) {

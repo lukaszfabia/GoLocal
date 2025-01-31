@@ -90,12 +90,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// authenthicated endpoints
 	auth.Use(s.isAuth)
 
-	preference := api.PathPrefix("/preference").Subrouter()
+	preference := auth.PathPrefix("/preference").Subrouter()
 
 	// preference survey routes
 	preference.HandleFunc("/change-preference-survey", s.handleSurvey)
 	preference.HandleFunc("/preference-survey/answer", s.handleSurveyAnswer)
 	preference.HandleFunc("/preference-survey", s.getSurvey)
+	preference.HandleFunc("/was-survey-filled", s.hasAccessToRecommendedEvents)
 
 	// recommendation routes
 	auth.HandleFunc("/recommendations", recommendationHandler.Handle).

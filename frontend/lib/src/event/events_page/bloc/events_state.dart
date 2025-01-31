@@ -8,6 +8,7 @@ class EventsState extends Equatable {
   /// Creates an instance of [EventsState].
   const EventsState({
     required this.events,
+    required this.hasAccessToRecommended,
     this.status = EventsStatus.initial,
     this.hasNext = true,
     this.nextPage = 1,
@@ -29,6 +30,9 @@ class EventsState extends Equatable {
   /// Error message in case of failure.
   final String? errorMessage;
 
+  /// Indicates if the user has access to recommended events.
+  final bool hasAccessToRecommended;
+
   /// Creates a copy of the current state with updated values.
   EventsState copyWith({
     List<Event>? events,
@@ -36,6 +40,7 @@ class EventsState extends Equatable {
     int? nextPage,
     EventsStatus? status,
     String? errorMessage,
+    bool? hasAccessToRecommended,
   }) {
     return EventsState(
       events: events ?? this.events,
@@ -43,6 +48,8 @@ class EventsState extends Equatable {
       nextPage: nextPage ?? this.nextPage,
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
+      hasAccessToRecommended:
+          hasAccessToRecommended ?? this.hasAccessToRecommended,
     );
   }
 
