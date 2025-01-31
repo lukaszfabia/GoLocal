@@ -38,8 +38,10 @@ func (h *EventHandler) Validate(next http.Handler) http.Handler {
 			app.InvalidDataResponse(w)
 		case http.MethodGet:
 			next.ServeHTTP(w, r.WithContext(get(w, r)))
+			return
 		default:
 			next.ServeHTTP(w, r)
+			return
 		}
 	})
 }

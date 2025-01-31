@@ -32,8 +32,10 @@ func (h *VoteHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.getVotes(w, r)
+		return
 	case http.MethodPost:
 		h.vote(w, r)
+		return
 	default:
 		app.NewResponse(w, http.StatusBadRequest, nil)
 		return
