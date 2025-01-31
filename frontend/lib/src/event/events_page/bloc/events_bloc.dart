@@ -6,8 +6,12 @@ import 'package:golocal/src/event/domain/event.dart';
 part 'events_event.dart';
 part 'events_state.dart';
 
+/// Bloc class for managing events.
 class EventsBloc extends Bloc<EventsEvent, EventsState> {
+  /// The repository for fetching events.
   IEventsRepository _repository;
+
+  /// Creates an instance of [EventsBloc].
   EventsBloc(this._repository) : super(EventsState(events: [])) {
     on<FetchEvents>((event, emit) async {
       if (event.refresh) {
