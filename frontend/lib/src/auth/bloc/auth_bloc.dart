@@ -7,6 +7,19 @@ import 'package:golocal/src/notifications_service/notification_service.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
+/// AuthBloc handles authentication-related events and states.
+///
+/// This Bloc listens to the following events:
+/// - [AuthSignIn]: Handles user sign-in with email and password.
+/// - [AuthSignUp]: Handles user sign-up with email, first name, last name, and password.
+/// - [AuthInitialCheck]: Checks if the user has valid tokens and is already authenticated.
+/// - [AuthLogout]: Handles user logout.
+///
+/// The Bloc emits the following states:
+/// - [AuthInitial]: Initial state of the authentication.
+/// - [Authenticated]: State when the user is successfully authenticated.
+/// - [AuthError]: State when there is an authentication error.
+/// - [Unathenticated]: State when the user is not authenticated.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final IAuthRepository _authRepository;
   AuthBloc(this._authRepository) : super(AuthInitial()) {
