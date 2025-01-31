@@ -92,10 +92,20 @@ class VotesRepositoryImpl implements IVotesRepository {
   @override
   Future<void> voteOnOption(int voteId, int optionId) async {
     try {
-      await _dioClient.dio.post('/auth/vote/', data: {
+      final formData = FormData.fromMap({
         'voteID': voteId,
         'voteOptionID': optionId,
       });
+
+      await _dioClient.dio.post(
+        '/auth/vote/',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
     } on DioException catch (e) {
       if (e.response?.statusCode == 400 &&
           e.response?.data['message'] ==

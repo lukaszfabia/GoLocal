@@ -603,7 +603,7 @@ func (d *dummyServiceImpl) event1() {
 		event.Title = generateEventTitle(models.EventType(rType))
 		event.EventType = models.EventType(rType)
 		event.Description = d.f.SentenceSimple()
-		sDate := d.f.FutureDate()
+		sDate := d.f.FutureDate().Add(time.Hour)
 		fDate := sDate.AddDate(0, d.f.Number(1, 12), d.f.Number(1, 25))
 		event.StartDate = &sDate
 		event.FinishDate = &fDate

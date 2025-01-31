@@ -133,8 +133,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	//-------------------------------------Vote-------------------------------------//
 
 	vote := auth.PathPrefix("/vote").Subrouter()
+	vote.Use(voteHandler.Validate)
 	vote.HandleFunc(`/{limit:[0-9]*}`, voteHandler.Handle).
 		Methods(http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete)
+
+	defaultRouter = vote.PathPrefix("").Subrouter()
+	defaultRouter.Use(voteHandler.Validate)
 
 	return r
 }

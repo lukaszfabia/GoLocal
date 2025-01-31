@@ -4,14 +4,9 @@ import (
 	"backend/internal/app"
 	"backend/internal/database"
 	"backend/internal/forms"
-	"backend/internal/models"
-	"backend/pkg/parsers"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 type VoteHandler struct {
@@ -62,6 +57,8 @@ func (h *VoteHandler) vote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("Form data retrieved from context:", form)
+
 	userId := r.Header.Get("User-Id")
 	if userId == "" {
 		log.Println("Unauthorized access: missing User-Id header")
@@ -103,13 +100,18 @@ func (h *VoteHandler) vote(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} map[string]string
 // @Router /api/auth/vote/{limit} [get]
 func (h *VoteHandler) getVotes(w http.ResponseWriter, r *http.Request) {
-	var vote models.Vote
-	params := parsers.ParseURLQuery(r, vote, "eventID", "voteType")
+	params, ok := r.Context().Value(_params).(map[string]interface{})
+	if !ok {
+		log.Println("Error: Params not found in context")
+		app.NewResponse(w, http.StatusBadRequest, "Invalid request")
+		return
+	}
 
-	limitStr := mux.Vars(r)["limit"]
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		limit = 5
+	limit, ok := r.Context().Value(_limit).(int)
+	if !ok {
+		log.Println("Error: Limit not found in context")
+		app.NewResponse(w, http.StatusBadRequest, "Invalid request")
+		return
 	}
 
 	userId := r.Header.Get("User-Id")
