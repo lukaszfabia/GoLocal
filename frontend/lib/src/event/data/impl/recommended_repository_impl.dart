@@ -96,6 +96,11 @@ class RecommendedRepositoryImpl implements IEventsRepository {
     throw UnimplementedError();
   }
 
+  @override
+  Future<bool> hasAccessToRecommendedEvents() async {
+    return true;
+  }
+
   // @override
   // Future<Event> getEvent(String id) async {
   //   final response = await _dioClient.dio.get('/auth/event?id=$id');

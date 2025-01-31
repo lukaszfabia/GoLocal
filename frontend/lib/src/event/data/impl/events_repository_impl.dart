@@ -106,6 +106,16 @@ class EventsRepositoryImpl implements IEventsRepository {
     return "Success";
   }
 
+  @override
+  Future<bool> hasAccessToRecommendedEvents() async {
+    final response =
+        await _dioClient.dio.get('/auth/preference/was-survey-filled');
+
+    final data = response.data['data'] as bool;
+
+    return data;
+  }
+
   // @override
   // Future<Event> getEvent(String id) async {
   //   final response = await _dioClient.dio.get('/auth/event?id=$id');

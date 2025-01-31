@@ -12,6 +12,7 @@ type PreferenceSurveyService interface {
 	SaveSurvey(survey *models.PreferenceSurvey) (*models.PreferenceSurvey, error)
 	DeleteSurvey(survey *models.PreferenceSurvey) error
 	SaveAnswers(answer []models.PreferenceSurveyAnswer) error
+	DidUserFillOutSurvey(userID uint) (bool, error)
 }
 
 func NewPreferenceSurveyService(db *gorm.DB) PreferenceSurveyService {
@@ -112,6 +113,15 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 		}
 	}
 	return nil
+}
+
+func (s *preferenceSurveyServiceImpl) DidUserFillOutSurvey(userID uint) (bool, error) {
+	var count int64
+	if err := s.db.Model(&models.PreferenceSurveyAnswer{}).Where("user_id = ? ", userID).Count(&count).Error; err != nil {
+		log.Printf("Couldn't count answers for user %d: %v", userID, err)
+		return false, nil
+	}
+	return count > 0, nil
 }
 
 func (s *service) PreferenceSurveyService() PreferenceSurveyService {
