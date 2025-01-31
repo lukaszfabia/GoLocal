@@ -58,10 +58,6 @@ func (s *Server) vote(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getVotes(w http.ResponseWriter, r *http.Request) {
-	// GET api/auth/votes/?=all
-	// GET api/auth/votes/?eventID=2
-	// GET api/auth/votes/5?eventID=2&voteType=jakistamtyp
-
 	var vote models.Vote
 
 	params := parsers.ParseURLQuery(r, vote, "eventID", "voteType")

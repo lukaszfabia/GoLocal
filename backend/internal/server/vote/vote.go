@@ -19,6 +19,15 @@ type VoteHandler struct {
 	UserService database.UserService
 }
 
+// @Summary Handle votes
+// @Description Handle voting requests
+// @Tags votes
+// @Accept json
+// @Produce json
+// @Success 200 {object} []forms.VoteForm
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 405 {object} map[string]string
 func (h *VoteHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -31,6 +40,18 @@ func (h *VoteHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Cast a vote
+// @Description Submit a user's vote
+// @Tags votes
+// @Accept json
+// @Produce json
+// @Param vote body forms.VoteInVotingForm true "Vote data"
+// @Param User-Id header string true "User ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/vote/ [post]
 func (h *VoteHandler) vote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Starting vote handler")
 
@@ -69,6 +90,18 @@ func (h *VoteHandler) vote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Vote handler completed successfully")
 }
 
+// @Summary Get votes
+// @Description Retrieve votes with filters
+// @Tags votes
+// @Accept json
+// @Produce json
+// @Param limit path int true "Number of results"
+// @Param User-Id header string true "User ID"
+// @Success 200 {object} []forms.VoteForm
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/vote/{limit} [get]
 func (h *VoteHandler) getVotes(w http.ResponseWriter, r *http.Request) {
 	var vote models.Vote
 	params := parsers.ParseURLQuery(r, vote, "eventID", "voteType")

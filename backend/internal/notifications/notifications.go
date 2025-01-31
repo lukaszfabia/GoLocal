@@ -37,8 +37,12 @@ func NewNotificationService(db *gorm.DB) NotificationService {
 }
 
 func (ns *notificationServiceImpl) SetClient(client MessagingClient) {
-	ns.client = client
-	log.Println("Client has been set")
+	if client != nil {
+		ns.client = client
+		log.Println("Client has been set")
+	} else {
+		log.Println("Client is nil")
+	}
 }
 
 func (ns *notificationServiceImpl) SendPush(n *Notification) error {

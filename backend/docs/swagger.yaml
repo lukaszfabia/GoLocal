@@ -1,10 +1,296 @@
 definitions:
+  backend_internal_forms.EditAccount:
+    properties:
+      bio:
+        type: string
+      birthday:
+        description: "1970-01-01"
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+    type: object
+  backend_internal_forms.Event:
+    properties:
+      description:
+        type: string
+      eventType:
+        type: string
+      finishDate:
+        type: string
+      isAdultOnly:
+        type: boolean
+      lat:
+        type: string
+      lon:
+        description: coords to get more info
+        type: string
+      organizers:
+        description: list with users ids
+        items:
+          type: integer
+        type: array
+      startDate:
+        type: string
+      tags:
+        description: list with user input tags
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  backend_internal_forms.ReportForm:
+    properties:
+      id:
+        type: integer
+      reason:
+        type: string
+    type: object
+  backend_internal_forms.VoteForm:
+    properties:
+      endDate:
+        type: string
+      event:
+        $ref: '#/definitions/backend_internal_models.Event'
+      eventID:
+        type: integer
+      id:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/backend_internal_forms.VoteOptionForm'
+        type: array
+      text:
+        type: string
+      voteType:
+        type: string
+    type: object
+  backend_internal_forms.VoteInVotingForm:
+    properties:
+      voteID:
+        type: integer
+      voteOptionID:
+        type: integer
+    type: object
+  backend_internal_forms.VoteOptionForm:
+    properties:
+      id:
+        type: integer
+      isSelected:
+        type: boolean
+      text:
+        type: string
+      voteID:
+        type: integer
+      votesCount:
+        type: integer
+    type: object
+  backend_internal_models.Address:
+    properties:
+      additionalInfo:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      street:
+        type: string
+      streetNumber:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  backend_internal_models.Comment:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      eventID:
+        type: integer
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+  backend_internal_models.Coords:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  backend_internal_models.DeviceToken:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      os:
+        type: string
+      platform:
+        type: string
+      token:
+        description: FMC token
+        type: string
+      updatedAt:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/backend_internal_models.User'
+        type: array
+    type: object
   backend_internal_models.ErrorResponse:
     properties:
       message:
         type: string
       type:
         type: integer
+    type: object
+  backend_internal_models.Event:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/backend_internal_models.Comment'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      event_tags:
+        description: for ml
+        items:
+          $ref: '#/definitions/backend_internal_models.Tag'
+        type: array
+      event_type:
+        $ref: '#/definitions/backend_internal_models.EventType'
+      eventOrganizers:
+        items:
+          $ref: '#/definitions/backend_internal_models.User'
+        type: array
+      finishDate:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      isAdultOnly:
+        type: boolean
+      isPromoted:
+        type: boolean
+      location:
+        $ref: '#/definitions/backend_internal_models.Location'
+      locationID:
+        type: integer
+      startDate:
+        description: Timestamp with time zone
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      votes:
+        items:
+          $ref: '#/definitions/backend_internal_models.Vote'
+        type: array
+    type: object
+  backend_internal_models.EventType:
+    enum:
+    - WORKSHOP
+    - CULTURAL
+    - SPORTS
+    - SOCIAL
+    - COMMUNITY
+    - CHARITY
+    - PARTY
+    type: string
+    x-enum-varnames:
+    - Workshop
+    - Cultural
+    - Sports
+    - Social
+    - Community
+    - Charity
+    - Party
+  backend_internal_models.Location:
+    properties:
+      address:
+        $ref: '#/definitions/backend_internal_models.Address'
+      addressID:
+        type: integer
+      city:
+        type: string
+      coords:
+        $ref: '#/definitions/backend_internal_models.Coords'
+      coordsID:
+        type: integer
+      country:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      zip:
+        type: string
+    type: object
+  backend_internal_models.ParticipationStatus:
+    enum:
+    - INTERESTED
+    - WILL_PARTICIPATE
+    - NOT_INTERESTED
+    - NOT_APPLICABLE
+    type: string
+    x-enum-varnames:
+    - Interested
+    - WillParticipate
+    - NotInterested
+    - NotApplicable
+  backend_internal_models.PreferenceSurvey:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      questions:
+        items:
+          $ref: '#/definitions/backend_internal_models.PreferenceSurveyQuestion'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
     type: object
   backend_internal_models.PreferenceSurveyAnswer:
     properties:
@@ -18,17 +304,25 @@ definitions:
         items:
           $ref: '#/definitions/backend_internal_models.PreferenceSurveyAnswerOption'
         type: array
+      question:
+        $ref: '#/definitions/backend_internal_models.PreferenceSurveyQuestion'
       questionID:
         type: integer
+      survey:
+        $ref: '#/definitions/backend_internal_models.PreferenceSurvey'
       surveyID:
         type: integer
       updatedAt:
         type: string
+      user:
+        $ref: '#/definitions/backend_internal_models.User'
       userID:
         type: integer
     type: object
   backend_internal_models.PreferenceSurveyAnswerOption:
     properties:
+      answer:
+        $ref: '#/definitions/backend_internal_models.PreferenceSurveyAnswer'
       answerID:
         type: integer
       createdAt:
@@ -37,11 +331,210 @@ definitions:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
+      option:
+        $ref: '#/definitions/backend_internal_models.PreferenceSurveyOption'
       optionID:
         type: integer
       updatedAt:
         type: string
     type: object
+  backend_internal_models.PreferenceSurveyOption:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      question:
+        $ref: '#/definitions/backend_internal_models.PreferenceSurveyQuestion'
+      questionID:
+        type: integer
+      tag:
+        $ref: '#/definitions/backend_internal_models.Tag'
+      tagID:
+        type: integer
+      tagPositive:
+        type: boolean
+      text:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  backend_internal_models.PreferenceSurveyQuestion:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/backend_internal_models.PreferenceSurveyOption'
+        type: array
+      survey:
+        $ref: '#/definitions/backend_internal_models.PreferenceSurvey'
+      surveyID:
+        type: integer
+      text:
+        type: string
+      type:
+        $ref: '#/definitions/backend_internal_models.QuestionType'
+      updatedAt:
+        type: string
+    type: object
+  backend_internal_models.QuestionType:
+    enum:
+    - TOGGLE
+    - SINGLE_CHOICE
+    - MULTIPLE_CHOICE
+    type: string
+    x-enum-varnames:
+    - Toggle
+    - SingleChoice
+    - MultipleChoice
+  backend_internal_models.Tag:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  backend_internal_models.User:
+    properties:
+      avatarUrl:
+        type: string
+      bio:
+        type: string
+      birthday:
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/backend_internal_models.Comment'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      devices:
+        items:
+          $ref: '#/definitions/backend_internal_models.DeviceToken'
+        type: array
+      email:
+        type: string
+      firstName:
+        type: string
+      followers:
+        items:
+          $ref: '#/definitions/backend_internal_models.User'
+        type: array
+      following:
+        items:
+          $ref: '#/definitions/backend_internal_models.User'
+        type: array
+      id:
+        type: integer
+      isPremium:
+        type: boolean
+      isVerified:
+        type: boolean
+      lastName:
+        type: string
+      location:
+        $ref: '#/definitions/backend_internal_models.Location'
+      locationID:
+        type: integer
+      provider:
+        type: string
+      updatedAt:
+        type: string
+      votes:
+        items:
+          $ref: '#/definitions/backend_internal_models.VoteAnswer'
+        type: array
+    type: object
+  backend_internal_models.Vote:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      endDate:
+        type: string
+      event:
+        $ref: '#/definitions/backend_internal_models.Event'
+      eventID:
+        type: integer
+      id:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/backend_internal_models.VoteOption'
+        type: array
+      text:
+        type: string
+      updatedAt:
+        type: string
+      voteType:
+        $ref: '#/definitions/backend_internal_models.VoteType'
+    type: object
+  backend_internal_models.VoteAnswer:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      optionSelected:
+        $ref: '#/definitions/backend_internal_models.VoteOption'
+      optionSelectedId:
+        type: integer
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+      voteId:
+        type: integer
+    type: object
+  backend_internal_models.VoteOption:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      participationStatus:
+        $ref: '#/definitions/backend_internal_models.ParticipationStatus'
+      text:
+        type: string
+      updatedAt:
+        type: string
+      vote:
+        $ref: '#/definitions/backend_internal_models.Vote'
+      voteAnswers:
+        items:
+          $ref: '#/definitions/backend_internal_models.VoteAnswer'
+        type: array
+      voteId:
+        type: integer
+    type: object
+  backend_internal_models.VoteType:
+    enum:
+    - CAN_CHANGE_VOTE
+    - CANNOT_CHANGE_VOTE
+    type: string
+    x-enum-varnames:
+    - CanChangeVote
+    - CannotChangeVote
   gorm.DeletedAt:
     properties:
       time:
@@ -53,7 +546,92 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/event:
+  /api/auth/account/:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the authenticated user account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete user account
+      tags:
+      - account
+    get:
+      consumes:
+      - application/json
+      description: Retrieve current authenticated user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user account
+      tags:
+      - account
+    put:
+      consumes:
+      - application/json
+      - ' multipart/form-data'
+      description: Update authenticated user account details
+      parameters:
+      - description: Updated account data
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/backend_internal_forms.EditAccount'
+      - description: New avatar image
+        in: formData
+        name: avatar
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user account
+      tags:
+      - account
+  /api/auth/event:
     get:
       consumes:
       - application/json
@@ -64,6 +642,259 @@ paths:
       summary: Get Events
       tags:
       - event
+  /api/auth/event/:
+    get:
+      consumes:
+      - application/json
+      description: Get list of events with filters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend_internal_models.Event'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get events
+      tags:
+      - events
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new event with given data
+      parameters:
+      - description: Event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/backend_internal_forms.Event'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.Event'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an event
+      tags:
+      - events
+  /api/auth/event/{id}/promo:
+    post:
+      consumes:
+      - application/json
+      description: Promote an existing event by ID
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.Event'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Promote an event
+      tags:
+      - events
+  /api/auth/event/report:
+    post:
+      consumes:
+      - application/json
+      description: Report an event issue
+      parameters:
+      - description: Report details
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/backend_internal_forms.ReportForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Report an event
+      tags:
+      - events
+  /api/auth/recommendation/:
+    get:
+      consumes:
+      - application/json
+      description: Get personalized event recommendations for a user
+      parameters:
+      - description: User ID
+        in: header
+        name: User-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend_internal_models.Event'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get event recommendations
+      tags:
+      - recommendations
+  /api/auth/vote/:
+    post:
+      consumes:
+      - application/json
+      description: Submit a user's vote
+      parameters:
+      - description: Vote data
+        in: body
+        name: vote
+        required: true
+        schema:
+          $ref: '#/definitions/backend_internal_forms.VoteInVotingForm'
+      - description: User ID
+        in: header
+        name: User-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cast a vote
+      tags:
+      - votes
+  /api/auth/vote/{limit}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve votes with filters
+      parameters:
+      - description: Number of results
+        in: path
+        name: limit
+        required: true
+        type: integer
+      - description: User ID
+        in: header
+        name: User-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend_internal_forms.VoteForm'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get votes
+      tags:
+      - votes
   /api/preference/change-preference-survey:
     post:
       consumes:
@@ -111,15 +942,4 @@ paths:
       summary: Handle Survey Answer
       tags:
       - preference
-  /api/recommendation/recommendation:
-    get:
-      consumes:
-      - application/json
-      description: Get recommendations based on user preferences
-      produces:
-      - application/json
-      responses: {}
-      summary: Get Recommendations
-      tags:
-      - recommendation
 swagger: "2.0"
