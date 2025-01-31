@@ -13,7 +13,7 @@ import (
 
 var (
 	base = "./media"
-	host = fmt.Sprintf("http://localhost:%s/api/media", os.Getenv("PORT"))
+	host = "/api/media"
 )
 
 type EventImage struct{}

@@ -71,6 +71,11 @@ func (s *service) EventService() EventService {
 }
 
 func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) {
+
+	if event.StartDate.After(*event.FinishDate) {
+		return models.Event{}, fmt.Errorf("start cant be before finish")
+	}
+
 	newEvent := models.Event{
 		Title:       event.Title,
 		Description: event.Description,

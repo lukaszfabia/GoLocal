@@ -4,8 +4,6 @@ WORKDIR /build
 COPY go.mod go.sum golocal-firebase.json ./
 RUN go mod download
 
-RUN echo "Listing files in current directory:" && ls -l
-
 COPY . .
 
 RUN go build -o backend ./cmd/api
@@ -17,6 +15,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY --from=builder /build/golocal-firebase.json /app/
 COPY --from=builder /build/backend .
+COPY --from=builder /build/media /app/media 
 
 RUN chmod +x ./backend
 

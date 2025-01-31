@@ -24,6 +24,7 @@ services:
       - ${PORT}:${PORT}
     environment:
       PORT: ${PORT}
+      APP_ENV: ${APP_ENV}
       DB_HOST: go_local_postgres
       DB_PORT: ${DB_PORT}
       DB_DATABASE: ${DB_DATABASE}
@@ -34,7 +35,9 @@ services:
       GMAIL_PASSWORD: ${GMAIL_PASSWORD}
       GMAIL_MAIL: ${GMAIL_MAIL}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
     networks:
       - go_local_network
   # pgadmin:

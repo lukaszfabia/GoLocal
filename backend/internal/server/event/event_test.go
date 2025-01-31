@@ -196,8 +196,6 @@ func TestPostEvent_Success(t *testing.T) {
 		Email:     "test@example.com",
 	}
 
-	fmt.Println("Form in test:", *form)
-
 	mockEventService.On("CreateEvent", mock.AnythingOfType("forms.Event")).Return(event, nil)
 
 	notification := &notifications.Notification{
