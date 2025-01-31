@@ -109,8 +109,11 @@ class EventsRepositoryImpl implements IEventsRepository {
   @override
   Future<bool> hasAccessToRecommendedEvents() async {
     try {
-      final response = await _dioClient.dio.get('/auth/event/recommended');
-      return response.statusCode == 200;
+      final response =
+          await _dioClient.dio.get('/auth/preference/was-survey-filled');
+      final data = response.data["data"] as bool;
+
+      return data;
     } catch (e) {
       return false;
     }

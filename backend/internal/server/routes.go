@@ -93,11 +93,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// authenthicated endpoints
 	auth.Use(s.isAuth)
 
-
 	auth.HandleFunc("/notifi-me", s.SendTestNofitication)
 
-	preference := api.PathPrefix("/preference").Subrouter()
-
+	preference := auth.PathPrefix("/preference").Subrouter()
 
 	// preference survey routes
 	preference.HandleFunc("/change-preference-survey", s.handleSurvey)
