@@ -9,4 +9,5 @@ abstract class IEventsRepository {
   Future<void> deleteEvent(String id);
   Future<void> reportEvent(int id, String category, String description);
   Future<String> promoteEvent(int id, PromotePack pack);
+  Future<bool> hasAccessToRecommendedEvents();
 }

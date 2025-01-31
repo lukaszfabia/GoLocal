@@ -5,7 +5,6 @@ import 'package:golocal/src/event/domain/eventtype_enum.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/event/promote_page/promote_pack.dart';
-import 'package:golocal/src/event/report_page/report_event_page.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
 class EventsRepositoryDummy implements IEventsRepository {
@@ -49,19 +48,16 @@ class EventsRepositoryDummy implements IEventsRepository {
 
   @override
   Future<Event> createEvent(EventDTO event) {
-    // TODO: implement createEvent
     throw UnimplementedError();
   }
 
   @override
   Future<void> deleteEvent(String id) {
-    // TODO: implement deleteEvent
     throw UnimplementedError();
   }
 
   @override
   Future<Event> getEvent(String id) {
-    // TODO: implement getEvent
     throw UnimplementedError();
   }
 
@@ -103,7 +99,6 @@ class EventsRepositoryDummy implements IEventsRepository {
 
   @override
   Future<Event> updateEvent(Event event) {
-    // TODO: implement updateEvent
     throw UnimplementedError();
   }
 
@@ -115,7 +110,11 @@ class EventsRepositoryDummy implements IEventsRepository {
 
   @override
   Future<String> promoteEvent(int id, PromotePack pack) {
-    // TODO: implement promoteEvent
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> hasAccessToRecommendedEvents() {
     throw UnimplementedError();
   }
 }

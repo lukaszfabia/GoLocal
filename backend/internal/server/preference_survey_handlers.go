@@ -131,3 +131,26 @@ func (s *Server) handleSurveyAnswer(w http.ResponseWriter, r *http.Request) {
 		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}
 }
+
+func (s *Server) hasAccessToRecommendedEvents(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		user, ok := r.Context().Value("user").(*models.User)
+
+		if !ok {
+			s.NewResponse(w, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		surveyFilledOut, err := s.db.PreferenceSurveyService().DidUserFillOutSurvey(user.ID)
+		if err != nil {
+			s.NewResponse(w, http.StatusInternalServerError, "Error fetching survey")
+			return
+		}
+
+		s.NewResponse(w, http.StatusOK, surveyFilledOut)
+		return
+	default:
+		s.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
+	}
+}

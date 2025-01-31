@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:golocal/src/dio_client.dart';
 
 class EventsDataSource {
-  Dio _dio = DioClient().dio;
+  final Dio _dio = DioClient().dio;
   Future<List<Response>> getEvents(Map<String, dynamic> data) {
     return Future.value([Response(requestOptions: RequestOptions(path: ''))]);
   }

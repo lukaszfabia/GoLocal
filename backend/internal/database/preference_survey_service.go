@@ -12,6 +12,7 @@ type PreferenceSurveyService interface {
 	SaveSurvey(survey *models.PreferenceSurvey) (*models.PreferenceSurvey, error)
 	DeleteSurvey(survey *models.PreferenceSurvey) error
 	SaveAnswers(answer []models.PreferenceSurveyAnswer) error
+	DidUserFillOutSurvey(userID uint) (bool, error)
 }
 
 func NewPreferenceSurveyService(db *gorm.DB) PreferenceSurveyService {
@@ -47,6 +48,7 @@ func (s *preferenceSurveyServiceImpl) DeleteSurvey(survey *models.PreferenceSurv
 	return nil
 }
 
+// this is pretty terrible
 func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSurveyAnswer) error {
 	for _, answer := range answers {
 		if err := s.db.Create(&answer).Error; err != nil {
@@ -75,9 +77,17 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			tags = append(tags, tag)
 		}
 
-		recommendation := models.UserPreference{
-			UserID: answer.UserID,
-			Tags:   tags,
+		recommendation := models.UserPreference{}
+
+		if err := s.db.First(&recommendation, "user_id = ?", answer.UserID).Error; err != nil {
+			log.Printf("Couldn't find recommendation with user id %d: %v", answer.UserID, err)
+		}
+
+		if recommendation.ID == 0 {
+			recommendation = models.UserPreference{
+				UserID: answer.UserID,
+				Tags:   tags,
+			}
 		}
 
 		if err := s.db.Save(&recommendation).Error; err != nil {
@@ -85,12 +95,33 @@ func (s *preferenceSurveyServiceImpl) SaveAnswers(answers []models.PreferenceSur
 			return err
 		}
 
+		tagsOld := []models.Tag{}
+		if err := s.db.Model(&recommendation).Association("Tags").Find(&tagsOld); err != nil {
+			log.Printf("Couldn't find recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
+		}
+
+		tagsOld = append(tagsOld, tags...)
+
 		if err := s.db.Model(&recommendation).Association("Tags").Replace(tags); err != nil {
 			log.Printf("Couldn't save recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
 			return err
 		}
+
+		tagsNew := []models.Tag{}
+		if err := s.db.Model(&recommendation).Association("Tags").Find(&tagsNew); err != nil {
+			log.Printf("Couldn't find recommendation tags for recommendation with id %d: %v", recommendation.ID, err)
+		}
 	}
 	return nil
+}
+
+func (s *preferenceSurveyServiceImpl) DidUserFillOutSurvey(userID uint) (bool, error) {
+	var count int64
+	if err := s.db.Model(&models.PreferenceSurveyAnswer{}).Where("user_id = ? ", userID).Count(&count).Error; err != nil {
+		log.Printf("Couldn't count answers for user %d: %v", userID, err)
+		return false, nil
+	}
+	return count > 0, nil
 }
 
 func (s *service) PreferenceSurveyService() PreferenceSurveyService {

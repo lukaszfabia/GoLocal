@@ -6,9 +6,17 @@ import 'package:golocal/src/event/domain/event.dart';
 part 'events_event.dart';
 part 'events_state.dart';
 
+/// Bloc class for managing events.
 class EventsBloc extends Bloc<EventsEvent, EventsState> {
+  /// The repository for fetching events.
   IEventsRepository _repository;
-  EventsBloc(this._repository) : super(EventsState(events: [])) {
+
+  /// Creates an instance of [EventsBloc].
+  EventsBloc(this._repository)
+      : super(EventsState(
+          events: [],
+          hasAccessToRecommended: false,
+        )) {
     on<FetchEvents>((event, emit) async {
       if (event.refresh) {
         emit(state
@@ -19,11 +27,12 @@ class EventsBloc extends Bloc<EventsEvent, EventsState> {
       try {
         final events = await _repository.getEvents();
         emit(state.copyWith(
-          events: state.events + events,
-          status: EventsStatus.loaded,
-          nextPage: state.nextPage + 1,
-          hasNext: events.isNotEmpty,
-        ));
+            events: state.events + events,
+            status: EventsStatus.loaded,
+            nextPage: state.nextPage + 1,
+            hasNext: events.isNotEmpty,
+            hasAccessToRecommended:
+                await _repository.hasAccessToRecommendedEvents()));
       } catch (e) {
         emit(state.copyWith(
           status: EventsStatus.error,

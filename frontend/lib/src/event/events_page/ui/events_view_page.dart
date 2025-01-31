@@ -26,6 +26,7 @@ class _EventsViewPageState extends State<EventsViewPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
+    print(_showSearchBar);
   }
 
   @override
@@ -97,7 +98,21 @@ class _EventsViewPageState extends State<EventsViewPage> {
       body: Column(
         children: [
           // SearchBar(showSearchBar: _showSearchBar),
-          FilterBar(showFilterBar: _showFilterBar),
+          BlocConsumer<EventsBloc, EventsState>(
+            listener: (context, state) {
+              if (state.status == EventsStatus.error) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.errorMessage!)),
+                );
+              }
+              if (state.hasAccessToRecommended != _showFilterBar) {
+                setState(() {});
+              }
+            },
+            builder: (context, state) {
+              return FilterBar(showFilterBar: _showFilterBar);
+            },
+          ),
           Expanded(
             child: BlocConsumer<EventsBloc, EventsState>(
               listener: (context, state) {
@@ -207,15 +222,17 @@ class FilterBar extends StatelessWidget {
                     },
                     child: const Text('Recent'),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      final recommendedRepository = RecommendedRepositoryImpl();
-                      context
-                          .read<EventsBloc>()
-                          .add(SwitchRepository(recommendedRepository));
-                    },
-                    child: const Text('Recommended'),
-                  ),
+                  if (context.read<EventsBloc>().state.hasAccessToRecommended)
+                    ElevatedButton(
+                      onPressed: () {
+                        final recommendedRepository =
+                            RecommendedRepositoryImpl();
+                        context
+                            .read<EventsBloc>()
+                            .add(SwitchRepository(recommendedRepository));
+                      },
+                      child: const Text('Recommended'),
+                    ),
                 ],
               ),
             )

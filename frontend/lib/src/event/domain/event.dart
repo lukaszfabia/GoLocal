@@ -7,6 +7,20 @@ import 'package:golocal/src/shared/model_base.dart';
 import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/user/domain/user.dart';
 
+/// Represents an event with details such as title, description, organizers, and location.
+///
+/// Attributes:
+/// - `eventOrganizers`: List of users who are organizing the event.
+/// - `title`: The title of the event.
+/// - `description`: The description of the event.
+/// - `imageUrl`: The URL of the event's image (optional).
+/// - `isAdultOnly`: Indicates if the event is for adults only.
+/// - `eventType`: The type of the event.
+/// - `tags`: List of tags associated with the event.
+/// - `isPromoted`: Indicates if the event is promoted.
+/// - `startDate`: The start date and time of the event.
+/// - `endDate`: The end date and time of the event (optional).
+/// - `location`: The location of the event (optional).
 class Event extends Model {
   List<User> eventOrganizers;
   String title;
@@ -84,6 +98,20 @@ class Event extends Model {
   }
 }
 
+/// Data Transfer Object for creating or updating an event.
+///
+/// Attributes:
+/// - `organizers`: List of IDs of the event organizers.
+/// - `title`: The title of the event.
+/// - `description`: The description of the event.
+/// - `image`: The image file of the event.
+/// - `startDate`: The start date and time of the event.
+/// - `endDate`: The end date and time of the event.
+/// - `isAdultOnly`: Indicates if the event is for adults only.
+/// - `eventType`: The type of the event.
+/// - `tags`: List of tags associated with the event.
+/// - `lon`: The longitude of the event location.
+/// - `lat`: The latitude of the event location.
 class EventDTO {
   List<int> organizers;
   String title;

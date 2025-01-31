@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golocal/src/event/domain/event.dart';
-import 'package:golocal/src/event/domain/address.dart';
-import 'package:golocal/src/event/domain/coords.dart';
 import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/event/shared/badge_widget.dart';
 import 'package:golocal/src/shared/extensions.dart';
 import 'package:golocal/src/user/domain/user.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailPage extends StatelessWidget {
@@ -130,9 +127,9 @@ class EventDetailPage extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.5),
+                  Colors.black.withValues(alpha: 0.5),
                   Colors.transparent,
-                  Colors.black.withOpacity(0.8),
+                  Colors.black.withValues(alpha: 0.8),
                 ],
               ),
             ),
@@ -222,7 +219,7 @@ class EventDetailPage extends StatelessWidget {
           .map(
             (tag) => Chip(
               label: Text(tag.name),
-              backgroundColor: Colors.blueGrey.withOpacity(0.2),
+              backgroundColor: Colors.blueGrey.withValues(alpha: 0.2),
               labelStyle: const TextStyle(color: Colors.black87),
             ),
           )

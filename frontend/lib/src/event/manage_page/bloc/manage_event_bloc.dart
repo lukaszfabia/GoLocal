@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -7,11 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:golocal/src/event/data/ievents_repository.dart';
 import 'package:golocal/src/event/domain/event.dart';
 import 'package:golocal/src/event/domain/eventtype_enum.dart';
-import 'package:golocal/src/event/domain/tag.dart';
 import 'package:golocal/src/event/domain/location.dart';
 import 'package:golocal/src/shared/position.dart';
 import 'package:golocal/src/user/data/user_repository.dart';
-import 'package:golocal/src/user/domain/user.dart';
 import 'package:image_picker/image_picker.dart';
 
 part 'manage_event_event.dart';
@@ -100,7 +97,7 @@ class ManageEventBloc extends Bloc<ManageEventEvent, ManageEventState> {
         lon: "17.041830",
       );
       try {
-        final created = await _repository.createEvent(dto);
+        await _repository.createEvent(dto);
         emit(state.copyWith(
           status: ManageEventStatus.success,
           message: 'Event saved successfully',

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golocal/src/vote/domain/vote.dart';
 import 'package:golocal/src/vote/domain/vote_in_voting.dart';
-import 'package:golocal/src/vote/domain/vote_option.dart';
 
 void main() {
   group('Voting', () {
