@@ -7,6 +7,7 @@ import (
 	"backend/pkg/parsers"
 	"context"
 	"log"
+	"math"
 	"reflect"
 	"strings"
 	"testing"
@@ -24,6 +25,10 @@ func timePtr(t time.Time) *time.Time {
 
 func stringPtr(s string) *string {
 	return &s
+}
+
+func approxFloat(f float64) float64 {
+	return math.Round(f*100) / 100
 }
 
 func timeApproxEqual(t1, t2 *time.Time) bool {
@@ -145,12 +150,41 @@ func TestEventServiceCreate(t *testing.T) {
 		IsAdultOnly: false,
 		EventType:   models.Workshop,
 		Tags:        []*models.Tag{{Name: "gaming"}, {Name: "e_sport"}},
+		Location: &models.Location{
+			City:    "Wrocław",
+			Country: "Polska",
+			Zip:     "50-323",
+			Coords: &models.Coords{
+				Longitude: 17.049275412738254,
+				Latitude:  51.12022845,
+			},
+		},
 	}
 
 	event, err := srv.EventService().CreateEvent(form)
 
 	if err != nil {
 		t.Errorf("Failed to create event: %s", err)
+	}
+
+	if event.Location.City != expectedEvent.Location.City {
+		t.Error("Cities differ. Expected:", expectedEvent.Location.City, "got:", event.Location.City)
+	}
+
+	if event.Location.Zip != expectedEvent.Location.Zip {
+		t.Error("Zip codes differ. Expected:", expectedEvent.Location.Zip, "got:", event.Location.Zip)
+	}
+
+	if event.Location.Country != expectedEvent.Location.Country {
+		t.Error("Countries differ. Expected:", expectedEvent.Location.Country, "got:", event.Location.Country)
+	}
+
+	if approxFloat(event.Location.Coords.Latitude) != approxFloat(expectedEvent.Location.Coords.Latitude) {
+		t.Error("Latitudes differ. Expected:", expectedEvent.Location.Coords.Latitude, "got:", event.Location.Coords.Latitude)
+	}
+
+	if approxFloat(event.Location.Coords.Longitude) != approxFloat(expectedEvent.Location.Coords.Longitude) {
+		t.Error("Longitudes differ. Expected:", expectedEvent.Location.Coords.Longitude, "got:", event.Location.Coords.Longitude)
 	}
 
 	if event.IsAdultOnly != expectedEvent.IsAdultOnly {
@@ -185,7 +219,7 @@ func TestEventServiceCreate(t *testing.T) {
 
 	for id, tag := range event.Tags {
 		if tag.Name != expectedEvent.Tags[id].Name {
-			t.Errorf("Want %s have %s", expectedEvent.Tags[id].Name, event.Title)
+			t.Errorf("Want %s have %s", expectedEvent.Tags[id].Name, tag.Name)
 		}
 	}
 
@@ -201,11 +235,14 @@ func TestEventServiceCreate_FailureWithOrganizers(t *testing.T) {
 
 	srv.Sync()
 
+	sDate := timePtr(time.Now().Add(24 * time.Hour))
+	fDate := timePtr(time.Now().Add(48 * time.Hour))
+
 	form := forms.Event{
 		Title:       "Gaming Expo 2025",
 		Description: "biggest gaming evnet",
-		StartDate:   timePtr(time.Now().Add(24 * time.Hour)),
-		FinishDate:  timePtr(time.Now().Add(48 * time.Hour)),
+		StartDate:   sDate,
+		FinishDate:  fDate,
 		IsAdultOnly: false,
 		EventType:   "WORKSHOP",
 		Tags:        []string{" gaming", "e sport"},
@@ -223,8 +260,8 @@ func TestEventServiceCreate_FailureWithOrganizers(t *testing.T) {
 		Organizers:  []uint{7},
 		Title:       "Gaming Expo 2025",
 		Description: "biggest gaming evnet",
-		StartDate:   timePtr(time.Now().Add(24 * time.Hour)),
-		FinishDate:  timePtr(time.Now().Add(48 * time.Hour)),
+		StartDate:   sDate,
+		FinishDate:  fDate,
 		IsAdultOnly: false,
 		EventType:   "WORKSHOP",
 		Tags:        []string{" gaming", "e sport"},
