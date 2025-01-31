@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -312,42 +311,25 @@ func (s *Server) PasswordResetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) DeviceTokenRegistrationHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: assign new device token to user
 	form, err := parsers.DecodeJSON[forms.Device](r)
+	user, ok := r.Context().Value("user").(*models.User)
+
+	if !ok {
+		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
+		return
+	}
 
 	if err != nil {
 		s.NewResponse(w, http.StatusBadRequest, "Failed to decode form")
 		return
 	}
 
-	userId := r.Header.Get("User-Id")
-	log.Println("User-Id:", userId)
-	if userId == "" {
-		log.Println("Unauthorized access")
-		s.NewResponse(w, http.StatusUnauthorized, "Unauthorized access")
-		return
-	}
-
-	_, err = s.db.UserService().GetUser(userId)
-	if err != nil {
-		log.Println("Error fetching user: " + err.Error())
-		s.NewResponse(w, http.StatusInternalServerError, "Internal server error")
-		return
-	}
-
-	userIDInt, err := strconv.Atoi(userId)
-	if err != nil {
-		log.Println(userId)
-		log.Println("Invalid User-Id: " + err.Error())
-		s.NewResponse(w, http.StatusBadRequest, "Invalid User-Id")
-		return
-	}
-	form.UserID = userIDInt
+	form.UserID = int(user.ID)
 
 	if err := s.db.UserService().AddDevice(form); err != nil {
 		s.NewResponse(w, http.StatusInternalServerError, "Failed to add device to user")
 		return
 	}
 
-	s.NewResponse(w, http.StatusOK, "Successfully added new device!")
+	s.NewResponse(w, http.StatusCreated, "Successfully added new device!")
 }

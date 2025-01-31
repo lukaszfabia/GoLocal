@@ -82,7 +82,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api.HandleFunc("/password-reset/", s.PasswordResetHandler).Methods(http.MethodPost)
 	api.HandleFunc("/verify/callback/", s.VerifyCallbackHandler).Methods(http.MethodPost)
 	api.HandleFunc("/password-reset/callback", s.PasswordResetCallbackHandler).Methods(http.MethodPost)
-	api.HandleFunc("/device-token-registration/", s.DeviceTokenRegistrationHandler).Methods(http.MethodPost)
 
 	provider := api.PathPrefix("/{provider}").Subrouter()
 	provider.HandleFunc("/login/", s.LoginHandler).Methods(http.MethodGet) // handles signing up
@@ -92,6 +91,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// setting middleware
 	// authenthicated endpoints
 	auth.Use(s.isAuth)
+	auth.HandleFunc("/device-token-registration/", s.DeviceTokenRegistrationHandler).Methods(http.MethodPost)
 
 	auth.HandleFunc("/notifi-me", s.SendTestNofitication)
 
