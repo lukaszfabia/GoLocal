@@ -1,5 +1,10 @@
 import 'package:golocal/src/shared/model_base.dart';
 
+/// Represents geographical coordinates with latitude and longitude.
+///
+/// Attributes:
+/// - `latitude`: The latitude of the coordinates.
+/// - `longitude`: The longitude of the coordinates.
 class Coords extends Model {
   double latitude;
   double longitude;

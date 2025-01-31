@@ -2,6 +2,16 @@ import 'package:golocal/src/event/domain/address.dart';
 import 'package:golocal/src/event/domain/coords.dart';
 import 'package:golocal/src/shared/model_base.dart';
 
+/// Represents the location of an event.
+///
+/// The location includes details such as the city, country, and optional coordinates and address.
+///
+/// Attributes:
+/// - `city`: The city where the event is located.
+/// - `country`: The country where the event is located.
+/// - `zip`: The zip code of the event location (optional).
+/// - `coords`: The geographical coordinates of the event location (optional).
+/// - `address`: The address of the event location (optional).
 class Location extends Model {
   String city;
   String country;

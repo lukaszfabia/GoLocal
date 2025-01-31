@@ -1,0 +1,9 @@
+export '../src/event/domain/event.dart';
+export '../src/event/domain/comment.dart';
+export '../src/event/domain/coords.dart';
+export '../src/event/domain/eventtype_enum.dart';
+export '../src/event/domain/location.dart';
+export '../src/event/domain/participationstatus_enum.dart';
+export '../src/event/domain/report_category_enum.dart';
+export '../src/event/domain/tag.dart';
+export '../src/event/domain/vote.dart';
