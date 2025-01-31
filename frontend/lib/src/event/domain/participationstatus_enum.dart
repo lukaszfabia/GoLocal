@@ -1,3 +1,11 @@
+/// Enum representing the participation status of a user for an event.
+///
+/// This enum is used to indicate whether a user is interested, will participate, or is not interested in an event.
+///
+/// Values:
+/// - `interested`: The user is interested in the event.
+/// - `willParticipate`: The user will participate in the event.
+/// - `notInterested`: The user is not interested in the event.
 enum ParticipationStatus {
   interested('INTERESTED'),
   willParticipate('WILL_PARTICIPATE'),

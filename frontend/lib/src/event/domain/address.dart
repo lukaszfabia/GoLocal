@@ -1,5 +1,11 @@
 import 'package:golocal/src/shared/model_base.dart';
 
+/// Represents an address with street, street number, and optional additional information.
+///
+/// Attributes:
+/// - `street`: The street name of the address.
+/// - `streetNumber`: The street number of the address.
+/// - `additionalInfo`: Additional information about the address (optional).
 class Address extends Model {
   String street;
   int streetNumber;
