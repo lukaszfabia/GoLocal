@@ -51,13 +51,27 @@ func post(w http.ResponseWriter, r *http.Request) context.Context {
 
 // validator for getting votes with query string
 func get(w http.ResponseWriter, r *http.Request) context.Context {
-	params := parsers.ParseURLQuery(r, forms.VoteInVotingForm{}, "eventID", "voteType")
+	println("get")
+
+	params := make(map[string]interface{})
+	query := r.URL.Query()
+
+	if eventID := query.Get("eventID"); eventID != "" {
+		params["eventID"] = eventID
+	}
+	if voteType := query.Get("voteType"); voteType != "" {
+		params["voteType"] = voteType
+	}
 
 	limitStr := mux.Vars(r)["limit"]
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		app.NewResponse(w, http.StatusBadRequest, map[string]string{"error": "Invalid limit"})
-		return nil
+	limit := -1
+	if limitStr != "" {
+		var err error
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			app.NewResponse(w, http.StatusBadRequest, map[string]string{"error": "Invalid limit"})
+			return nil
+		}
 	}
 
 	ctx := context.WithValue(r.Context(), _params, params)
