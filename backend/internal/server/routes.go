@@ -1,6 +1,9 @@
 package server
 
 import (
+	"backend/internal/app"
+	"backend/internal/models"
+	"backend/internal/notifications"
 	"backend/internal/server/account"
 	"backend/internal/server/event"
 	recommendation_handler "backend/internal/server/recommendation"
@@ -90,6 +93,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// authenthicated endpoints
 	auth.Use(s.isAuth)
 
+	auth.HandleFunc("/notifi-me", s.SendTestNofitication)
+
 	preference := api.PathPrefix("/preference").Subrouter()
 
 	// preference survey routes
@@ -173,4 +178,25 @@ func (s *Server) websocketHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		time.Sleep(time.Second * 2)
 	}
+}
+
+func (s *Server) SendTestNofitication(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		app.NewResponse(w, http.StatusUnauthorized, nil)
+		return
+	}
+
+	if err := s.db.NotificationService().SendPush(&notifications.Notification{
+		Title:    fmt.Sprintf("Test notification to %s", user.FirstName),
+		Body:     "Hell this is a test message",
+		UsersIds: []uint{user.ID},
+		Author:   0,
+	}); err != nil {
+		log.Println("Failed to send test nofication")
+		app.NewResponse(w, http.StatusBadGateway, nil)
+		return
+	}
+
+	app.NewResponse(w, http.StatusOK, nil)
 }

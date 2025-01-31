@@ -87,6 +87,7 @@ func (e *eventServiceImpl) CreateEvent(event forms.Event) (models.Event, error) 
 
 	result := <-ch
 	if result.Err != nil {
+		log.Println(result.Err)
 		return models.Event{}, result.Err
 	}
 
