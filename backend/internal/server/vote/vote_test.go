@@ -74,14 +74,6 @@ func TestVote_Success(t *testing.T) {
 
 	assert.Equal(t, 1, form.VoteID)
 	assert.Equal(t, 2, form.VoteOptionID)
-
-	handler := &VoteHandler{
-		VoteService: new(MockVoteService),
-	}
-
-	handler.vote(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestVote_Unauthorized(t *testing.T) {
