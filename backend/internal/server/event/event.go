@@ -6,6 +6,8 @@ import (
 	"backend/internal/forms"
 	"backend/internal/models"
 	"backend/internal/notifications"
+	"backend/pkg/image"
+	"backend/pkg/parsers"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,11 +34,14 @@ type EventHandler struct {
 func (h *EventHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		h.post(w, r)
+		return
 	}
 	if r.Method == "GET" {
 		h.get(w, r)
+		return
 	} else {
 		app.NewResponse(w, http.StatusMethodNotAllowed, nil)
+		return
 	}
 }
 
@@ -92,6 +97,12 @@ func (h *EventHandler) post(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+
+	info, _ := parsers.GetFileFromForm(r.MultipartForm, "image")
+
+	url, _ := image.SaveImage[*image.EventImage](info)
+
+	form.ImageURL = url
 
 	event, err := h.EventService.CreateEvent(*form)
 	if err != nil {

@@ -29,6 +29,10 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GMAIL_PASSWORD: ${GMAIL_PASSWORD}
+      GMAIL_MAIL: ${GMAIL_MAIL}
     depends_on:
       - db
     networks:

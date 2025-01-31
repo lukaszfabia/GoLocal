@@ -27,10 +27,13 @@ func (a *AccountHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		a.get(w, r)
+		return
 	case http.MethodDelete:
 		a.delete(w, r)
+		return
 	case http.MethodPut, http.MethodPatch:
 		a.put(w, r)
+		return
 	default:
 		app.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}

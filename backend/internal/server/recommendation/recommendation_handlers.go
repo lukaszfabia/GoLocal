@@ -30,6 +30,7 @@ func (h *RecommendationHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.getRecommendations(w, r)
+		return
 	default:
 		app.NewResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
 	}
