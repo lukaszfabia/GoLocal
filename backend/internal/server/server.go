@@ -21,6 +21,7 @@ import (
 
 type Server struct {
 	port int
+	host string
 
 	db    database.Service
 	store store.Store
@@ -56,6 +57,10 @@ func (s *Server) InvalidFormResponse(w http.ResponseWriter) {
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(strings.TrimSpace(os.Getenv("PORT")))
+	host := strings.TrimSpace(os.Getenv("APP_ENV"))
+	if host == "" {
+		host = "locahost"
+	}
 
 	opt := option.WithCredentialsFile("./golocal-firebase.json")
 
@@ -71,8 +76,8 @@ func NewServer() *http.Server {
 	}
 
 	NewServer := &Server{
-		port: port,
-
+		port:  port,
+		host:  host,
 		db:    database.New(),
 		store: store.New(),
 	}
@@ -83,12 +88,14 @@ func NewServer() *http.Server {
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
+		Addr:         fmt.Sprintf("%s:%d", host, port),
 		Handler:      NewServer.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
+
+	log.Printf("Server is running on http://%s:%d\n", host, port)
 
 	return server
 }

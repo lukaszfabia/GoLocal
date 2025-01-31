@@ -41,8 +41,6 @@ func main() {
 	auth.NewAuth()
 	server := server.NewServer()
 
-	log.Printf("Server is listening on http://localhost%s\n", server.Addr)
-
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
