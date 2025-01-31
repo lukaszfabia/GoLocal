@@ -12,7 +12,7 @@ import (
 )
 
 const MAX_CAPACITY = 1000
-const CAN_CLEAR_DATABASE = false
+const CAN_CLEAR_DATABASE = true
 
 type DummyService interface {
 	Cook()
@@ -85,23 +85,23 @@ func (s *service) DummyService() DummyService {
 }
 
 func (d *dummyServiceImpl) Cook() {
-	// d.clearDatabase()
-	//
-	// d.coords()
-	// d.address()
-	// d.location()
-	// d.user1()
-	// d.tags()
-	// d.event1()
-	// d.event2()
-	// d.opinion()
-	// d.followers()
-	// d.comments()
-	// d.votes()
-	// d.user2()
-	// d.generateMockSurvey()
-	// d.easyLoginUser()
-	// d.generateRecommendations()
+	d.clearDatabase()
+
+	d.coords()
+	d.address()
+	d.location()
+	d.user1()
+	d.tags()
+	d.event1()
+	d.event2()
+	d.opinion()
+	d.followers()
+	d.comments()
+	d.votes()
+	d.user2()
+	d.generateMockSurvey()
+	d.easyLoginUser()
+	d.generateRecommendations()
 }
 
 //lint:ignore U1000 Ignore unused function as dynamically used in seeder

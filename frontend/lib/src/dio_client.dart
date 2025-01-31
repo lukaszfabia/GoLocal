@@ -13,8 +13,7 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl:
-            'http://${Platform.isAndroid ? "10.0.2.2" : "127.0.0.1"}:8080/api',
+        baseUrl: 'http://192.168.0.242:8080/api',
         headers: {
           'Content-Type': 'application/json',
         },
