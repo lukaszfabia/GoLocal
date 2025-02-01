@@ -1,26 +1,26 @@
-name: go-code-quality
-
+name: golangci-lint
 on:
   push:
     branches:
       - main
+      - master
   pull_request:
 
+permissions:
+  contents: read
+  # Optional: allow read access to pull request. Use with `only-new-issues` option.
+  # pull-requests: read
+
 jobs:
-  lint:
+  golangci:
+    name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
-
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
-
-      - name: Run golangci-lint
-        run: $(go env GOPATH)/bin/golangci-lint run ./...
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
